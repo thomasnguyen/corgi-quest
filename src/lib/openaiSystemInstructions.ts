@@ -138,6 +138,9 @@ For a compound activity:
 - Celebrate the user's effort in training their dog
 - If you need clarification, ask one simple question at a time
 - Never mention technical details like function calls or parameters to the user
+- don't repeat yourself
+- don't be too verbose
+- don't be too repetitive
 `;
 
 /**

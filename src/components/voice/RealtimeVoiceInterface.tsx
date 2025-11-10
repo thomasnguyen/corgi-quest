@@ -10,7 +10,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Toast } from "../ui/Toast";
 import { useNavigate } from "@tanstack/react-router";
-import { Mic, MicOff, Eye } from "lucide-react";
+import { Mic, MicOff, Eye, X } from "lucide-react";
 
 /**
  * Get timestamp for logging
@@ -1037,32 +1037,6 @@ export function RealtimeVoiceInterface({
         />
       )}
 
-      {/* Loading State - Session Token Generation and Connection */}
-      {connectionState === "connecting" && (
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f5c35f] border-t-transparent"></div>
-            <p className="mt-4 text-[#f9dca0] text-sm">Connecting...</p>
-            <p className="mt-2 text-[#888] text-xs">
-              Establishing connection to voice service
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Loading State - Session Configuration */}
-      {connectionState === "connected" && !sessionConfigured && (
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f5c35f] border-t-transparent"></div>
-            <p className="mt-4 text-[#f9dca0] text-sm">Configuring...</p>
-            <p className="mt-2 text-[#888] text-xs">
-              Setting up voice interface
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Success Confirmation Card */}
       {savedActivity && (
         <div className="w-full max-w-md mb-8 p-6 bg-green-50 border-2 border-green-600 rounded-lg">
@@ -1132,49 +1106,58 @@ export function RealtimeVoiceInterface({
         </div>
       )}
 
-      {/* Main Interface - Only show when not in loading states */}
-      {connectionState !== "connecting" &&
-        (connectionState !== "connected" || sessionConfigured) && (
-          <>
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-2 text-[#f5c35f]">
-                Voice Activity Logging
-              </h2>
-              <p className="text-[#888] mb-4">
-                Speak naturally to log your dog's activities
+      {/* Main Interface */}
+      <>
+        {/* Back/Close Button */}
+        <div className="w-full flex justify-end mb-4">
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label="Close"
+          >
+            <X size={24} className="text-[#888]" strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2 text-[#f5c35f]">
+            Voice Activity Logging
+          </h2>
+          <p className="text-[#888] mb-4">
+            Speak naturally to log your dog's activities
+          </p>
+
+          {/* Permission Denied Message */}
+          {isPermissionDenied && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+              <p className="font-medium mb-1">Microphone Access Required</p>
+              <p>
+                Please enable microphone permissions in your browser settings to
+                use voice logging.
               </p>
-
-              {/* Permission Denied Message */}
-              {isPermissionDenied && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-                  <p className="font-medium mb-1">Microphone Access Required</p>
-                  <p>
-                    Please enable microphone permissions in your browser
-                    settings to use voice logging.
-                  </p>
-                </div>
-              )}
             </div>
+          )}
+        </div>
 
-            {/* Voice Visualizer - RPG-style prominent visualizer */}
-            <div className="flex flex-col items-center justify-center my-8">
-              {/* Main visualizer with dynamic size */}
-              <div
-                className={`transition-all duration-500 relative ${
-                  conversationState === "speaking"
-                    ? "animate-voice-glow-speaking"
-                    : isListeningSmoothed
-                      ? "animate-voice-glow-active"
-                      : "animate-voice-glow"
-                }`}
-              >
-                <CircularWaveform
-                  size={300}
-                  numBars={32}
-                  barWidth={10}
-                  color1="#f5c35f"
-                  color2="#f9dca0"
-                  /*                   color1={
+        {/* Voice Visualizer - RPG-style prominent visualizer */}
+        <div className="flex flex-col items-center justify-center my-8">
+          {/* Main visualizer with dynamic size */}
+          <div
+            className={`transition-all duration-500 relative ${
+              conversationState === "speaking"
+                ? "animate-voice-glow-speaking"
+                : isListeningSmoothed
+                  ? "animate-voice-glow-active"
+                  : "animate-voice-glow"
+            }`}
+          >
+            <CircularWaveform
+              size={300}
+              numBars={32}
+              barWidth={10}
+              color1="#f5c35f"
+              color2="#f9dca0"
+              /*                   color1={
                     conversationState === "speaking"
                       ? "#60a5fa"
                       : isListeningSmoothed
@@ -1188,57 +1171,52 @@ export function RealtimeVoiceInterface({
                         ? "#fcd587"
                         : "#f9dca0"
                   } */
-                  backgroundColor="transparent"
-                  sensitivity={1.5}
-                  rotationEnabled={true}
-                  audioTrack={audioTrack}
-                />
+              backgroundColor="transparent"
+              sensitivity={1.5}
+              rotationEnabled={true}
+              audioTrack={audioTrack}
+            />
 
-                {/* Conversation State - Inside the orb (centered) */}
-                {isConnected && sessionConfigured && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div
-                      className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
-                    >
-                      {conversationState === "listening" && (
-                        <Mic
-                          size={16}
-                          strokeWidth={2}
-                          className="animate-pulse"
-                        />
-                      )}
-                      {conversationState === "speaking" && (
-                        <MicOff size={16} strokeWidth={2} />
-                      )}
-                      <span>{conversationStateInfo.text}</span>
-                    </div>
-                  </div>
-                )}
+            {/* Conversation State - Inside the orb (centered) */}
+            {isConnected && sessionConfigured && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div
+                  className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
+                >
+                  {conversationState === "listening" && (
+                    <Mic size={16} strokeWidth={2} className="animate-pulse" />
+                  )}
+                  {conversationState === "speaking" && (
+                    <MicOff size={16} strokeWidth={2} />
+                  )}
+                  <span>{conversationStateInfo.text}</span>
+                </div>
               </div>
+            )}
+          </div>
 
-              {/* Ready Status - Under the orb */}
-              {isConnected &&
-                sessionConfigured &&
-                !isRecording &&
-                conversationState === "idle" && (
-                  <div className="mt-4 text-sm text-[#888] font-medium">
-                    Ready to listen
-                  </div>
-                )}
-            </div>
+          {/* Ready Status - Under the orb */}
+          {/* {isConnected &&
+            sessionConfigured &&
+            !isRecording &&
+            conversationState === "idle" && (
+              <div className="mt-4 text-sm text-[#888] font-medium">
+                Ready to listen
+              </div>
+            )} */}
+        </div>
 
-            {/* Help Text */}
-            <div className="mt-8 text-center text-sm text-[#888] max-w-md">
-              <p>
-                Just speak naturally to describe your dog's activity. The AI
-                will automatically calculate XP rewards and save it.
-              </p>
-              <p className="mt-2 text-[#f9dca0]">
-                Example: "We went on a 20 minute walk this morning"
-              </p>
-            </div>
-          </>
-        )}
+        {/* Help Text */}
+        <div className="mt-8 text-center text-sm text-[#888] max-w-md">
+          <p>
+            Just speak naturally to describe your dog's activity. The AI will
+            automatically calculate XP rewards and save it.
+          </p>
+          <p className="mt-2 text-[#f9dca0]">
+            Example: "We went on a 20 minute walk this morning"
+          </p>
+        </div>
+      </>
     </div>
   );
 }
