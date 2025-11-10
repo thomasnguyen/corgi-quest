@@ -663,7 +663,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Only show once per day
   - _Requirements: 26_
 
-- [ ] 70. Add real-time toast for partner mood logs
+- [x] 70. Add real-time toast for partner mood logs
   - Subscribe to mood feed in Layout component
   - Detect when new mood is added (compare previous vs current data)
   - Display toast: "Sarah logged: Bumi is 😊 Calm"
@@ -671,14 +671,14 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Stack multiple toasts if several moods logged quickly
   - _Requirements: 26_
 
-- [ ] 71. Update seed mutation to include sample mood logs
+- [ ] *71. Update seed mutation to include sample mood logs
   - Add 2-3 sample mood_logs entries to seed.ts
   - Create moods from past few hours with realistic timestamps
   - Include variety of moods (calm, playful, etc.)
   - Test seed mutation includes mood logs
   - _Requirements: 26_
 
-- [ ] 72. Create AI recommendations Convex action
+- [x] 72. Create AI recommendations Convex action
   - Create convex/actions/generateRecommendations.ts
   - Query mood logs from last 7 days
   - Query activity history from last 7 days

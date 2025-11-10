@@ -53,30 +53,30 @@ export function Toast({
     };
   }, [duration, onDismiss]);
 
-  const getLevelStyles = () => {
+  const getLevelAccent = () => {
     switch (level) {
       case "error":
-        return "bg-red-600 text-white";
+        return "border-red-500/60";
       case "warning":
-        return "bg-yellow-500 text-black";
+        return "border-yellow-500/60";
       case "info":
-        return "bg-blue-600 text-white";
+        return "border-[#d4af37]/60"; // Gold
       case "success":
-        return "bg-green-600 text-white";
+        return "border-[#d4af37]/60"; // Gold
       default:
-        return "bg-gray-600 text-white";
+        return "border-[#d4af37]/60"; // Gold
     }
   };
 
   return (
     <div
-      className={`px-6 py-3 rounded-lg shadow-lg ${getLevelStyles()} max-w-md mx-auto animate-slide-in`}
+      className={`px-4 py-2 rounded-lg shadow-lg bg-[#1a1a1a] border-2 ${getLevelAccent()} max-w-sm mx-auto animate-slide-in`}
     >
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-medium">{message}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium text-white">{message}</p>
         <button
           onClick={onDismiss}
-          className="text-lg font-bold hover:opacity-80"
+          className="text-base font-bold text-[#d4af37] hover:opacity-80 flex-shrink-0"
           aria-label="Dismiss"
         >
           ×

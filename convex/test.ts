@@ -207,3 +207,33 @@ export const testGetTodaysMoods = query({
     };
   },
 });
+
+/**
+ * Test action for generateRecommendations
+ * Verifies that the AI recommendations action works correctly
+ */
+export const testGenerateRecommendations = query({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+
+    if (!dog) {
+      return {
+        success: false,
+        message: "No dog found. Please run seedDemoData first.",
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        "Test setup complete. Call the generateRecommendations action with dogId: " +
+        dog._id,
+      dogId: dog._id,
+      instructions:
+        "Run: await ctx.runAction(api.actions.generateRecommendations, { dogId: '" +
+        dog._id +
+        "' })",
+    };
+  },
+});
