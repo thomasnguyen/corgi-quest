@@ -1,0 +1,123 @@
+import { ReactNode, useEffect, useRef } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import BottomNav from "./BottomNav";
+import { useToast } from "../../contexts/ToastContext";
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+/**
+ * Layout component with real-time activity feed subscription
+ * Detects new activities and shows toast notifications
+ * Also detects level-ups by watching stat changes
+ * Requirements: 1, 21, 22
+ */
+export default function Layout({ children }: LayoutProps) {
+  const { showToast } = useToast();
+
+  // Get the first dog (demo purposes)
+  const firstDog = useQuery(api.queries.getFirstDog);
+
+  // Subscribe to activity feed for real-time updates
+  const activityFeed = useQuery(
+    api.queries.getActivityFeed,
+    firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
+  // Subscribe to dog profile to detect level-ups
+  const dogProfile = useQuery(
+    api.queries.getDogProfile,
+    firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
+  // Track previous activity IDs to detect new activities
+  const previousActivityIdsRef = useRef<Set<string>>(new Set());
+
+  // Track previous stat levels to detect level-ups
+  const previousStatLevelsRef = useRef<Map<string, number>>(new Map());
+  const previousOverallLevelRef = useRef<number | null>(null);
+
+  // Detect new activities and show toasts
+  useEffect(() => {
+    if (!activityFeed || activityFeed.length === 0) {
+      return;
+    }
+
+    // Get current activity IDs
+    const currentActivityIds = new Set(
+      activityFeed.map((activity) => activity._id)
+    );
+
+    // If this is the first load, just store the IDs without showing toasts
+    if (previousActivityIdsRef.current.size === 0) {
+      previousActivityIdsRef.current = currentActivityIds;
+      return;
+    }
+
+    // Find new activities (IDs that weren't in previous set)
+    const newActivities = activityFeed.filter(
+      (activity) => !previousActivityIdsRef.current.has(activity._id)
+    );
+
+    // Show toast for each new activity
+    newActivities.forEach((activity) => {
+      // Format stat gains as "PHY +30 XP, IMP +10 XP"
+      const statGainsText = activity.statGains
+        .map((gain) => `${gain.statType} +${gain.xpAmount} XP`)
+        .join(", ");
+
+      const message = `${activity.userName} logged ${activity.activityName}${statGainsText ? ` - ${statGainsText}` : ""}`;
+
+      showToast(message, "success");
+    });
+
+    // Update previous activity IDs
+    previousActivityIdsRef.current = currentActivityIds;
+  }, [activityFeed, showToast]);
+
+  // Detect level-ups by watching stat changes
+  useEffect(() => {
+    if (!dogProfile || !dogProfile.stats || !dogProfile.dog) {
+      return;
+    }
+
+    // Check overall level
+    if (previousOverallLevelRef.current !== null) {
+      const currentOverallLevel = dogProfile.dog.overallLevel;
+      if (currentOverallLevel > previousOverallLevelRef.current) {
+        showToast(
+          `🎉 Overall leveled up to ${currentOverallLevel}!`,
+          "success"
+        );
+      }
+    }
+    previousOverallLevelRef.current = dogProfile.dog.overallLevel;
+
+    // Check each stat level
+    dogProfile.stats.forEach((stat) => {
+      const key = stat.statType;
+      const previousLevel = previousStatLevelsRef.current.get(key);
+
+      if (previousLevel !== undefined && stat.level > previousLevel) {
+        showToast(
+          `🎉 ${stat.statType} leveled up to ${stat.level}!`,
+          "success"
+        );
+      }
+
+      previousStatLevelsRef.current.set(key, stat.level);
+    });
+  }, [dogProfile, showToast]);
+
+  return (
+    <div className="min-h-screen bg-[#121216] flex flex-col">
+      <main className="flex-1 pb-32 overflow-y-auto">
+        <div className="max-w-md mx-auto">{children}</div>
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}

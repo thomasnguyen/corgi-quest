@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "convex": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "convex@latest",
+        "mcp",
+        "start"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "functionSpec",
+        "run",
+        "data",
+        "status",
+        "tables",
+        "envList"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "disabled": false
+    },
+    "Figma Desktop": {
+      "url": "http://127.0.0.1:3845/mcp",
+      "disabled": false,
+      "autoApprove": [
+        "get_design_context",
+        "get_design_context",
+        "get_design_context",
+        "get_screenshot"
+      ]
+    }
+  }
+}

@@ -1,0 +1,114 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+/**
+ * Corgi Quest Database Schema
+ *
+ * This schema defines 8 tables for the dog training RPG:
+ * - users: Partners in a household
+ * - households: Shared account containing users and a dog
+ * - dogs: The pet character being trained
+ * - dog_stats: Four character attributes (INT, PHY, IMP, SOC)
+ * - activities: Logged training/exercise events
+ * - activity_stat_gains: XP awards per activity per stat
+ * - daily_goals: Daily physical and mental stimulation tracking
+ * - streaks: Consecutive days meeting goals
+ */
+
+export default defineSchema({
+  // Users table - partners in a household
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    householdId: v.id("households"),
+    createdAt: v.number(),
+  })
+    .index("by_household", ["householdId"])
+    .index("by_email", ["email"]),
+
+  // Households table - shared account
+  households: defineTable({
+    dogId: v.optional(v.id("dogs")),
+    createdAt: v.number(),
+  }),
+
+  // Dogs table - the pet character
+  dogs: defineTable({
+    name: v.string(),
+    householdId: v.id("households"),
+    overallLevel: v.number(),
+    overallXp: v.number(),
+    xpToNextLevel: v.number(),
+    photoUrl: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_household", ["householdId"]),
+
+  // Dog stats table - four character attributes
+  dog_stats: defineTable({
+    dogId: v.id("dogs"),
+    statType: v.union(
+      v.literal("INT"),
+      v.literal("PHY"),
+      v.literal("IMP"),
+      v.literal("SOC")
+    ),
+    level: v.number(),
+    xp: v.number(),
+    xpToNextLevel: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_stat", ["dogId", "statType"]),
+
+  // Activities table - logged training events
+  activities: defineTable({
+    dogId: v.id("dogs"),
+    userId: v.id("users"),
+    activityName: v.string(),
+    description: v.optional(v.string()),
+    durationMinutes: v.optional(v.number()),
+    physicalPoints: v.optional(v.number()),
+    mentalPoints: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_created", ["dogId", "createdAt"]),
+
+  // Activity stat gains table - XP awards per activity
+  activity_stat_gains: defineTable({
+    activityId: v.id("activities"),
+    statType: v.union(
+      v.literal("INT"),
+      v.literal("PHY"),
+      v.literal("IMP"),
+      v.literal("SOC")
+    ),
+    xpAmount: v.number(),
+  }).index("by_activity", ["activityId"]),
+
+  // Daily goals table - physical and mental stimulation tracking
+  daily_goals: defineTable({
+    dogId: v.id("dogs"),
+    date: v.string(), // YYYY-MM-DD format
+    physicalPoints: v.number(),
+    physicalGoal: v.number(),
+    mentalPoints: v.number(),
+    mentalGoal: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_date", ["dogId", "date"]),
+
+  // Streaks table - consecutive days meeting goals
+  streaks: defineTable({
+    dogId: v.id("dogs"),
+    currentStreak: v.number(),
+    longestStreak: v.number(),
+    lastActivityDate: v.string(), // YYYY-MM-DD format
+  }).index("by_dog", ["dogId"]),
+
+  // Presence table - real-time awareness of partner activity
+  presence: defineTable({
+    userId: v.id("users"),
+    location: v.string(), // e.g., "log-activity", "overview", etc.
+    lastSeen: v.number(), // timestamp
+  }).index("by_user", ["userId"]),
+});

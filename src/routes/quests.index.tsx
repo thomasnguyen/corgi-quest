@@ -1,0 +1,191 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import Layout from "../components/layout/Layout";
+import QuestCard from "../components/quests/QuestCard";
+import { Dumbbell, Brain } from "lucide-react";
+
+export const Route = createFileRoute("/quests/")({
+  component: QuestsPage,
+});
+
+// Quest data structure
+interface Quest {
+  id: string;
+  name: string;
+  category: "Physical" | "Mental";
+  points: number;
+  description: string;
+}
+
+// Static quest list from requirements
+const QUESTS: Quest[] = [
+  // Physical Quests
+  {
+    id: "morning-walk",
+    name: "Morning Walk",
+    category: "Physical",
+    points: 30,
+    description:
+      "Take your dog for a morning walk to start the day with energy",
+  },
+  {
+    id: "fetch-session",
+    name: "Fetch Session",
+    category: "Physical",
+    points: 15,
+    description: "Play fetch with your dog to build physical fitness",
+  },
+  {
+    id: "dog-park-visit",
+    name: "Dog Park Visit",
+    category: "Physical",
+    points: 40,
+    description: "Visit the dog park for exercise and socialization",
+  },
+  {
+    id: "long-walk",
+    name: "Long Walk 60min+",
+    category: "Physical",
+    points: 50,
+    description: "Take an extended walk of 60 minutes or more",
+  },
+  // Mental Quests
+  {
+    id: "training-session",
+    name: "Training Session",
+    category: "Mental",
+    points: 20,
+    description: "Practice obedience training and commands",
+  },
+  {
+    id: "puzzle-toy",
+    name: "Puzzle Toy",
+    category: "Mental",
+    points: 10,
+    description: "Let your dog solve a puzzle toy for mental stimulation",
+  },
+  {
+    id: "new-trick-training",
+    name: "New Trick Training",
+    category: "Mental",
+    points: 25,
+    description: "Teach your dog a new trick or command",
+  },
+  {
+    id: "hide-and-seek",
+    name: "Hide & Seek",
+    category: "Mental",
+    points: 15,
+    description: "Play hide and seek to engage your dog's mind",
+  },
+];
+
+function QuestsPage() {
+  // Get first dog
+  const firstDog = useQuery(api.queries.getFirstDog);
+
+  // Subscribe to activity feed for real-time quest completion detection
+  const activities = useQuery(
+    api.queries.getActivityFeed,
+    firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
+  // Loading state
+  if (firstDog === undefined || activities === undefined) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen bg-[#121216]">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f5c35f] border-t-transparent"></div>
+            <p className="mt-4 text-[#f9dca0] text-sm">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
+  // Check which quests are completed today
+  const completedQuestNames = new Set<string>();
+  if (activities) {
+    activities.forEach((activity) => {
+      const activityDate = new Date(activity.createdAt)
+        .toISOString()
+        .split("T")[0];
+      if (activityDate === today) {
+        // Normalize activity name for matching (case-insensitive, trim whitespace)
+        const normalizedActivityName = activity.activityName
+          .toLowerCase()
+          .trim();
+
+        // Check if activity name matches any quest name
+        QUESTS.forEach((quest) => {
+          const normalizedQuestName = quest.name.toLowerCase().trim();
+          if (
+            normalizedActivityName.includes(normalizedQuestName) ||
+            normalizedQuestName.includes(normalizedActivityName)
+          ) {
+            completedQuestNames.add(quest.name);
+          }
+        });
+      }
+    });
+  }
+
+  // Group quests by category
+  const physicalQuests = QUESTS.filter((q) => q.category === "Physical");
+  const mentalQuests = QUESTS.filter((q) => q.category === "Mental");
+
+  return (
+    <Layout>
+      <div className="p-6 pb-32">
+        <h1 className="text-2xl font-bold mb-6 text-black">QUESTS</h1>
+
+        {/* Physical Quests Section */}
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-4 text-black border-b-2 border-black pb-2 flex items-center gap-2">
+            <Dumbbell size={20} strokeWidth={2} />
+            PHYSICAL
+          </h2>
+          <div className="space-y-3">
+            {physicalQuests.map((quest) => (
+              <QuestCard
+                key={quest.id}
+                id={quest.id}
+                name={quest.name}
+                category={quest.category}
+                points={quest.points}
+                description={quest.description}
+                isCompleted={completedQuestNames.has(quest.name)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Mental Quests Section */}
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-4 text-black border-b-2 border-black pb-2 flex items-center gap-2">
+            <Brain size={20} strokeWidth={2} />
+            MENTAL
+          </h2>
+          <div className="space-y-3">
+            {mentalQuests.map((quest) => (
+              <QuestCard
+                key={quest.id}
+                id={quest.id}
+                name={quest.name}
+                category={quest.category}
+                points={quest.points}
+                description={quest.description}
+                isCompleted={completedQuestNames.has(quest.name)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
