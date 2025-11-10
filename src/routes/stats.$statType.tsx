@@ -18,6 +18,13 @@ const STAT_NAMES: Record<StatType, string> = {
   SOC: "Socialization",
 };
 
+const STAT_DESCRIPTIONS: Record<StatType, string> = {
+  PHY: "Physical fitness keeps your dog healthy, strong, and full of energy. Regular exercise helps maintain a healthy weight and improves overall wellbeing.",
+  INT: "Mental stimulation keeps your dog's mind sharp and engaged. Puzzle toys and training exercises help prevent boredom and build problem-solving skills.",
+  IMP: "Impulse control teaches your dog patience and self-discipline. Training sessions help your dog learn to wait, listen, and make better decisions.",
+  SOC: "Socialization helps your dog feel comfortable around people and other dogs. Positive interactions build confidence and reduce anxiety in new situations.",
+};
+
 const STAT_ICONS: Record<
   StatType,
   React.ComponentType<{
@@ -141,7 +148,7 @@ function StatDetailPage() {
               >
                 Lvl {stat.level}
               </p>
-              <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="flex items-center justify-center gap-3 mb-3">
                 {(() => {
                   const Icon = STAT_ICONS[stat.statType];
                   return (
@@ -153,7 +160,7 @@ function StatDetailPage() {
                   );
                 })()}
                 <h1
-                  className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
+                  className="text-3xl font-bold text-[#fcd587]"
                   style={{
                     textShadow: "0px 1px 1px #1e1e1e",
                     fontFamily: "serif",
@@ -162,6 +169,10 @@ function StatDetailPage() {
                   {statName}
                 </h1>
               </div>
+              {/* Stat Description */}
+              <p className="text-[#f9dca0] text-sm leading-relaxed px-4 max-w-md mx-auto">
+                {STAT_DESCRIPTIONS[stat.statType]}
+              </p>
             </div>
 
             {/* Large XP Progress Bar */}

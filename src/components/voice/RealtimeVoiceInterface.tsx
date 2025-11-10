@@ -1039,23 +1039,23 @@ export function RealtimeVoiceInterface({
 
       {/* Success Confirmation Card */}
       {savedActivity && (
-        <div className="w-full max-w-md mb-8 p-6 bg-green-50 border-2 border-green-600 rounded-lg">
+        <div className="w-full max-w-md mb-8 p-6 bg-[#1a1a1e] border-2 border-[#f5c35f] rounded-lg animate-slide-in">
           <div className="text-center mb-4">
-            <div className="text-4xl mb-2">✓</div>
-            <h3 className="text-xl font-bold text-green-800 mb-1">
+            <div className="text-5xl mb-2 text-[#f5c35f]">✓</div>
+            <h3 className="text-2xl font-bold text-[#f5c35f] mb-1">
               Activity Logged!
             </h3>
-            <p className="text-green-700 font-medium">
+            <p className="text-[#f9dca0] font-medium text-lg">
               {savedActivity.activityName}
             </p>
           </div>
 
           <div className="space-y-2 mb-4">
-            <div className="flex justify-between items-center py-2 border-b border-green-200">
-              <span className="text-sm font-medium text-green-800">
+            <div className="flex justify-between items-center py-3 border-b border-[#f5c35f]/30">
+              <span className="text-sm font-medium text-[#f9dca0]">
                 Total XP Gained:
               </span>
-              <span className="text-lg font-bold text-green-900">
+              <span className="text-2xl font-bold text-[#f5c35f]">
                 +{savedActivity.totalXpGained} XP
               </span>
             </div>
@@ -1063,22 +1063,22 @@ export function RealtimeVoiceInterface({
             {savedActivity.statGains.map((gain) => (
               <div
                 key={gain.statType}
-                className="flex justify-between items-center py-1"
+                className="flex justify-between items-center py-2 px-2 rounded bg-[#f5c35f]/10 border border-[#f5c35f]/20"
               >
-                <span className="text-sm text-green-700">{gain.statType}:</span>
-                <span className="text-sm font-medium text-green-800">
+                <span className="text-sm text-[#f9dca0]">{gain.statType}:</span>
+                <span className="text-sm font-medium text-[#f5c35f]">
                   +{gain.xpAmount} XP
                 </span>
               </div>
             ))}
 
             {savedActivity.levelUps.length > 0 && (
-              <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded">
-                <p className="text-sm font-bold text-yellow-800 mb-1">
+              <div className="mt-4 p-4 bg-[#f5c35f]/20 border-2 border-[#f5c35f] rounded-lg">
+                <p className="text-base font-bold text-[#f5c35f] mb-2">
                   🎉 Level Up!
                 </p>
                 {savedActivity.levelUps.map((levelUp) => (
-                  <p key={levelUp.statType} className="text-xs text-yellow-700">
+                  <p key={levelUp.statType} className="text-sm text-[#f9dca0]">
                     {levelUp.statType}: Level {levelUp.oldLevel} → Level{" "}
                     {levelUp.newLevel}
                   </p>
@@ -1090,14 +1090,14 @@ export function RealtimeVoiceInterface({
           <div className="flex gap-3">
             <button
               onClick={handleLogAnother}
-              className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#f5c35f] text-black rounded-lg hover:bg-[#f9dca0] transition-colors font-medium flex items-center justify-center gap-2"
             >
               <Mic size={18} strokeWidth={2} />
               Log Another
             </button>
             <button
               onClick={handleViewFeed}
-              className="flex-1 px-4 py-2 bg-white text-black border-2 border-black rounded-lg hover:bg-gray-100 transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-transparent text-[#f9dca0] border-2 border-[#f5c35f] rounded-lg hover:bg-[#f5c35f]/10 transition-colors font-medium flex items-center justify-center gap-2"
             >
               <Eye size={18} strokeWidth={2} />
               View Feed
