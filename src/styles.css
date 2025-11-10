@@ -77,3 +77,59 @@ code {
 .animate-pulse-ring {
   animation: pulse-ring 1s ease-in-out infinite;
 }
+
+/* Voice visualizer glow animation */
+@keyframes voice-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(245, 195, 95, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(245, 195, 95, 0.9));
+  }
+}
+
+@keyframes voice-glow-active {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(255, 241, 171, 0.8)) drop-shadow(0 0 40px rgba(252, 213, 135, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 241, 171, 1)) drop-shadow(0 0 60px rgba(252, 213, 135, 0.8));
+  }
+}
+
+@keyframes voice-glow-speaking {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.8)) drop-shadow(0 0 40px rgba(147, 197, 253, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(96, 165, 250, 1)) drop-shadow(0 0 60px rgba(147, 197, 253, 0.8));
+  }
+}
+
+.animate-voice-glow {
+  animation: voice-glow 2s ease-in-out infinite;
+}
+
+.animate-voice-glow-active {
+  animation: voice-glow-active 1.5s ease-in-out infinite;
+}
+
+.animate-voice-glow-speaking {
+  animation: voice-glow-speaking 1.5s ease-in-out infinite;
+}
+
+/* Voice visualizer ring pulse */
+@keyframes ring-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-ring-pulse {
+  animation: ring-pulse 2s ease-in-out infinite;
+}

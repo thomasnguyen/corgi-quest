@@ -99,6 +99,7 @@ export function RealtimeVoiceInterface({
   const [sessionConfigured, setSessionConfigured] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isListeningSmoothed, setIsListeningSmoothed] = useState(false);
   const [audioTrack, setAudioTrack] = useState<MediaStreamTrack | null>(null);
   const [conversationState, setConversationState] =
     useState<ConversationState>("idle");
@@ -110,6 +111,9 @@ export function RealtimeVoiceInterface({
 
   // Track if recording has been started to prevent double-start in strict mode
   const recordingStartedRef = useRef(false);
+
+  // Track when listening started to enforce minimum duration
+  const listeningStartTimeRef = useRef<number | null>(null);
 
   // Get dog and user IDs for activity logging
   const firstDog = useQuery(api.queries.getFirstDog);
@@ -691,7 +695,18 @@ export function RealtimeVoiceInterface({
         break;
 
       case "response.audio.done":
-        setConversationState("idle");
+        // Wait for audio queue to finish playing before changing state
+        // Check if audio is still playing, if so wait for it to finish
+        const checkAudioFinished = () => {
+          if (isPlayingRef.current || audioQueueRef.current.length > 0) {
+            // Audio still playing, check again in 100ms
+            setTimeout(checkAudioFinished, 100);
+          } else {
+            // Audio finished, now we can change state to idle
+            setConversationState("idle");
+          }
+        };
+        checkAudioFinished();
         break;
 
       case "response.function_call_arguments.delta":
@@ -756,13 +771,22 @@ export function RealtimeVoiceInterface({
         break;
 
       case "input_audio_buffer.speech_started":
-        setIsListening(true);
-        setConversationState("listening");
+        // Only set listening state if OpenAI is not currently speaking
+        if (conversationState !== "speaking") {
+          setIsListening(true);
+          setConversationState("listening");
+          // Immediately update smoothed state to prevent flash
+          listeningStartTimeRef.current = Date.now();
+          setIsListeningSmoothed(true);
+        }
         break;
 
       case "input_audio_buffer.speech_stopped":
-        setIsListening(false);
-        setConversationState("processing");
+        // Only update state if OpenAI is not currently speaking
+        if (conversationState !== "speaking") {
+          setIsListening(false);
+          setConversationState("processing");
+        }
         break;
 
       case "error":
@@ -813,13 +837,87 @@ export function RealtimeVoiceInterface({
   };
 
   /**
-   * Request microphone permission on mount
+   * Handle connect button click
+   */
+  const handleConnect = async () => {
+    try {
+      log("[Voice] Connecting to OpenAI...");
+      await connect();
+    } catch (error) {
+      logError("[Voice] Failed to connect:", error);
+      onError?.(error as Error);
+    }
+  };
+
+  /**
+   * Request microphone permission on mount and auto-connect when ready
    */
   useEffect(() => {
     if (hasPermission === null) {
       requestPermission();
+    } else if (
+      hasPermission === true &&
+      !isConnected &&
+      connectionState !== "connecting"
+    ) {
+      // Auto-connect when permission is granted
+      handleConnect();
     }
-  }, [hasPermission, requestPermission]);
+  }, [
+    hasPermission,
+    isConnected,
+    connectionState,
+    requestPermission,
+    connect,
+    onError,
+  ]);
+
+  /**
+   * Smooth out rapid isListening state changes to prevent jarring visual updates
+   */
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    // If OpenAI is speaking, immediately clear smoothed listening state
+    if (conversationState === "speaking") {
+      setIsListeningSmoothed(false);
+      listeningStartTimeRef.current = null;
+      return;
+    }
+
+    if (isListening) {
+      // When listening starts, update immediately and record start time
+      // Only update if not already set (to avoid overriding immediate updates from handlers)
+      if (!isListeningSmoothed) {
+        listeningStartTimeRef.current = Date.now();
+        setIsListeningSmoothed(true);
+      } else if (!listeningStartTimeRef.current) {
+        // If smoothed is true but timestamp is missing, set it
+        listeningStartTimeRef.current = Date.now();
+      }
+    } else {
+      // When listening stops, calculate how long we've been listening
+      const listeningDuration = listeningStartTimeRef.current
+        ? Date.now() - listeningStartTimeRef.current
+        : 0;
+
+      // Minimum listening duration is 500ms to prevent jarring transitions
+      const minDuration = 500;
+      const remainingTime = Math.max(0, minDuration - listeningDuration);
+
+      // Wait for remaining time + 300ms buffer before updating
+      timeoutId = setTimeout(() => {
+        setIsListeningSmoothed(false);
+        listeningStartTimeRef.current = null;
+      }, remainingTime + 300);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isListening, conversationState]);
 
   /**
    * Cleanup on unmount
@@ -841,19 +939,6 @@ export function RealtimeVoiceInterface({
   }, []);
 
   /**
-   * Handle connect button click
-   */
-  const handleConnect = async () => {
-    try {
-      log("[Voice] Connecting to OpenAI...");
-      await connect();
-    } catch (error) {
-      logError("[Voice] Failed to connect:", error);
-      onError?.(error as Error);
-    }
-  };
-
-  /**
    * Get conversation state display information
    */
   const getConversationStateInfo = () => {
@@ -862,31 +947,31 @@ export function RealtimeVoiceInterface({
         return {
           text: "Ready to listen",
           icon: "🎤",
-          color: "text-gray-600",
+          color: "text-[#888]",
         };
       case "listening":
         return {
           text: "Listening...",
           icon: "👂",
-          color: "text-blue-600",
+          color: "text-[#f5c35f]",
         };
       case "processing":
         return {
           text: "Processing...",
           icon: "⚙️",
-          color: "text-yellow-600",
+          color: "text-[#f9dca0]",
         };
       case "speaking":
         return {
           text: "Speaking...",
           icon: "🔊",
-          color: "text-green-600",
+          color: "text-[#f5c35f]",
         };
       default:
         return {
           text: "Unknown",
           icon: "❓",
-          color: "text-gray-600",
+          color: "text-[#888]",
         };
     }
   };
@@ -919,18 +1004,18 @@ export function RealtimeVoiceInterface({
    */
   const getConnectionStatusColor = () => {
     if (connectionState === "connected" && sessionConfigured) {
-      return "text-green-600";
+      return "text-[#f5c35f]";
     }
 
     switch (connectionState) {
       case "connected":
-        return "text-yellow-600"; // Configuring
+        return "text-[#f9dca0]"; // Configuring
       case "connecting":
-        return "text-yellow-600";
+        return "text-[#f9dca0]";
       case "error":
         return "text-red-600";
       default:
-        return "text-gray-600";
+        return "text-[#888]";
     }
   };
 
@@ -938,21 +1023,6 @@ export function RealtimeVoiceInterface({
    * Check if microphone permission was denied
    */
   const isPermissionDenied = hasPermission === false;
-
-  /**
-   * Check if ready to connect
-   */
-  const canConnect =
-    !isPermissionDenied && connectionState !== "connecting" && !isConnected;
-
-  /**
-   * Check if conversation can be stopped
-   */
-  const canStopConversation =
-    isConnected &&
-    sessionConfigured &&
-    conversationState !== "idle" &&
-    isRecording;
 
   const conversationStateInfo = getConversationStateInfo();
 
@@ -1067,42 +1137,12 @@ export function RealtimeVoiceInterface({
         (connectionState !== "connected" || sessionConfigured) && (
           <>
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-2">
+              <h2 className="text-2xl font-bold mb-2 text-[#f5c35f]">
                 Voice Activity Logging
               </h2>
-              <p className="text-gray-600 mb-4">
+              <p className="text-[#888] mb-4">
                 Speak naturally to log your dog's activities
               </p>
-
-              {/* Connection Status */}
-              <div
-                className={`text-sm font-medium ${getConnectionStatusColor()}`}
-              >
-                Status: {getConnectionStatusText()}
-              </div>
-
-              {/* Permission Status */}
-              {hasPermission !== null && (
-                <div
-                  className={`text-xs mt-2 ${hasPermission ? "text-green-600" : "text-red-600"}`}
-                >
-                  Microphone: {hasPermission ? "Granted" : "Denied"}
-                </div>
-              )}
-
-              {/* Conversation State */}
-              {isConnected && sessionConfigured && isRecording && (
-                <div
-                  className={`mt-4 text-lg font-medium flex items-center justify-center gap-2 ${conversationStateInfo.color}`}
-                >
-                  {isListening ? (
-                    <Mic size={20} strokeWidth={2} className="animate-pulse" />
-                  ) : (
-                    <MicOff size={20} strokeWidth={2} />
-                  )}
-                  {conversationStateInfo.text}
-                </div>
-              )}
 
               {/* Permission Denied Message */}
               {isPermissionDenied && (
@@ -1114,82 +1154,86 @@ export function RealtimeVoiceInterface({
                   </p>
                 </div>
               )}
-
-              {/* Ready Status */}
-              {isConnected && sessionConfigured && !isRecording && (
-                <div className="mt-4 text-sm text-green-600 font-medium">
-                  ✓ Ready to log activities
-                </div>
-              )}
             </div>
 
-            {/* Voice Visualizer - Using CircularWaveform configured per task requirements */}
-            <div className="flex items-center justify-center my-8">
-              <CircularWaveform
-                size={200}
-                numBars={32}
-                barWidth={4}
-                color1="#000000"
-                color2="#000000"
-                backgroundColor="transparent"
-                sensitivity={1.5}
-                rotationEnabled={false}
-                audioTrack={audioTrack}
-              />
-            </div>
+            {/* Voice Visualizer - RPG-style prominent visualizer */}
+            <div className="flex flex-col items-center justify-center my-8">
+              {/* Main visualizer with dynamic size */}
+              <div
+                className={`transition-all duration-500 relative ${
+                  conversationState === "speaking"
+                    ? "animate-voice-glow-speaking"
+                    : isListeningSmoothed
+                      ? "animate-voice-glow-active"
+                      : "animate-voice-glow"
+                }`}
+              >
+                <CircularWaveform
+                  size={300}
+                  numBars={32}
+                  barWidth={10}
+                  color1="#f5c35f"
+                  color2="#f9dca0"
+                  /*                   color1={
+                    conversationState === "speaking"
+                      ? "#60a5fa"
+                      : isListeningSmoothed
+                        ? "#fff1ab"
+                        : "#f5c35f"
+                  }
+                  color2={
+                    conversationState === "speaking"
+                      ? "#93c5fd"
+                      : isListeningSmoothed
+                        ? "#fcd587"
+                        : "#f9dca0"
+                  } */
+                  backgroundColor="transparent"
+                  sensitivity={1.5}
+                  rotationEnabled={true}
+                  audioTrack={audioTrack}
+                />
 
-            {/* Connection Controls */}
-            <div className="flex flex-col gap-3 mt-4">
-              <div className="flex gap-4">
-                {!isConnected ? (
-                  <button
-                    onClick={handleConnect}
-                    disabled={!canConnect}
-                    className="px-6 py-2 bg-black text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors flex items-center gap-2"
-                  >
-                    <Mic size={18} strokeWidth={2} />
-                    Connect
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={disconnect}
-                      className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                {/* Conversation State - Inside the orb (centered) */}
+                {isConnected && sessionConfigured && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
                     >
-                      <MicOff size={18} strokeWidth={2} />
-                      Disconnect
-                    </button>
-                    {isRecording && (
-                      <button
-                        onClick={stopRecording}
-                        className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-                      >
-                        <MicOff size={18} strokeWidth={2} />
-                        Stop Recording
-                      </button>
-                    )}
-                  </>
+                      {conversationState === "listening" && (
+                        <Mic
+                          size={16}
+                          strokeWidth={2}
+                          className="animate-pulse"
+                        />
+                      )}
+                      {conversationState === "speaking" && (
+                        <MicOff size={16} strokeWidth={2} />
+                      )}
+                      <span>{conversationStateInfo.text}</span>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Stop Conversation Button */}
-              {canStopConversation && (
-                <button
-                  onClick={stopConversation}
-                  className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
-                >
-                  Stop Conversation
-                </button>
-              )}
+              {/* Ready Status - Under the orb */}
+              {isConnected &&
+                sessionConfigured &&
+                !isRecording &&
+                conversationState === "idle" && (
+                  <div className="mt-4 text-sm text-[#888] font-medium">
+                    Ready to listen
+                  </div>
+                )}
             </div>
 
             {/* Help Text */}
-            <div className="mt-8 text-center text-sm text-gray-500 max-w-md">
+            <div className="mt-8 text-center text-sm text-[#888] max-w-md">
               <p>
-                Once connected, describe your dog's activity and the AI will
-                automatically calculate XP rewards and save it.
+                Just speak naturally to describe your dog's activity. The AI
+                will automatically calculate XP rewards and save it.
               </p>
-              <p className="mt-2">
+              <p className="mt-2 text-[#f9dca0]">
                 Example: "We went on a 20 minute walk this morning"
               </p>
             </div>
