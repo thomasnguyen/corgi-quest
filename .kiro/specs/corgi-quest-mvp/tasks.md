@@ -562,3 +562,175 @@ This implementation plan breaks down the Corgi Quest MVP into discrete, incremen
   - Prepare answers: "How does voice work?" → "OpenAI Realtime API with function calling"
   - _Requirements: All_
 
+- [ ] 61. Add mood_logs table to database schema
+  - Add mood_logs table definition to convex/schema.ts
+  - Define mood union type: calm, anxious, reactive, playful, tired, neutral
+  - Add fields: dogId, userId, mood, note (optional), activityId (optional), createdAt
+  - Add indexes: by_dog, by_dog_and_created
+  - Test schema in Convex dashboard
+  - _Requirements: 26_
+
+- [ ] 62. Create mood logging mutation
+  - Create logMood mutation in convex/mutations.ts
+  - Accept args: dogId, userId, mood, note (optional), activityId (optional)
+  - Insert mood_logs record with current timestamp
+  - Return mood log ID
+  - Test mutation in Convex dashboard
+  - _Requirements: 26_
+
+- [ ] 63. Create mood queries
+  - Create getMoodFeed query to get recent mood logs (last 20)
+  - Create getLatestMood query to get most recent mood for a dog
+  - Create getTodaysMoods query to check if mood logged today
+  - Test queries in Convex dashboard
+  - _Requirements: 26_
+
+- [ ] 64. Create MoodPicker component
+  - Create src/components/mood/MoodPicker.tsx
+  - Display 6 mood options in grid layout
+  - Each mood shows emoji + label (😊 Calm, 😰 Anxious, etc.)
+  - Include optional note textarea (max 200 chars)
+  - Add "Cancel" and "Log Mood" buttons
+  - Handle mood selection and note input
+  - _Requirements: 26_
+
+- [ ] 65. Create MoodFeedItem component
+  - Create src/components/mood/MoodFeedItem.tsx
+  - Display user name, mood emoji + label, optional note, timestamp
+  - Style differently from ActivityFeedItem (different background/border)
+  - Format timestamp as relative time (e.g., "2h ago")
+  - _Requirements: 26_
+
+- [ ] 66. Add mood logging button to Activity screen
+  - Add "LOG MOOD" button to Activity screen (above or below activity feed)
+  - Button opens MoodPicker modal
+  - Call logMood mutation when user confirms
+  - Show loading state during mutation
+  - Display success toast after logging
+  - _Requirements: 26_
+
+- [ ] 67. Integrate mood entries into activity feed
+  - Merge mood logs and activities into unified chronological feed
+  - Sort by createdAt timestamp (newest first)
+  - Display MoodFeedItem for mood entries, ActivityFeedItem for activities
+  - Update feed in real-time when mood is logged
+  - Test with two browsers: log mood in one, see it appear in other
+  - _Requirements: 26_
+
+- [ ] 68. Add mood indicator to TopResourceBar
+  - Add 4th item to resource bar: mood emoji (latest mood)
+  - Subscribe to getLatestMood query
+  - Display mood emoji (or "—" if no mood logged)
+  - Make mood indicator tappable to open MoodPicker
+  - Update in real-time when partner logs mood
+  - Handle case when no mood exists (show "—" or "Tap to log")
+  - _Requirements: 26_
+
+- [ ] 69. Implement daily mood reminder (6pm+)
+  - Create hook to check if current time is after 6pm
+  - Query getTodaysMoods to check if mood logged today
+  - Show dismissible popup if no mood logged and time > 6pm
+  - Popup shows: "How is Bumi feeling today?" with mood options
+  - Add "Log Mood Now", "Remind Me Later" (2hr), "Dismiss" (for day) buttons
+  - Store dismissal state in localStorage (key: moodReminderDismissed_YYYY-MM-DD)
+  - Only show once per day
+  - _Requirements: 26_
+
+- [ ] 70. Add real-time toast for partner mood logs
+  - Subscribe to mood feed in Layout component
+  - Detect when new mood is added (compare previous vs current data)
+  - Display toast: "Sarah logged: Bumi is 😊 Calm"
+  - Auto-dismiss after 3 seconds
+  - Stack multiple toasts if several moods logged quickly
+  - _Requirements: 26_
+
+- [ ] 71. Update seed mutation to include sample mood logs
+  - Add 2-3 sample mood_logs entries to seed.ts
+  - Create moods from past few hours with realistic timestamps
+  - Include variety of moods (calm, playful, etc.)
+  - Test seed mutation includes mood logs
+  - _Requirements: 26_
+
+- [ ] 72. Create AI recommendations Convex action
+  - Create convex/actions/generateRecommendations.ts
+  - Query mood logs from last 7 days
+  - Query activity history from last 7 days
+  - Query current stats and daily goals
+  - Format data for OpenAI API
+  - Call OpenAI Chat Completion API with analysis prompt
+  - Parse OpenAI response into structured recommendations
+  - Return recommendations array
+  - Handle errors gracefully
+  - _Requirements: 27_
+
+- [ ] 73. Create OpenAI recommendation prompt
+  - Write system prompt explaining Corgi Quest context
+  - Include mood pattern analysis instructions
+  - Include activity effectiveness analysis
+  - Include stat gap identification
+  - Include daily goal consideration
+  - Specify output format (JSON with activity name, reasoning, XP, etc.)
+  - Test prompt with sample data
+  - _Requirements: 27_
+
+- [ ] 74. Create QuestTabs component
+  - Create src/components/quests/QuestTabs.tsx
+  - Display two tabs: "ALL QUESTS" and "AI RECOMMENDATIONS"
+  - Handle tab switching state
+  - Style tabs to match app design
+  - Show active tab indicator
+  - _Requirements: 27_
+
+- [ ] 75. Create AIRecommendations component
+  - Create src/components/quests/AIRecommendations.tsx
+  - Call generateRecommendations action on mount (if no cache)
+  - Display loading state while generating
+  - Display recommendations in card layout
+  - Show activity name, reasoning, expected mood impact, XP rewards
+  - Add "Log Activity" button for each recommendation
+  - Add "Refresh Recommendations" button
+  - Handle errors (show error message with retry)
+  - _Requirements: 27_
+
+- [ ] 76. Integrate tabs into Quests screen
+  - Update src/routes/quests.index.tsx
+  - Add QuestTabs component at top
+  - Conditionally render: All Quests view OR AI Recommendations view
+  - Maintain existing quest functionality in "ALL QUESTS" tab
+  - Add AI Recommendations view in "AI RECOMMENDATIONS" tab
+  - _Requirements: 27_
+
+- [ ] 77. Link recommendations to activity logging
+  - When user taps "Log Activity" on recommendation
+  - Navigate to /log-activity route
+  - Pass activity name in route state or search params
+  - Pre-populate voice interface with activity context
+  - OpenAI should acknowledge the recommended activity
+  - _Requirements: 27_
+
+- [ ] 78. Add recommendation caching (optional)
+  - Create recommendations table in Convex schema (optional)
+  - Or cache in component state (simpler)
+  - Cache recommendations for current day
+  - Invalidate cache when new mood/activity logged
+  - Show "Last updated: X minutes ago" in UI
+  - _Requirements: 27_
+
+- [ ] 79. Add error handling for AI recommendations
+  - Handle OpenAI API failures gracefully
+  - Show user-friendly error message
+  - Provide retry button
+  - Handle rate limiting
+  - Handle network errors
+  - Show fallback message if no recommendations available
+  - _Requirements: 27_
+
+- [ ] 80. Polish AI recommendations UI
+  - Style recommendation cards to match app design
+  - Add visual distinction from regular quests
+  - Show AI icon/badge
+  - Add smooth loading animations
+  - Ensure mobile-responsive layout
+  - Test on various screen sizes
+  - _Requirements: 27_
+

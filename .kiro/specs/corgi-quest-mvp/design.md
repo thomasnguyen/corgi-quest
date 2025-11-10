@@ -52,7 +52,7 @@ The application follows a mobile-first design approach with a custom CSS impleme
 │  │  └────────────────────┘                               │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              Convex Database (8 Tables)                │ │
+│  │              Convex Database (9 Tables)                │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                               │
@@ -88,6 +88,7 @@ The application follows a mobile-first design approach with a custom CSS impleme
 
 **External APIs:**
 - OpenAI Realtime API for audio-to-audio voice conversations with function calling
+- OpenAI Chat Completion API for AI-powered activity recommendations
 
 
 ## Components and Interfaces
@@ -117,10 +118,15 @@ src/
 │   │   ├── ActivityFeedItem.tsx     # Single activity in feed
 │   │   ├── ActivityFeed.tsx         # List of activities
 │   │   └── ActivityToast.tsx        # Real-time notification toast
+│   ├── mood/
+│   │   ├── MoodPicker.tsx           # Mood selection modal
+│   │   └── MoodFeedItem.tsx         # Single mood entry in feed
 │   ├── quests/
 │   │   ├── QuestCard.tsx            # Quest list item
 │   │   ├── QuestList.tsx            # Categorized quest list
-│   │   └── QuestDetail.tsx          # Quest instructions
+│   │   ├── QuestDetail.tsx          # Quest instructions
+│   │   ├── QuestTabs.tsx            # Tab navigation (All Quests / AI Recommendations)
+│   │   └── AIRecommendations.tsx    # AI recommendations display
 │   ├── voice/
 │   │   ├── RealtimeVoiceInterface.tsx  # OpenAI Realtime API interface
 │   │   ├── AudioVisualizer.tsx         # @pipecat-ai/voice-ui-kit VoiceVisualizer
@@ -169,7 +175,8 @@ convex/
 │   ├── updateStreak.ts              # Streak increment/reset
 │   └── seed.ts                      # Demo data seeding
 ├── actions/
-│   └── generateSessionToken.ts      # OpenAI Realtime API session token generation
+│   ├── generateSessionToken.ts      # OpenAI Realtime API session token generation
+│   └── generateRecommendations.ts  # OpenAI API for activity recommendations
 ├── crons.ts                         # Scheduled functions
 └── lib/
     ├── validators.ts                # Reusable Convex validators
@@ -234,6 +241,29 @@ interface Streak {
   currentStreak: number;
   longestStreak: number;
   lastActivityDate: string; // YYYY-MM-DD format
+}
+
+interface MoodLog {
+  _id: Id<"mood_logs">;
+  dogId: Id<"dogs">;
+  userId: Id<"users">;
+  mood: "calm" | "anxious" | "reactive" | "playful" | "tired" | "neutral";
+  note?: string;
+  activityId?: Id<"activities">;
+  createdAt: number;
+}
+
+interface AIRecommendation {
+  activityName: string;
+  reasoning: string; // Why this activity is recommended
+  expectedMoodImpact: string; // e.g., "Reduces weekend anxiety"
+  statGains: Array<{
+    statType: "INT" | "PHY" | "IMP" | "SOC";
+    xpAmount: number;
+  }>;
+  physicalPoints: number;
+  mentalPoints: number;
+  durationMinutes?: number;
 }
 
 // Component Props Types
@@ -553,6 +583,27 @@ streaks: defineTable({
   .index("by_dog", ["dogId"]);
 ```
 
+#### 9. mood_logs
+```typescript
+mood_logs: defineTable({
+  dogId: v.id("dogs"),
+  userId: v.id("users"),
+  mood: v.union(
+    v.literal("calm"),
+    v.literal("anxious"),
+    v.literal("reactive"),
+    v.literal("playful"),
+    v.literal("tired"),
+    v.literal("neutral")
+  ),
+  note: v.optional(v.string()),
+  activityId: v.optional(v.id("activities")), // Optional link to activity
+  createdAt: v.number(),
+})
+  .index("by_dog", ["dogId"])
+  .index("by_dog_and_created", ["dogId", "createdAt"]);
+```
+
 ### Data Flow Diagrams
 
 #### Activity Logging Flow
@@ -642,6 +693,92 @@ Component re-renders with updated data
          │
          ▼
 Toast notification appears
+```
+
+#### Mood Logging Flow
+```
+User taps "LOG MOOD" button or resource bar mood indicator
+         │
+         ▼
+Open mood picker modal
+         │
+         ▼
+User selects mood (😊 Calm, 😰 Anxious, etc.)
+         │
+         ▼
+User optionally adds note
+         │
+         ▼
+User confirms mood log
+         │
+         ▼
+Convex Mutation: logMood
+         │
+         ├─► Insert mood_logs record
+         │
+         ▼
+Real-time subscriptions trigger
+         │
+         ├─► Update resource bar mood indicator
+         ├─► Add mood entry to activity feed
+         ├─► Show toast notification to partner
+         │
+         ▼
+Mood appears in feed instantly
+```
+
+#### Daily Mood Reminder Flow
+```
+User opens app after 6pm
+         │
+         ▼
+System checks: mood logged today?
+         │
+         ├─► Yes → No reminder
+         └─► No → Show reminder popup
+         │
+         ▼
+User sees: "How is Bumi feeling today?"
+         │
+         ├─► "Log Mood Now" → Opens mood picker
+         ├─► "Remind Me Later" → Dismisses for 2 hours
+         └─► "Dismiss" → Dismisses for the day
+```
+
+#### AI Recommendations Generation Flow
+```
+User opens Quests screen → Selects "AI RECOMMENDATIONS" tab
+         │
+         ▼
+Check if cached recommendations exist (from today)
+         │
+         ├─► Yes → Display cached recommendations
+         └─► No → Generate new recommendations
+         │
+         ▼
+Convex Action: generateRecommendations
+         │
+         ├─► Query mood logs (last 7 days)
+         ├─► Query activity history (last 7 days)
+         ├─► Query current stats and daily goals
+         │
+         ▼
+Send data to OpenAI API (Chat Completion)
+         │
+         ▼
+OpenAI analyzes patterns and generates recommendations
+         │
+         ▼
+Parse OpenAI response into structured recommendations
+         │
+         ▼
+Cache recommendations in Convex (optional table or return directly)
+         │
+         ▼
+Display recommendations in UI
+         │
+         ▼
+User taps "Log Activity" → Navigate to /log-activity with activity name
 ```
 
 

@@ -324,6 +324,48 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 4. THE System SHALL ensure the voice logging interface is optimized for one-handed mobile use
 5. THE System SHALL test and verify functionality on iOS Safari and Android Chrome browsers
 
+### Requirement 26: Mood Tracking System
+
+**User Story:** As a User, I want to log how Bumi is feeling throughout the day, so that we can track mood patterns and correlate them with activities to understand what helps Bumi stay calm and happy.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide a mood logging interface accessible from the Activity screen with a "LOG MOOD" button
+2. THE System SHALL display six mood options: 😊 Calm/Relaxed, 😰 Anxious/Stressed, 😡 Reactive/Aggressive, 🎾 Playful/Energetic, 😴 Tired/Overwhelmed, 😐 Neutral
+3. THE System SHALL allow Users to add an optional note (max 200 characters) when logging mood
+4. THE System SHALL display mood entries in the Activity feed, mixed chronologically with activity entries
+5. THE System SHALL visually distinguish mood entries from activity entries in the feed
+6. THE System SHALL display the latest mood in the top resource bar as the 4th item (after streak, physical, mental) showing the mood emoji
+7. THE System SHALL make the mood indicator in the resource bar tappable to open the mood picker
+8. THE System SHALL update the resource bar mood indicator in real-time when either partner logs a mood
+9. THE System SHALL show a dismissible daily reminder popup after 6pm local time if no mood has been logged today
+10. THE System SHALL provide options in the reminder: "Log Mood Now", "Remind Me Later" (dismisses for 2 hours), or "Dismiss" (dismisses for the day)
+11. THE System SHALL only show the daily reminder once per day
+12. WHEN a partner logs a mood, THE System SHALL display it in the activity feed on all connected clients within 1 second
+13. THE System SHALL display toast notification when partner logs mood: "Sarah logged: Bumi is 😊 Calm"
+14. THE System SHALL store mood logs with timestamp, user who logged it, optional note, and optional link to activity if logged together
+
+### Requirement 27: AI-Powered Activity Recommendations
+
+**User Story:** As a User, I want AI to analyze Bumi's mood patterns and activity history to suggest personalized daily activities, so that I can focus on activities that address mood issues, fill stat gaps, and meet daily goals.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide an "AI RECOMMENDATIONS" tab in the Quests screen alongside the "ALL QUESTS" tab
+2. THE System SHALL use OpenAI API to analyze mood patterns from the last 7 days
+3. THE System SHALL analyze activity history and outcomes to identify effective activities
+4. THE System SHALL consider current stat levels and gaps when generating recommendations
+5. THE System SHALL consider daily goal progress (physical and mental points) when generating recommendations
+6. THE System SHALL generate 3-5 personalized activity recommendations per day
+7. THE System SHALL display for each recommendation: activity name, reasoning (why it's recommended), expected mood impact, and XP rewards
+8. THE System SHALL provide a "Log Activity" button for each recommendation that navigates to the voice logging interface with the activity pre-filled
+9. THE System SHALL provide a "Refresh Recommendations" button to regenerate suggestions
+10. THE System SHALL cache recommendations in Convex to avoid regenerating on every view
+11. THE System SHALL show a loading state while generating recommendations
+12. THE System SHALL handle errors gracefully if OpenAI API fails (show error message with retry option)
+13. THE System SHALL display recommendations in a card-based layout with clear visual hierarchy
+14. THE System SHALL update recommendations when new mood logs or activities are added (optional: auto-refresh or manual refresh)
+
 ---
 
 ## Implementation Notes
