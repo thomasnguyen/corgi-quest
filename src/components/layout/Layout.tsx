@@ -3,6 +3,8 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import BottomNav from "./BottomNav";
 import { useToast } from "../../contexts/ToastContext";
+import { useMoodReminder } from "../../hooks/useMoodReminder";
+import MoodReminderPopup from "../mood/MoodReminderPopup";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,13 +14,20 @@ interface LayoutProps {
  * Layout component with real-time activity feed subscription
  * Detects new activities and shows toast notifications
  * Also detects level-ups by watching stat changes
- * Requirements: 1, 21, 22
+ * Shows daily mood reminder after 6pm if no mood logged
+ * Requirements: 1, 21, 22, 26
  */
 export default function Layout({ children }: LayoutProps) {
   const { showToast } = useToast();
 
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
+
+  // Get the first user (demo purposes)
+  const firstUser = useQuery(
+    api.queries.getFirstUser,
+    firstDog ? { householdId: firstDog.householdId } : "skip"
+  );
 
   // Subscribe to activity feed for real-time updates
   const activityFeed = useQuery(
@@ -30,6 +39,11 @@ export default function Layout({ children }: LayoutProps) {
   const dogProfile = useQuery(
     api.queries.getDogProfile,
     firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
+  // Mood reminder hook
+  const { shouldShowReminder, dismissReminder } = useMoodReminder(
+    firstDog?._id
   );
 
   // Track previous activity IDs to detect new activities
@@ -118,6 +132,15 @@ export default function Layout({ children }: LayoutProps) {
       </main>
 
       <BottomNav />
+
+      {/* Mood reminder popup */}
+      {shouldShowReminder && firstDog && firstUser && (
+        <MoodReminderPopup
+          dogId={firstDog._id}
+          userId={firstUser._id}
+          onDismiss={dismissReminder}
+        />
+      )}
     </div>
   );
 }

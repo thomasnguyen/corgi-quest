@@ -644,7 +644,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test with two browsers: log mood in one, see it appear in other
   - _Requirements: 26_
 
-- [ ] 68. Add mood indicator to TopResourceBar
+- [x] 68. Add mood indicator to TopResourceBar
   - Add 4th item to resource bar: mood emoji (latest mood)
   - Subscribe to getLatestMood query
   - Display mood emoji (or "—" if no mood logged)
@@ -653,7 +653,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Handle case when no mood exists (show "—" or "Tap to log")
   - _Requirements: 26_
 
-- [ ] 69. Implement daily mood reminder (6pm+)
+- [x] 69. Implement daily mood reminder (6pm+)
   - Create hook to check if current time is after 6pm
   - Query getTodaysMoods to check if mood logged today
   - Show dismissible popup if no mood logged and time > 6pm
