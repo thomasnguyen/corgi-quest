@@ -14,6 +14,7 @@ import type * as mutations from "../mutations.js";
 import type * as queries from "../queries.js";
 import type * as seed from "../seed.js";
 import type * as test from "../test.js";
+import type * as testMoodQueries from "../testMoodQueries.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   queries: typeof queries;
   seed: typeof seed;
   test: typeof test;
+  testMoodQueries: typeof testMoodQueries;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

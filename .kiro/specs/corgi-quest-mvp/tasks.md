@@ -605,14 +605,14 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test mutation in Convex dashboard
   - _Requirements: 26_
 
-- [ ] 63. Create mood queries
+- [x] 63. Create mood queries
   - Create getMoodFeed query to get recent mood logs (last 20)
   - Create getLatestMood query to get most recent mood for a dog
   - Create getTodaysMoods query to check if mood logged today
   - Test queries in Convex dashboard
   - _Requirements: 26_
 
-- [ ] 64. Create MoodPicker component
+- [x] 64. Create MoodPicker component
   - Create src/components/mood/MoodPicker.tsx
   - Display 6 mood options in grid layout
   - Each mood shows emoji + label (😊 Calm, 😰 Anxious, etc.)
@@ -621,14 +621,14 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Handle mood selection and note input
   - _Requirements: 26_
 
-- [ ] 65. Create MoodFeedItem component
+- [x] 65. Create MoodFeedItem component
   - Create src/components/mood/MoodFeedItem.tsx
   - Display user name, mood emoji + label, optional note, timestamp
   - Style differently from ActivityFeedItem (different background/border)
   - Format timestamp as relative time (e.g., "2h ago")
   - _Requirements: 26_
 
-- [ ] 66. Add mood logging button to Activity screen
+- [x] 66. Add mood logging button to Activity screen
   - Add "LOG MOOD" button to Activity screen (above or below activity feed)
   - Button opens MoodPicker modal
   - Call logMood mutation when user confirms
@@ -636,7 +636,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Display success toast after logging
   - _Requirements: 26_
 
-- [ ] 67. Integrate mood entries into activity feed
+- [x] 67. Integrate mood entries into activity feed
   - Merge mood logs and activities into unified chronological feed
   - Sort by createdAt timestamp (newest first)
   - Display MoodFeedItem for mood entries, ActivityFeedItem for activities

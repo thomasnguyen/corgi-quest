@@ -306,3 +306,97 @@ export const getPartnerPresence = query({
     };
   },
 });
+
+/**
+ * Query to get mood feed (20 most recent mood logs)
+ * Returns mood logs with user info
+ */
+export const getMoodFeed = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get 20 most recent mood logs for this dog
+    const moodLogs = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .order("desc")
+      .take(20);
+
+    // For each mood log, get user info
+    const moodLogsWithDetails = await Promise.all(
+      moodLogs.map(async (moodLog) => {
+        const user = await ctx.db.get(moodLog.userId);
+        return {
+          ...moodLog,
+          userName: user?.name || "Unknown",
+        };
+      })
+    );
+
+    return moodLogsWithDetails;
+  },
+});
+
+/**
+ * Query to get the latest mood for a dog
+ * Returns the most recent mood log
+ */
+export const getLatestMood = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get the most recent mood log for this dog
+    const latestMood = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .order("desc")
+      .first();
+
+    if (!latestMood) {
+      return null;
+    }
+
+    // Get user info
+    const user = await ctx.db.get(latestMood.userId);
+
+    return {
+      ...latestMood,
+      userName: user?.name || "Unknown",
+    };
+  },
+});
+
+/**
+ * Query to check if mood has been logged today
+ * Returns boolean indicating if any mood log exists for today
+ */
+export const getTodaysMoods = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+    const todayStart = new Date(today).getTime();
+    const todayEnd = todayStart + 24 * 60 * 60 * 1000; // End of today
+
+    // Get all mood logs for today
+    const todaysMoods = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("createdAt"), todayStart),
+          q.lt(q.field("createdAt"), todayEnd)
+        )
+      )
+      .collect();
+
+    return {
+      hasMoodToday: todaysMoods.length > 0,
+      count: todaysMoods.length,
+      moods: todaysMoods,
+    };
+  },
+});
