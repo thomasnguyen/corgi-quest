@@ -876,7 +876,7 @@ This implementation plan breaks down the Corgi Quest MVP into discrete, incremen
   - _Requirements: 28_
 
 - [ ] 97. Add 3rd user to seed data
-  - Update seed mutation to include 3rd user (e.g., "Alex" or "Jordan")
+  - Update seed mutation to include 3rd user Guest
   - Add character title/role for each user (optional)
   - Add avatar/portrait URLs for each user (optional, can use placeholder)
   - Ensure all 3 users are in the same household
