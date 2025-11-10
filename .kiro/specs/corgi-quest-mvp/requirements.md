@@ -179,17 +179,18 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 4. THE System SHALL display the current Streak with visual milestone markers
 5. THE System SHALL display the Dog's overall level and XP progress bar
 
-### Requirement 14: Three-Tab Bottom Navigation
+### Requirement 14: Four-Tab Bottom Navigation
 
 **User Story:** As a User, I want to navigate between the main sections of the app using a bottom navigation bar, so that I can easily access different features.
 
 #### Acceptance Criteria
 
-1. THE System SHALL display a bottom navigation bar with three tabs: OVERVIEW, QUESTS, and ACTIVITY
+1. THE System SHALL display a bottom navigation bar with four tabs: OVERVIEW, QUESTS, ACTIVITY, and BUMI
 2. WHEN a User taps the OVERVIEW tab, THE System SHALL display the Progress Dashboard screen
 3. WHEN a User taps the QUESTS tab, THE System SHALL display the Quest System screen
 4. WHEN a User taps the ACTIVITY tab, THE System SHALL display the Shared Activity Feed screen
-5. THE System SHALL highlight the currently active tab
+5. WHEN a User taps the BUMI tab, THE System SHALL display the BUMI Character Sheet screen
+6. THE System SHALL highlight the currently active tab
 
 ### Requirement 15: Fixed Log Activity Button
 
@@ -245,11 +246,12 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 
 #### Acceptance Criteria
 
-1. THE System SHALL provide a seed mutation that creates a Household with two Users named "You" and "Sarah"
+1. THE System SHALL provide a seed mutation that creates a Household with three Users named "Thomas", "Holly", and a third user Guest
 2. THE System SHALL create a Dog named "Bumi" at level 8 with 4,500 XP
 3. THE System SHALL create four dog_stats records with INT level 7, PHY level 9, IMP level 5, SOC level 6
 4. THE System SHALL create a daily_goals record for today with Physical 45/60 and Mental 30/45
 5. THE System SHALL create 3-4 sample Activities from the past few hours with realistic stat gains
+6. THE System SHALL optionally include character titles/roles and avatar URLs for each user
 
 ### Requirement 20: Figma Design Implementation
 
@@ -365,6 +367,50 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 12. THE System SHALL handle errors gracefully if OpenAI API fails (show error message with retry option)
 13. THE System SHALL display recommendations in a card-based layout with clear visual hierarchy
 14. THE System SHALL update recommendations when new mood logs or activities are added (optional: auto-refresh or manual refresh)
+
+### Requirement 28: BUMI Character Sheet Tab
+
+**User Story:** As a User, I want to view Bumi's character sheet with detailed stats visualization and unlockable cosmetic items, so that I can see progress and customize Bumi's appearance as we level up.
+
+#### Acceptance Criteria
+
+1. THE System SHALL add a 4th bottom navigation tab labeled "BUMI" alongside Overview, Quests, and Activity
+2. THE System SHALL provide two sub-tabs within BUMI: "STATS" and "ITEMS"
+3. THE System SHALL display in STATS sub-tab: Bumi portrait with current outfit, name + level badge, overall XP bar, radar chart showing all 4 stats, and horizontal progress bars for each stat
+4. THE System SHALL make stat progress bars tappable to navigate to the existing stat detail screen
+5. THE System SHALL unlock one cosmetic item per level (e.g., Level 2 = Item 1, Level 3 = Item 2, etc.)
+6. THE System SHALL display unlocked items in ITEMS sub-tab with ability to equip them
+7. THE System SHALL display locked items with unlock requirement (e.g., "LVL 10" or "Level 5")
+8. WHEN a User taps an unlocked item to equip it, THE System SHALL generate an AI image of Bumi wearing that item using an image generation API
+9. THE System SHALL save the generated image URL to the database
+10. THE System SHALL allow only one item to be equipped at a time (equipping a new item automatically unequips the previous item)
+11. THE System SHALL update Bumi's portrait in real-time on all connected clients when an item is equipped
+12. WHEN a dog levels up, THE System SHALL automatically generate the image for the newly unlocked item so it's ready when the User views it
+13. THE System SHALL display a loading state while generating AI images
+14. THE System SHALL handle image generation errors gracefully (show error message with retry option)
+15. THE System SHALL use the provided Bumi photo as the base image for AI generation
+16. THE System SHALL store generated images in the database with reference to the equipped item
+17. THE System SHALL allow Users to unequip items (return to base portrait)
+
+### Requirement 29: Character Selection Screen
+
+**User Story:** As a User, I want to select which dog parent character I want to play as from a character selection screen, so that I can choose my identity before entering the app.
+
+#### Acceptance Criteria
+
+1. THE System SHALL display a character selection screen as the first screen when the app loads (if no character is selected)
+2. THE System SHALL display 3 character cards in a vertical scrollable list, each representing a different dog parent user
+3. THE System SHALL display for each character card: character name, avatar/portrait image, optional title/role, and a "Select" button
+4. THE System SHALL style character cards similar to gacha game character selection (dark background, golden borders, character art prominent)
+5. THE System SHALL store the selected character ID in localStorage or app state
+6. THE System SHALL navigate to the Overview screen after character selection
+7. THE System SHALL remember the selected character across app sessions (using localStorage)
+8. THE System SHALL allow Users to change their selected character (via settings or re-selecting)
+9. THE System SHALL use the selected character's ID for all activity logging and mood tracking
+10. THE System SHALL display the selected character's name in the activity feed and throughout the app
+11. THE System SHALL seed 3 users in the demo data: "You", "Sarah", and a third user (e.g., "Alex" or "Jordan")
+12. THE System SHALL show a loading state while fetching available characters
+13. THE System SHALL handle the case when no characters are available (show error message)
 
 ---
 

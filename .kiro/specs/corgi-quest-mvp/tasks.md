@@ -734,3 +734,207 @@ This implementation plan breaks down the Corgi Quest MVP into discrete, incremen
   - Test on various screen sizes
   - _Requirements: 27_
 
+- [ ] 81. Add BUMI tab to bottom navigation
+  - Update src/components/layout/BottomNav.tsx
+  - Add 4th tab: "BUMI"
+  - Add navigation route /bumi
+  - Update tab icons/images
+  - Ensure mobile-responsive layout
+  - _Requirements: 28_
+
+- [ ] 82. Create cosmetic_items and equipped_items database tables
+  - Add cosmetic_items table to convex/schema.ts
+  - Add equipped_items table to convex/schema.ts
+  - Define item unlock levels (1 per level, starting at level 2)
+  - Add indexes: by_unlock_level, by_dog
+  - Test schema in Convex dashboard
+  - _Requirements: 28_
+
+- [ ] 83. Seed cosmetic items data
+  - Create seed data for cosmetic items (1 per level, starting at level 2)
+  - Define item types: warrior, mage, ranger, paladin, etc.
+  - Add icons/emojis for each item
+  - Add descriptions for each item
+  - Update seed mutation to include cosmetic items
+  - _Requirements: 28_
+
+- [ ] 84. Create RadarChart component
+  - Create src/components/dog/RadarChart.tsx
+  - Use recharts library or custom SVG
+  - Display 4 stats in pentagon/spider chart format
+  - White lines on black background
+  - 200x200px size
+  - Make it responsive
+  - _Requirements: 28_
+
+- [ ] 85. Create StatsView component (STATS sub-tab)
+  - Create src/components/dog/StatsView.tsx
+  - Display Bumi portrait with current outfit
+  - Display name + level badge
+  - Display overall XP bar
+  - Display RadarChart component
+  - Display 4 horizontal progress bars (one per stat)
+  - Make progress bars tappable → navigate to stat detail
+  - Style to match app design
+  - _Requirements: 28_
+
+- [ ] 86. Create ItemCard component
+  - Create src/components/dog/ItemCard.tsx
+  - Display item icon, name, description
+  - Show "UNLOCKED" or "LOCKED" state
+  - Show unlock requirement for locked items
+  - Add "Equip" button for unlocked items
+  - Show "Currently Equipped" badge
+  - Style to match app design
+  - _Requirements: 28_
+
+- [ ] 87. Create ItemsView component (ITEMS sub-tab)
+  - Create src/components/dog/ItemsView.tsx
+  - Display large Bumi portrait at top (with current outfit)
+  - Display "Currently Wearing: [Item Name]"
+  - Display grid of unlocked items
+  - Display grid of locked items (grayed out)
+  - Handle item equip/unequip
+  - Show loading state during image generation
+  - _Requirements: 28_
+
+- [ ] 88. Create BumiCharacterSheet component
+  - Create src/components/dog/BumiCharacterSheet.tsx
+  - Add sub-tab navigation: "STATS" and "ITEMS"
+  - Conditionally render StatsView or ItemsView
+  - Handle tab switching
+  - Style tabs to match app design
+  - _Requirements: 28_
+
+- [ ] 89. Create BUMI route
+  - Create src/routes/bumi.tsx
+  - Use BumiCharacterSheet component
+  - Subscribe to dog profile data
+  - Subscribe to equipped items
+  - Handle loading states
+  - _Requirements: 28_
+
+- [ ] 90. Create generateItemImage Convex action
+  - Create convex/actions/generateItemImage.ts
+  - Accept args: dogId, itemId, baseImageUrl (Bumi photo)
+  - Create prompt: "A corgi dog wearing [item name], [item type] style, [description], high quality, photorealistic"
+  - Call OpenAI DALL-E API or Stable Diffusion API
+  - Upload generated image to Convex file storage or external storage
+  - Return image URL
+  - Handle errors gracefully
+  - _Requirements: 28_
+
+- [ ] 91. Create equipItem mutation
+  - Create equipItem mutation in convex/mutations.ts
+  - Accept args: dogId, itemId
+  - Check if image already exists for this item
+  - If not, call generateItemImage action
+  - Delete any existing equipped_items record for this dog (only one item at a time)
+  - Insert new equipped_items record
+  - Update dog's portrait URL (or reference equipped item)
+  - Return equipped item with image URL
+  - _Requirements: 28_
+
+- [ ] 92. Create queries for cosmetic items
+  - Create getUnlockedItems query (based on dog's level)
+  - Create getEquippedItem query (current equipped item)
+  - Create getAllCosmeticItems query (all items with unlock status)
+  - Test queries in Convex dashboard
+  - _Requirements: 28_
+
+- [ ] 93. Integrate item unlock on level up
+  - Update logActivity mutation to check for level ups
+  - When level up detected, check if new item unlocks
+  - If yes, automatically generate image for new item (background)
+  - Store generated image in equipped_items (but don't equip)
+  - Show "New!" badge in ITEMS tab
+  - _Requirements: 28_
+
+- [ ] 94. Add real-time portrait updates
+  - Subscribe to equipped_items in BumiCharacterSheet
+  - Update portrait when partner equips item
+  - Show toast notification: "Sarah equipped [Item Name]"
+  - Ensure portrait updates instantly on both devices
+  - Test with two browsers
+  - _Requirements: 28_
+
+- [ ] 95. Add unequip functionality
+  - Add "Unequip" button to currently equipped item
+  - Create unequipItem mutation
+  - Remove equipped_items record
+  - Return to base Bumi portrait
+  - Update in real-time
+  - _Requirements: 28_
+
+- [ ] 96. Polish BUMI tab UI
+  - Ensure mobile-responsive layout
+  - Style radar chart and progress bars
+  - Add smooth transitions
+  - Add loading states for image generation
+  - Add error handling UI
+  - Test on various screen sizes
+  - _Requirements: 28_
+
+- [ ] 97. Add 3rd user to seed data
+  - Update seed mutation to include 3rd user (e.g., "Alex" or "Jordan")
+  - Add character title/role for each user (optional)
+  - Add avatar/portrait URLs for each user (optional, can use placeholder)
+  - Ensure all 3 users are in the same household
+  - Test seed mutation includes all 3 users
+  - _Requirements: 29_
+
+- [ ] 98. Create CharacterCard component
+  - Create src/components/character/CharacterCard.tsx
+  - Style like gacha character card: dark background, golden border, character art
+  - Display character name, optional title, avatar/portrait
+  - Add "Select" button
+  - Add hover/press animations
+  - Style to match app's black/white/gold aesthetic
+  - _Requirements: 29_
+
+- [ ] 99. Create CharacterSelection component
+  - Create src/components/character/CharacterSelection.tsx
+  - Query all users in household (getHouseholdUsers)
+  - Display character cards in vertical scrollable list
+  - Handle character selection
+  - Store selected character ID in localStorage
+  - Navigate to Overview after selection
+  - Show loading state while fetching characters
+  - _Requirements: 29_
+
+- [ ] 100. Create select-character route
+  - Create src/routes/select-character.tsx
+  - Use CharacterSelection component
+  - Handle case when no characters available
+  - Redirect to Overview if character already selected
+  - _Requirements: 29_
+
+- [ ] 101. Add character selection check to app entry
+  - Update root route or Layout component
+  - Check localStorage for selected character
+  - If no character selected → redirect to /select-character
+  - If character selected → proceed to normal app flow
+  - _Requirements: 29_
+
+- [ ] 102. Update app to use selected character
+  - Create context or hook to manage selected character
+  - Update all queries/mutations to use selected character ID
+  - Update activity feed to show selected character's name
+  - Update mood logging to use selected character
+  - Ensure real-time sync works with character selection
+  - _Requirements: 29_
+
+- [ ] 103. Add character change functionality
+  - Add "Change Character" option in settings or profile
+  - Clear localStorage and redirect to character selection
+  - Or add character switcher in UI (optional)
+  - _Requirements: 29_
+
+- [ ] 104. Polish character selection UI
+  - Ensure mobile-responsive layout
+  - Add smooth card animations
+  - Add character selection confirmation
+  - Style to match gacha game aesthetic (dark, golden accents)
+  - Test on various screen sizes
+  - _Requirements: 29_
+

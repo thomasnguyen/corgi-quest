@@ -52,7 +52,7 @@ The application follows a mobile-first design approach with a custom CSS impleme
 │  │  └────────────────────┘                               │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              Convex Database (9 Tables)                │ │
+│  │              Convex Database (11 Tables)               │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                               │
@@ -89,6 +89,7 @@ The application follows a mobile-first design approach with a custom CSS impleme
 **External APIs:**
 - OpenAI Realtime API for audio-to-audio voice conversations with function calling
 - OpenAI Chat Completion API for AI-powered activity recommendations
+- OpenAI DALL-E API or Stable Diffusion API for AI image generation of dog with cosmetic items
 
 
 ## Components and Interfaces
@@ -98,18 +99,23 @@ The application follows a mobile-first design approach with a custom CSS impleme
 ```
 src/
 ├── routes/                          # TanStack Start file-based routing
-│   ├── index.tsx                    # Overview screen (default route)
+│   ├── index.tsx                    # Overview screen (default route) or character selection
+│   ├── select-character.tsx         # Character selection screen
 │   ├── quests.tsx                   # Quests list screen
 │   ├── activity.tsx                 # Activity feed screen
+│   ├── bumi.tsx                     # BUMI character sheet screen
 │   ├── stats.$statType.tsx          # Stat detail screen (dynamic route)
 │   ├── quests.$questId.tsx          # Quest detail screen (dynamic route)
 │   └── log-activity.tsx             # Voice logging screen with OpenAI Realtime API
 ├── components/
 │   ├── layout/
-│   │   ├── BottomNav.tsx            # 3-tab navigation
+│   │   ├── BottomNav.tsx            # 4-tab navigation (Overview, Quests, Activity, BUMI)
 │   │   ├── TopResourceBar.tsx       # Daily goals + streak display
 │   │   ├── LogActivityButton.tsx    # Fixed action button
 │   │   └── Layout.tsx               # Main layout wrapper
+│   ├── character/
+│   │   ├── CharacterSelection.tsx    # Character selection screen
+│   │   └── CharacterCard.tsx        # Individual character card (gacha-style)
 │   ├── dog/
 │   │   ├── DogProfile.tsx           # Dog name, level, XP bar, portrait
 │   │   ├── StatOrb.tsx              # Individual stat circular progress
@@ -127,6 +133,15 @@ src/
 │   │   ├── QuestDetail.tsx          # Quest instructions
 │   │   ├── QuestTabs.tsx            # Tab navigation (All Quests / AI Recommendations)
 │   │   └── AIRecommendations.tsx    # AI recommendations display
+│   ├── dog/
+│   │   ├── DogProfile.tsx           # Dog name, level, XP bar, portrait
+│   │   ├── StatOrb.tsx              # Individual stat circular progress
+│   │   ├── StatGrid.tsx             # 4-stat grid layout
+│   │   ├── BumiCharacterSheet.tsx    # BUMI tab main component
+│   │   ├── StatsView.tsx             # STATS sub-tab with radar chart
+│   │   ├── ItemsView.tsx            # ITEMS sub-tab with cosmetic items
+│   │   ├── RadarChart.tsx           # Spider/pentagon chart for stats
+│   │   └── ItemCard.tsx            # Individual cosmetic item card
 │   ├── voice/
 │   │   ├── RealtimeVoiceInterface.tsx  # OpenAI Realtime API interface
 │   │   ├── AudioVisualizer.tsx         # @pipecat-ai/voice-ui-kit VoiceVisualizer
@@ -167,7 +182,8 @@ convex/
 │   ├── activities.ts                # Activity feed queries
 │   ├── dailyGoals.ts                # Daily goal queries
 │   ├── streaks.ts                   # Streak queries
-│   └── quests.ts                    # Quest queries
+│   ├── quests.ts                    # Quest queries
+│   └── characters.ts                # Character/user queries
 ├── mutations/
 │   ├── logActivity.ts               # Main activity logging mutation
 │   ├── updateStats.ts               # Stat XP and level updates
@@ -176,7 +192,8 @@ convex/
 │   └── seed.ts                      # Demo data seeding
 ├── actions/
 │   ├── generateSessionToken.ts      # OpenAI Realtime API session token generation
-│   └── generateRecommendations.ts  # OpenAI API for activity recommendations
+│   ├── generateRecommendations.ts  # OpenAI API for activity recommendations
+│   └── generateItemImage.ts         # AI image generation for cosmetic items
 ├── crons.ts                         # Scheduled functions
 └── lib/
     ├── validators.ts                # Reusable Convex validators
@@ -264,6 +281,32 @@ interface AIRecommendation {
   physicalPoints: number;
   mentalPoints: number;
   durationMinutes?: number;
+}
+
+interface CosmeticItem {
+  _id: Id<"cosmetic_items">;
+  name: string;
+  description: string;
+  unlockLevel: number; // Level required to unlock (e.g., 2, 3, 4...)
+  itemType: "warrior" | "mage" | "ranger" | "paladin" | "rogue" | "cleric" | "bard" | "monk" | "wizard" | "knight" | "archer" | "ninja" | "priest" | "druid" | "sorcerer" | "barbarian" | "fighter" | "warlock" | "ranger" | "artificer";
+  icon: string; // Emoji or icon identifier
+  generatedImageUrl?: string; // AI-generated image URL (stored after generation)
+}
+
+interface EquippedItem {
+  _id: Id<"equipped_items">;
+  dogId: Id<"dogs">;
+  itemId: Id<"cosmetic_items">;
+  generatedImageUrl: string; // AI-generated image of dog with item
+  equippedAt: number; // Timestamp
+}
+
+interface Character {
+  _id: Id<"users">;
+  name: string;
+  avatarUrl?: string; // Optional character portrait/avatar
+  title?: string; // Optional title/role (e.g., "Primary Trainer", "Play Partner")
+  householdId: Id<"households">;
 }
 
 // Component Props Types
@@ -483,6 +526,8 @@ users: defineTable({
   name: v.string(),
   email: v.string(),
   householdId: v.id("households"),
+  avatarUrl: v.optional(v.string()), // Optional character portrait/avatar URL
+  title: v.optional(v.string()), // Optional title/role (e.g., "Primary Trainer", "Play Partner")
   createdAt: v.number(),
 })
   .index("by_household", ["householdId"])
@@ -602,6 +647,32 @@ mood_logs: defineTable({
 })
   .index("by_dog", ["dogId"])
   .index("by_dog_and_created", ["dogId", "createdAt"]);
+```
+
+#### 10. cosmetic_items
+```typescript
+cosmetic_items: defineTable({
+  name: v.string(),
+  description: v.string(),
+  unlockLevel: v.number(), // Level required to unlock (1 per level, starting at level 2)
+  itemType: v.string(), // e.g., "warrior", "mage", "ranger", etc.
+  icon: v.string(), // Emoji or icon identifier
+  createdAt: v.number(),
+})
+  .index("by_unlock_level", ["unlockLevel"]);
+```
+
+#### 11. equipped_items
+```typescript
+equipped_items: defineTable({
+  dogId: v.id("dogs"),
+  itemId: v.id("cosmetic_items"),
+  generatedImageUrl: v.string(), // AI-generated image URL
+  equippedAt: v.number(),
+})
+  .index("by_dog", ["dogId"]);
+  // Note: Only one item can be equipped per dog at a time
+  // When equipping a new item, the previous equipped item is automatically unequipped
 ```
 
 ### Data Flow Diagrams
@@ -779,6 +850,99 @@ Display recommendations in UI
          │
          ▼
 User taps "Log Activity" → Navigate to /log-activity with activity name
+```
+
+#### Item Equipping and Image Generation Flow
+```
+User opens BUMI tab → Selects "ITEMS" sub-tab
+         │
+         ▼
+Display unlocked items (based on dog's current level)
+         │
+         ▼
+User taps item to equip
+         │
+         ▼
+Check if image already generated for this item
+         │
+         ├─► Yes → Equip immediately, update portrait
+         └─► No → Generate new image
+         │
+         ▼
+Convex Mutation: equipItem
+         │
+         ├─► Delete existing equipped_items record for this dog (only one at a time)
+         ├─► Check if image exists for new item
+         │   ├─► Yes → Use existing image
+         │   └─► No → Call generateItemImage action
+         │       ├─► Get base Bumi photo from dog record
+         │       ├─► Create prompt: "A corgi dog wearing [item name], [item type] style, [description]"
+         │       └─► Call OpenAI DALL-E API or Stable Diffusion API
+         │
+         ▼
+Insert new equipped_items record
+         │
+         ▼
+Update dog's portrait in real-time
+         │
+         ├─► Update local user's UI
+         └─► Update partner's UI via WebSocket
+         │
+         ▼
+Portrait updates instantly on both devices
+```
+
+#### Level Up Item Unlock Flow
+```
+Dog levels up (stat or overall level)
+         │
+         ▼
+Check if new item unlocks at this level
+         │
+         ├─► No → Continue
+         └─► Yes → Unlock item
+         │
+         ▼
+Convex Action: generateItemImage (background)
+         │
+         ├─► Generate image for newly unlocked item
+         ├─► Save to equipped_items (but don't equip yet)
+         │
+         ▼
+Item appears in ITEMS tab as "New!" badge
+         │
+         ▼
+User can equip when ready (image already generated)
+```
+
+#### Character Selection Flow
+```
+User opens app
+         │
+         ▼
+Check localStorage for selected character
+         │
+         ├─► Character selected → Navigate to Overview
+         └─► No character selected → Show Character Selection screen
+         │
+         ▼
+Display 3 character cards (vertical scrollable list)
+         │
+         ├─► Character 1: "You" (Primary Trainer)
+         ├─► Character 2: "Sarah" (Play Partner)
+         └─► Character 3: "Alex" (Training Buddy)
+         │
+         ▼
+User taps character card
+         │
+         ▼
+Store selected character ID in localStorage
+         │
+         ▼
+Navigate to Overview screen
+         │
+         ▼
+Use selected character for all actions (logging, mood tracking)
 ```
 
 
