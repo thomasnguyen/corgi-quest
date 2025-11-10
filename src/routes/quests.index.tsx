@@ -3,7 +3,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import QuestCard from "../components/quests/QuestCard";
-import { Dumbbell, Brain } from "lucide-react";
+import { Zap, Brain } from "lucide-react";
 
 export const Route = createFileRoute("/quests/")({
   component: QuestsPage,
@@ -141,48 +141,66 @@ function QuestsPage() {
 
   return (
     <Layout>
-      <div className="p-6 pb-32">
-        <h1 className="text-2xl font-bold mb-6 text-black">QUESTS</h1>
-
-        {/* Physical Quests Section */}
-        <div className="mb-8">
-          <h2 className="text-lg font-bold mb-4 text-black border-b-2 border-black pb-2 flex items-center gap-2">
-            <Dumbbell size={20} strokeWidth={2} />
-            PHYSICAL
-          </h2>
-          <div className="space-y-3">
-            {physicalQuests.map((quest) => (
-              <QuestCard
-                key={quest.id}
-                id={quest.id}
-                name={quest.name}
-                category={quest.category}
-                points={quest.points}
-                description={quest.description}
-                isCompleted={completedQuestNames.has(quest.name)}
-              />
-            ))}
-          </div>
+      <div className="relative min-h-screen bg-[#121216] pb-32">
+        {/* Background atmospheric effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-radial from-[#492e25]/20 via-[#2f2120]/20 to-[#141b1b]/20"></div>
         </div>
 
-        {/* Mental Quests Section */}
-        <div className="mb-8">
-          <h2 className="text-lg font-bold mb-4 text-black border-b-2 border-black pb-2 flex items-center gap-2">
-            <Brain size={20} strokeWidth={2} />
-            MENTAL
-          </h2>
-          <div className="space-y-3">
-            {mentalQuests.map((quest) => (
-              <QuestCard
-                key={quest.id}
-                id={quest.id}
-                name={quest.name}
-                category={quest.category}
-                points={quest.points}
-                description={quest.description}
-                isCompleted={completedQuestNames.has(quest.name)}
-              />
-            ))}
+        {/* Content */}
+        <div className="relative z-10 px-5 pt-5">
+          <h1 className="text-2xl font-bold mb-6 text-[#feefd0]">QUESTS</h1>
+
+          {/* Physical Quests Section */}
+          <div className="mb-8">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold mb-2 text-[#feefd0] flex items-center gap-2">
+                <Zap size={20} strokeWidth={2} className="text-[#fcd587]" />
+                PHYSICAL
+              </h2>
+              <p className="text-[#f9dca0] text-sm leading-relaxed">
+                Physical fitness keeps your dog healthy, strong, and full of energy. Regular exercise helps maintain a healthy weight and improves overall wellbeing.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {physicalQuests.map((quest) => (
+                <QuestCard
+                  key={quest.id}
+                  id={quest.id}
+                  name={quest.name}
+                  category={quest.category}
+                  points={quest.points}
+                  description={quest.description}
+                  isCompleted={completedQuestNames.has(quest.name)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Mental Quests Section */}
+          <div className="mb-8">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold mb-2 text-[#feefd0] flex items-center gap-2">
+                <Brain size={20} strokeWidth={2} className="text-[#fcd587]" />
+                MENTAL
+              </h2>
+              <p className="text-[#f9dca0] text-sm leading-relaxed">
+                Mental stimulation keeps your dog's mind sharp and engaged. Puzzle toys and training exercises help prevent boredom and build problem-solving skills.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {mentalQuests.map((quest) => (
+                <QuestCard
+                  key={quest.id}
+                  id={quest.id}
+                  name={quest.name}
+                  category={quest.category}
+                  points={quest.points}
+                  description={quest.description}
+                  isCompleted={completedQuestNames.has(quest.name)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

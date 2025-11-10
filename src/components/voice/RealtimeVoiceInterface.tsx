@@ -97,7 +97,6 @@ export function RealtimeVoiceInterface({
 }: RealtimeVoiceInterfaceProps) {
   const navigate = useNavigate();
   const [sessionConfigured, setSessionConfigured] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isListeningSmoothed, setIsListeningSmoothed] = useState(false);
   const [audioTrack, setAudioTrack] = useState<MediaStreamTrack | null>(null);
@@ -202,7 +201,6 @@ export function RealtimeVoiceInterface({
     isConnected,
     requestPermission,
     connect,
-    disconnect,
     sendMessage,
   } = useOpenAIRealtime({
     onError: (error) => {
@@ -324,7 +322,6 @@ export function RealtimeVoiceInterface({
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      setIsRecording(true);
       log("[Voice] Recording started");
     } catch (error) {
       logError("[Voice] Failed to start recording:", error);
@@ -362,31 +359,6 @@ export function RealtimeVoiceInterface({
 
     // Reset audio chunks counter
     audioChunksSentRef.current = 0;
-
-    setIsRecording(false);
-  };
-
-  /**
-   * Stop the conversation and clear audio queue
-   */
-  const stopConversation = () => {
-    // Clear audio queue to stop any pending playback
-    audioQueueRef.current = [];
-    isPlayingRef.current = false;
-
-    // Clear any function call in progress
-    currentFunctionCallRef.current = null;
-
-    // Send cancel event to OpenAI to interrupt response
-    if (isConnected && sessionConfigured) {
-      sendMessage({
-        type: "response.cancel",
-      });
-    }
-
-    // Reset conversation state
-    setConversationState("idle");
-    setIsListening(false);
   };
 
   /**
@@ -501,11 +473,7 @@ export function RealtimeVoiceInterface({
   /**
    * Handle function call from OpenAI
    */
-  const handleFunctionCall = async (
-    callId: string,
-    name: string,
-    argumentsJson: string
-  ) => {
+  const handleFunctionCall = async (callId: string, argumentsJson: string) => {
     try {
       // Parse function arguments
       const params: SaveActivityParams = JSON.parse(argumentsJson);
@@ -754,7 +722,7 @@ export function RealtimeVoiceInterface({
           if (functionName === "saveActivity") {
             log("[Voice] ⚡ EXECUTING SAVEACTIVITY ⚡");
             log("[Voice] Arguments:", functionArgs);
-            handleFunctionCall(callId, functionName, functionArgs);
+            handleFunctionCall(callId, functionArgs);
           } else {
             logWarn("[Voice] Unknown function:", functionName);
           }
@@ -973,49 +941,6 @@ export function RealtimeVoiceInterface({
           icon: "❓",
           color: "text-[#888]",
         };
-    }
-  };
-
-  /**
-   * Get connection status text for display
-   */
-  const getConnectionStatusText = () => {
-    if (connectionState === "connected" && !sessionConfigured) {
-      return "Configuring...";
-    }
-    if (connectionState === "connected" && sessionConfigured) {
-      return "Ready";
-    }
-
-    switch (connectionState) {
-      case "disconnected":
-        return "Disconnected";
-      case "connecting":
-        return "Connecting...";
-      case "error":
-        return "Connection Error";
-      default:
-        return "Unknown";
-    }
-  };
-
-  /**
-   * Get connection status color for display
-   */
-  const getConnectionStatusColor = () => {
-    if (connectionState === "connected" && sessionConfigured) {
-      return "text-[#f5c35f]";
-    }
-
-    switch (connectionState) {
-      case "connected":
-        return "text-[#f9dca0]"; // Configuring
-      case "connecting":
-        return "text-[#f9dca0]";
-      case "error":
-        return "text-red-600";
-      default:
-        return "text-[#888]";
     }
   };
 
