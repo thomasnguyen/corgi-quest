@@ -4,7 +4,7 @@ import { v } from "convex/values";
 /**
  * Corgi Quest Database Schema
  *
- * This schema defines 8 tables for the dog training RPG:
+ * This schema defines 9 tables for the dog training RPG:
  * - users: Partners in a household
  * - households: Shared account containing users and a dog
  * - dogs: The pet character being trained
@@ -13,6 +13,7 @@ import { v } from "convex/values";
  * - activity_stat_gains: XP awards per activity per stat
  * - daily_goals: Daily physical and mental stimulation tracking
  * - streaks: Consecutive days meeting goals
+ * - mood_logs: Dog mood tracking throughout the day
  */
 
 export default defineSchema({
@@ -111,4 +112,23 @@ export default defineSchema({
     location: v.string(), // e.g., "log-activity", "overview", etc.
     lastSeen: v.number(), // timestamp
   }).index("by_user", ["userId"]),
+
+  // Mood logs table - dog mood tracking throughout the day
+  mood_logs: defineTable({
+    dogId: v.id("dogs"),
+    userId: v.id("users"),
+    mood: v.union(
+      v.literal("calm"),
+      v.literal("anxious"),
+      v.literal("reactive"),
+      v.literal("playful"),
+      v.literal("tired"),
+      v.literal("neutral")
+    ),
+    note: v.optional(v.string()),
+    activityId: v.optional(v.id("activities")),
+    createdAt: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_created", ["dogId", "createdAt"]),
 });

@@ -269,3 +269,44 @@ export const clearPresence = mutation({
     return { success: true };
   },
 });
+
+/**
+ * Log Mood Mutation
+ *
+ * Creates a mood log record for tracking the dog's emotional state
+ * Used to track mood patterns throughout the day
+ */
+export const logMood = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    userId: v.id("users"),
+    mood: v.union(
+      v.literal("calm"),
+      v.literal("anxious"),
+      v.literal("reactive"),
+      v.literal("playful"),
+      v.literal("tired"),
+      v.literal("neutral")
+    ),
+    note: v.optional(v.string()),
+    activityId: v.optional(v.id("activities")),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Insert mood log record
+    const moodLogId = await ctx.db.insert("mood_logs", {
+      dogId: args.dogId,
+      userId: args.userId,
+      mood: args.mood,
+      note: args.note,
+      activityId: args.activityId,
+      createdAt: now,
+    });
+
+    return {
+      success: true,
+      moodLogId,
+    };
+  },
+});

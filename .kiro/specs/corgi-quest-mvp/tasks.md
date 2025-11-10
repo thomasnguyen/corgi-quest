@@ -589,7 +589,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - _Requirements: 1, 25_
 
 
-- [ ] 61. Add mood_logs table to database schema
+- [x] 61. Add mood_logs table to database schema
   - Add mood_logs table definition to convex/schema.ts
   - Define mood union type: calm, anxious, reactive, playful, tired, neutral
   - Add fields: dogId, userId, mood, note (optional), activityId (optional), createdAt
@@ -597,7 +597,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test schema in Convex dashboard
   - _Requirements: 26_
 
-- [ ] 62. Create mood logging mutation
+- [x] 62. Create mood logging mutation
   - Create logMood mutation in convex/mutations.ts
   - Accept args: dogId, userId, mood, note (optional), activityId (optional)
   - Insert mood_logs record with current timestamp
