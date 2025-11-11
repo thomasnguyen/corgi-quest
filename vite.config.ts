@@ -17,7 +17,11 @@ const config = defineConfig({
     viteReact(),
   ],
   optimizeDeps: {
-    include: ["@pipecat-ai/client-js", "@pipecat-ai/voice-ui-kit"],
+    include: [
+      "@pipecat-ai/client-js",
+      "@pipecat-ai/client-react",
+      "@pipecat-ai/voice-ui-kit",
+    ],
   },
   build: {
     commonjsOptions: {
