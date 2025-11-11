@@ -310,3 +310,98 @@ export const generateRecommendations = action({
     }
   },
 });
+
+/**
+ * Create Autumn Checkout Session (Sandbox Mode)
+ *
+ * Creates a checkout session for tip jar functionality using Autumn's payment platform.
+ * In sandbox mode, this simulates the checkout flow without real charges.
+ * In production, this would create an actual Autumn checkout session and return a URL.
+ *
+ * @param {Object} args - Arguments object
+ * @param {number} args.amount - Tip amount in USD
+ * @param {string} args.customerId - Customer ID (user ID)
+ * @param {string} args.successUrl - URL to redirect after successful payment
+ * @returns {Object} Checkout session with URL and session ID
+ * @throws {Error} If AUTUMN_API_KEY is not configured or API request fails
+ *
+ * Note: To use Autumn in production:
+ * 1. Install autumn-js: npm install autumn-js
+ * 2. Get API key from https://useautumn.com/dashboard
+ * 3. Add AUTUMN_API_KEY to Convex environment variables
+ * 4. Create products in Autumn dashboard for tip amounts
+ * 5. Use Autumn.checkout() to create checkout sessions
+ * 6. Handle webhooks for payment confirmation
+ */
+export const createAutumnCheckout = action({
+  args: {
+    amount: v.number(),
+    customerId: v.string(),
+    successUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const apiKey = process.env.AUTUMN_API_KEY;
+
+    // In sandbox mode, return a mock checkout session
+    if (!apiKey || apiKey === "autumn_sandbox_test_key_placeholder") {
+      return {
+        url: null, // No redirect needed in sandbox
+        sessionId: `sandbox_${Date.now()}`,
+        amount: args.amount,
+        currency: "USD",
+        mode: "sandbox",
+        message: "Sandbox mode - no real charges will be made",
+      };
+    }
+
+    // Production implementation (requires autumn-js package)
+    // Uncomment and configure when ready for production:
+    /*
+    try {
+      const { Autumn } = await import("autumn-js");
+      
+      const autumn = new Autumn({
+        apiKey,
+        env: "sandbox", // Change to "live" for production
+      });
+
+      // Create or get customer
+      const customer = await autumn.createCustomer({
+        id: args.customerId,
+        email: `${args.customerId}@corgiquest.app`,
+      });
+
+      // Create checkout session
+      // Note: You need to create products in Autumn dashboard first
+      const productId = `tip_${args.amount}`; // e.g., "tip_3", "tip_5", "tip_10"
+      
+      const result = await autumn.checkout({
+        customer_id: customer.id,
+        product_id: productId,
+        success_url: args.successUrl || "https://corgiquest.app/thanks?success=true",
+      });
+
+      if (result.url) {
+        return {
+          url: result.url,
+          sessionId: result.customer_id,
+          amount: args.amount,
+          currency: result.currency,
+          mode: "live",
+        };
+      }
+
+      throw new Error("Failed to create checkout session");
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Autumn checkout failed: ${error.message}`);
+      }
+      throw new Error("Autumn checkout failed: Unknown error");
+    }
+    */
+
+    throw new Error(
+      "AUTUMN_API_KEY not configured. Please add it to your Convex environment variables."
+    );
+  },
+});

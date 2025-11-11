@@ -88,17 +88,36 @@ export default function ItemsView({ dog }: ItemsViewProps) {
       <div className="max-w-md mx-auto space-y-4">
         {/* Dog Portrait Section */}
         <div className="text-center">
-          {/* Portrait - shows equipped item or base portrait */}
-          <div className="w-32 h-32 mx-auto mb-3 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border-2 border-[#D4AF37] flex items-center justify-center overflow-hidden">
-            {equippedItem?.generatedImageUrl ? (
-              <img
-                src={equippedItem.generatedImageUrl}
-                alt={`${dog.name} wearing ${equippedItem.item.name}`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="text-4xl">🐕</div>
-            )}
+          {/* Portrait with Border - shows equipped item or base portrait */}
+          <div className="relative w-32 h-32 mx-auto mb-3">
+            {/* Border SVG */}
+            <img
+              src="/Border.svg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+            {/* Portrait - shows equipped item or base portrait */}
+            <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
+              {equippedItem?.item?.itemType === "moon" ? (
+                <img
+                  src="/mage_avatar.png"
+                  alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : equippedItem?.generatedImageUrl ? (
+                <img
+                  src={equippedItem.generatedImageUrl}
+                  alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src="/default_avatar.png"
+                  alt={dog.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
           </div>
 
           {/* Currently Wearing */}

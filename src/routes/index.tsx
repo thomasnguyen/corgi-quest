@@ -34,8 +34,14 @@ function OverviewPage() {
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
+  // Get currently equipped item to check if moon item is equipped
+  const equippedItem = useQuery(
+    api.queries.getEquippedItem,
+    firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
   // Loading state
-  if (firstDog === undefined || dogProfile === undefined) {
+  if (firstDog === undefined || dogProfile === undefined || equippedItem === undefined) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
@@ -65,9 +71,17 @@ function OverviewPage() {
 
   const { dog, stats } = dogProfile;
 
+  // Determine background based on equipped item
+  const backgroundImage = equippedItem?.item?.itemType === "moon" 
+    ? "/mage_bg.png" 
+    : "/smoke_bg.svg";
+
   return (
     <Layout>
-      <div className="relative overflow-hidden bg-[url('/smoke_bg.svg')] bg-cover bg-bottom min-h-screen">
+      <div 
+        className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
+        style={{ backgroundImage: `url('${backgroundImage}')` }}
+      >
         {/* Content */}
         <div className="relative z-10 pb-32">
           {/* Top Resource Bar */}

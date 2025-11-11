@@ -484,6 +484,26 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 5. THE System SHALL handle tip submission gracefully (sandbox mode for demo)
 6. THE System SHALL provide a "Skip" or "Maybe Later" option on the thanks screen
 
+### Requirement 36: Progressive Web App (PWA) Installation
+
+**User Story:** As a User, I want to install Corgi Quest on my mobile device home screen, so that I can launch it like a native app without browser UI.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide a valid web app manifest file at /manifest.json with app metadata
+2. THE System SHALL include manifest link in the HTML head section
+3. THE System SHALL configure the manifest with standalone display mode for full-screen experience
+4. THE System SHALL provide app icons in multiple sizes (192x192px and 512x512px) for home screen installation
+5. THE System SHALL include Apple-specific meta tags for iOS home screen installation
+6. THE System SHALL set theme-color meta tag to match app design (#000000 for black)
+7. THE System SHALL configure apple-mobile-web-app-capable meta tag to enable standalone mode on iOS
+8. THE System SHALL set apple-mobile-web-app-status-bar-style to black-translucent for iOS status bar
+9. THE System SHALL provide apple-touch-icon link for iOS home screen icon
+10. WHEN a User accesses the app on iOS Safari, THE System SHALL display "Add to Home Screen" option in the share menu
+11. WHEN a User accesses the app on Android Chrome, THE System SHALL display install banner or menu option
+12. WHEN the app is installed, THE System SHALL open in standalone mode without browser UI
+13. THE System SHALL display the app icon and name "Corgi Quest" on the device home screen after installation
+
 ---
 
 ## Implementation Notes

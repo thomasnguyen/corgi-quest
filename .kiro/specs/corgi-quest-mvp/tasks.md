@@ -1061,7 +1061,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
 
 ### Autumn Tip Jar Integration (Est. 30 min)
 
-- [ ] 119. Create /thanks route
+- [x] 119. Create /thanks route
   - Create src/routes/thanks.tsx
   - Display "Thanks for Playing Corgi Quest!" header
   - Display Bumi image or animation
@@ -1069,7 +1069,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Style page to match app design 
   - _Requirements: 35_
 
-- [ ] 120. Integrate Autumn sandbox checkout
+- [x] 120. Integrate Autumn sandbox checkout
   - Research Autumn API documentation for sandbox mode
   - Install Autumn SDK if available: `npm install @autumn/sdk` (or similar)
   - Add AUTUMN_API_KEY to environment variables (sandbox key)
@@ -1112,3 +1112,110 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
 5. Autumn (nice-to-have, adds monetization angle)
 
 
+
+
+---
+
+## PWA Implementation Tasks
+
+### Progressive Web App (PWA) - Add to Home Screen (Est. 15-30 min)
+
+- [x] 122. Update web app manifest
+  - Open public/manifest.json
+  - Update short_name to "Corgi Quest"
+  - Update name to "Corgi Quest"
+  - Update description to "Track your dog's activities and daily quests"
+  - Verify icons array includes favicon.ico, logo192.png, logo512.png
+  - Set start_url to "/"
+  - Set display to "standalone"
+  - Set theme_color to "#000000" (black)
+  - Set background_color to "#ffffff" (white)
+  - Set orientation to "portrait"
+  - Verify JSON is valid (no syntax errors)
+  - _Requirements: 36_
+
+- [x] 123. Add manifest link and Apple meta tags to HTML head
+  - Open src/routes/__root.tsx
+  - Add manifest link: `{ rel: "manifest", href: "/manifest.json" }`
+  - Add apple-touch-icon link: `{ rel: "apple-touch-icon", href: "/logo192.png" }`
+  - Add theme-color meta tag: `{ name: "theme-color", content: "#000000" }`
+  - Add apple-mobile-web-app-capable meta tag: `{ name: "apple-mobile-web-app-capable", content: "yes" }`
+  - Add apple-mobile-web-app-status-bar-style meta tag: `{ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" }`
+  - Add apple-mobile-web-app-title meta tag: `{ name: "apple-mobile-web-app-title", content: "Corgi Quest" }`
+  - Verify all meta tags are in the head section
+  - _Requirements: 36_
+
+- [-] 124. Verify icon files exist and are correct
+  - Check public/favicon.ico exists (64x64, 32x32, 24x24, 16x16 multi-size ICO)
+  - Check public/logo192.png exists and is 192x192px
+  - Check public/logo512.png exists and is 512x512px
+  - Verify icons use Corgi Quest branding (logo or Bumi portrait)
+  - Verify icons work on both light and dark backgrounds
+  - Test icons load correctly in browser
+  - _Requirements: 36_
+
+- [ ] 125. Test PWA installation on iOS Safari
+  - Open app in Safari on iPhone or iPad
+  - Tap Share button (square with arrow)
+  - Scroll and tap "Add to Home Screen"
+  - Verify icon and name "Corgi Quest" appear correctly
+  - Tap "Add" to install
+  - Open app from home screen
+  - Verify app opens in standalone mode (no Safari UI)
+  - Verify status bar is black
+  - Test navigation and features work normally
+  - _Requirements: 36_
+
+- [ ] 126. Test PWA installation on Android Chrome
+  - Open app in Chrome on Android device
+  - Look for install banner or tap menu (⋮)
+  - Tap "Add to Home screen" or "Install app"
+  - Verify icon and name "Corgi Quest" appear correctly
+  - Tap "Install" or "Add"
+  - Open app from home screen
+  - Verify app opens as standalone app (no Chrome UI)
+  - Test navigation and features work normally
+  - _Requirements: 36_
+
+- [ ] 127. Test PWA in Chrome DevTools
+  - Open Chrome DevTools → Application tab
+  - Check "Manifest" section
+  - Verify all manifest properties are correct
+  - Verify all icons load successfully (no 404 errors)
+  - Check for manifest warnings or errors
+  - Test "Add to Home Screen" button in DevTools
+  - Verify no console errors related to manifest
+  - _Requirements: 36_
+
+---
+
+## PWA Implementation Summary
+
+**Total Time: 15-30 minutes**
+
+**Files Modified:**
+- public/manifest.json (update metadata)
+- src/routes/__root.tsx (add manifest link and Apple meta tags)
+
+**Files Verified:**
+- public/favicon.ico
+- public/logo192.png
+- public/logo512.png
+
+**Testing:**
+- iOS Safari (iPhone/iPad)
+- Android Chrome
+- Desktop Chrome DevTools
+
+**Expected Outcome:**
+- ✅ App is installable on iOS and Android home screens
+- ✅ App opens in standalone mode (no browser UI)
+- ✅ App icon and name appear correctly
+- ✅ No manifest errors in DevTools
+- ✅ Works offline (Convex queueing already handles this)
+
+**No Backend Changes Required:**
+- PWA is entirely client-side
+- No environment variables needed
+- No Convex changes required
+- Works immediately after deployment to Netlify

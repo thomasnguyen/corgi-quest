@@ -26,8 +26,37 @@ export const Route = createRootRoute({
       {
         title: "Corgi Quest",
       },
+      {
+        name: "theme-color",
+        content: "#000000",
+      },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
+      {
+        name: "apple-mobile-web-app-title",
+        content: "Corgi Quest",
+      },
     ],
     links: [
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/favicon.png",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/logo192.png",
+      },
       {
         rel: "preload",
         as: "image",

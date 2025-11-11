@@ -146,6 +146,16 @@ export default defineSchema({
     .index("by_dog", ["dogId"])
     .index("by_dog_and_date", ["dogId", "date"]),
 
+  // Firecrawl Tips cache - stores daily Firecrawl-scraped training tips
+  firecrawl_tips: defineTable({
+    dogId: v.id("dogs"),
+    date: v.string(), // YYYY-MM-DD format
+    tips: v.string(), // JSON stringified array of training tips
+    createdAt: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_date", ["dogId", "date"]),
+
   // Cosmetic items table - unlockable items for dog customization
   cosmetic_items: defineTable({
     name: v.string(),

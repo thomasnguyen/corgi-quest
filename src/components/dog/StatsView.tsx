@@ -1,12 +1,28 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "convex/react";
+import { Id } from "convex/_generated/dataModel";
 import { Dog, DogStat, StatType } from "../../lib/types";
 import { ProgressBar } from "../ui/ProgressBar";
 import RadarChart from "./RadarChart";
+import MoodGraph from "./MoodGraph";
 import { Lightbulb, Zap, Shield, Users } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
+
+interface MoodLog {
+  _id: Id<"mood_logs">;
+  dogId: Id<"dogs">;
+  userId: Id<"users">;
+  mood: "calm" | "anxious" | "reactive" | "playful" | "tired" | "neutral";
+  note?: string;
+  activityId?: Id<"activities">;
+  createdAt: number;
+  userName: string;
+}
 
 interface StatsViewProps {
   dog: Dog;
   stats: DogStat[];
+  moodHistory?: MoodLog[];
 }
 
 const STAT_NAMES: Record<StatType, string> = {
@@ -33,8 +49,13 @@ const STAT_ICONS: Record<
 // Order of stats for display
 const STAT_ORDER: StatType[] = ["INT", "PHY", "IMP", "SOC"];
 
-export default function StatsView({ dog, stats }: StatsViewProps) {
+export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
   const navigate = useNavigate();
+
+  // Get currently equipped item to check if moon item is equipped (for demo)
+  const equippedItem = useQuery(api.queries.getEquippedItem, {
+    dogId: dog._id,
+  });
 
   // Get ordered stats
   const orderedStats = STAT_ORDER.map((statType) => {
@@ -51,9 +72,22 @@ export default function StatsView({ dog, stats }: StatsViewProps) {
       <div className="max-w-md mx-auto space-y-6">
         {/* Dog Portrait Section */}
         <div className="text-center">
-          {/* Portrait placeholder - will show equipped item later */}
-          <div className="w-48 h-48 mx-auto mb-4 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border-2 border-[#D4AF37] flex items-center justify-center">
-            <div className="text-6xl">🐕</div>
+          {/* Portrait with Border - placeholder - will show equipped item later */}
+          <div className="relative w-32 h-32 mx-auto mb-3">
+            {/* Border SVG */}
+            <img
+              src="/Border.svg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+            {/* Portrait placeholder */}
+            <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
+              <img
+                src={equippedItem?.item?.itemType === "moon" ? "/mage_avatar.png" : "/default_avatar.png"}
+                alt={dog.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
 
           {/* Dog Name and Level */}
@@ -70,14 +104,6 @@ export default function StatsView({ dog, stats }: StatsViewProps) {
           <div className="px-4 mt-4">
             <ProgressBar current={dog.overallXp} max={dog.xpToNextLevel} />
           </div>
-        </div>
-
-        {/* Radar Chart */}
-        <div className="bg-black/40 border border-white/10 rounded-lg p-6">
-          <h3 className="text-white text-center text-sm font-semibold mb-4 uppercase tracking-wide">
-            Stat Overview
-          </h3>
-          <RadarChart stats={stats} size={220} />
         </div>
 
         {/* Individual Stat Progress Bars */}
@@ -127,6 +153,19 @@ export default function StatsView({ dog, stats }: StatsViewProps) {
               </button>
             );
           })}
+        </div>
+
+        {/* Mood Graph */}
+        {moodHistory !== undefined && (
+          <MoodGraph moodLogs={moodHistory} days={7} />
+        )}
+
+        {/* Radar Chart */}
+        <div className="bg-black/40 border border-white/10 rounded-lg p-6">
+          <h3 className="text-white text-center text-sm font-semibold mb-4 uppercase tracking-wide">
+            Stat Overview
+          </h3>
+          <RadarChart stats={stats} size={220} />
         </div>
       </div>
     </div>

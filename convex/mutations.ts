@@ -408,6 +408,49 @@ export const cacheRecommendations = mutation({
 });
 
 /**
+ * Cache Firecrawl Tips Mutation
+ *
+ * Saves Firecrawl-scraped training tips to the cache for today.
+ * Replaces any existing cache for today.
+ */
+export const cacheFirecrawlTips = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    tips: v.string(), // JSON stringified array
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+    const now = Date.now();
+
+    // Check if cache already exists for today
+    const existing = await ctx.db
+      .query("firecrawl_tips")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (existing) {
+      // Update existing cache
+      await ctx.db.patch(existing._id, {
+        tips: args.tips,
+        createdAt: now,
+      });
+      return { success: true, updated: true };
+    } else {
+      // Insert new cache
+      await ctx.db.insert("firecrawl_tips", {
+        dogId: args.dogId,
+        date: today,
+        tips: args.tips,
+        createdAt: now,
+      });
+      return { success: true, updated: false };
+    }
+  },
+});
+
+/**
  * Invalidate Recommendation Cache Mutation
  *
  * Deletes cached AI recommendations for a dog for today.

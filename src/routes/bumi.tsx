@@ -17,10 +17,10 @@ function BumiPage() {
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
 
-  // Get dog profile with stats
+  // Get dog profile with stats and mood history (optimized/cached query)
   const dogProfile = useQuery(
-    api.queries.getDogProfile,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    api.queries.getDogProfileWithMood,
+    firstDog ? { dogId: firstDog._id, days: 7 } : "skip"
   );
 
   // Get equipped item
@@ -66,7 +66,11 @@ function BumiPage() {
 
   return (
     <Layout>
-      <BumiCharacterSheet dog={dogProfile.dog} stats={dogProfile.stats} />
+      <BumiCharacterSheet 
+        dog={dogProfile.dog} 
+        stats={dogProfile.stats}
+        moodHistory={dogProfile.moodHistory}
+      />
     </Layout>
   );
 }

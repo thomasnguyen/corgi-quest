@@ -90,6 +90,60 @@ export const getDogProfile = query({
 });
 
 /**
+ * Query to get dog profile with stats and mood history (cached/optimized)
+ * Returns dog info, all 4 stat records, and mood history for the last 7 days
+ * This is more efficient than making separate queries
+ */
+export const getDogProfileWithMood = query({
+  args: {
+    dogId: v.id("dogs"),
+    days: v.optional(v.number()), // Number of days for mood history (default: 7)
+  },
+  handler: async (ctx, args) => {
+    // Get dog record
+    const dog = await ctx.db.get(args.dogId);
+    if (!dog) {
+      return null;
+    }
+
+    // Get all 4 stats for this dog
+    const stats = await ctx.db
+      .query("dog_stats")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    // Get mood history for the specified time period
+    const days = args.days || 7;
+    const now = Date.now();
+    const startTime = now - days * 24 * 60 * 60 * 1000;
+
+    const moodLogs = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) => q.gte(q.field("createdAt"), startTime))
+      .order("asc")
+      .collect();
+
+    // For each mood log, get user info
+    const moodLogsWithDetails = await Promise.all(
+      moodLogs.map(async (moodLog) => {
+        const user = await ctx.db.get(moodLog.userId);
+        return {
+          ...moodLog,
+          userName: user?.name || "Unknown",
+        };
+      })
+    );
+
+    return {
+      dog,
+      stats,
+      moodHistory: moodLogsWithDetails,
+    };
+  },
+});
+
+/**
  * Query to get daily goals for today
  * Returns today's physical and mental goal progress
  */
@@ -416,6 +470,43 @@ export const getTodaysMoods = query({
 });
 
 /**
+ * Query to get mood logs over a time period (default: last 7 days)
+ * Returns mood logs sorted by creation time
+ */
+export const getMoodHistory = query({
+  args: {
+    dogId: v.id("dogs"),
+    days: v.optional(v.number()), // Number of days to look back (default: 7)
+  },
+  handler: async (ctx, args) => {
+    const days = args.days || 7;
+    const now = Date.now();
+    const startTime = now - days * 24 * 60 * 60 * 1000;
+
+    // Get all mood logs within the time period
+    const moodLogs = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) => q.gte(q.field("createdAt"), startTime))
+      .order("asc")
+      .collect();
+
+    // For each mood log, get user info
+    const moodLogsWithDetails = await Promise.all(
+      moodLogs.map(async (moodLog) => {
+        const user = await ctx.db.get(moodLog.userId);
+        return {
+          ...moodLog,
+          userName: user?.name || "Unknown",
+        };
+      })
+    );
+
+    return moodLogsWithDetails;
+  },
+});
+
+/**
  * Query to get cached AI recommendations for today
  * Returns cached recommendations if they exist for today, otherwise null
  */
@@ -447,6 +538,43 @@ export const getCachedRecommendations = query({
       };
     } catch (error) {
       console.error("Failed to parse cached recommendations:", error);
+      return null;
+    }
+  },
+});
+
+/**
+ * Query to get cached Firecrawl tips for today
+ * Returns cached tips if they exist for today, otherwise null
+ */
+export const getCachedFirecrawlTips = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+    // Find today's cached tips
+    const cached = await ctx.db
+      .query("firecrawl_tips")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (!cached) {
+      return null;
+    }
+
+    // Parse the JSON string back to array
+    try {
+      const tips = JSON.parse(cached.tips);
+      return {
+        tips,
+        createdAt: cached.createdAt,
+      };
+    } catch (error) {
+      console.error("Failed to parse cached Firecrawl tips:", error);
       return null;
     }
   },

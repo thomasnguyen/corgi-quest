@@ -2141,3 +2141,386 @@ export const Footer = () => {
 - [ ] Test sandbox payment flow
 - [ ] Verify thank you message displays
 
+
+
+---
+
+## Progressive Web App (PWA) Implementation
+
+### Overview
+
+Corgi Quest will be installable as a Progressive Web App on iOS and Android devices, allowing users to add it to their home screen and launch it like a native app without browser UI. This implementation focuses on the core PWA features without push notifications.
+
+### PWA Requirements
+
+**Already Complete:**
+- ✅ HTTPS (provided by Netlify)
+- ✅ Mobile-responsive design
+- ✅ App icons exist (logo192.png, logo512.png, favicon.ico)
+
+**Required Changes:**
+1. Update web app manifest with proper metadata
+2. Add manifest link and Apple-specific meta tags to HTML head
+3. Verify icon files are properly configured
+
+### Web App Manifest Configuration
+
+**File Location:** `public/manifest.json`
+
+**Manifest Structure:**
+```json
+{
+  "short_name": "Corgi Quest",
+  "name": "Corgi Quest",
+  "description": "Track your dog's activities and daily quests",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "orientation": "portrait"
+}
+```
+
+**Manifest Properties Explained:**
+- `short_name`: Name displayed on home screen (max 12 characters)
+- `name`: Full app name displayed in install prompts
+- `description`: App description for app stores and install prompts
+- `icons`: Array of icon objects with different sizes and purposes
+  - `purpose: "any maskable"`: Icon works for both standard and adaptive icons
+- `start_url`: URL to load when app is launched from home screen
+- `display: "standalone"`: Opens without browser UI (like a native app)
+- `theme_color`: Color of the status bar and browser chrome
+- `background_color`: Background color shown during app launch
+- `orientation: "portrait"`: Lock app to portrait mode on mobile
+
+### HTML Head Configuration
+
+**File Location:** `src/routes/__root.tsx`
+
+**Required Meta Tags and Links:**
+```typescript
+export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      {
+        charSet: "utf-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
+      },
+      {
+        name: "theme-color",
+        content: "#000000",
+      },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
+      {
+        name: "apple-mobile-web-app-title",
+        content: "Corgi Quest",
+      },
+      {
+        title: "Corgi Quest",
+      },
+    ],
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        href: "/smoke_bg.svg",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/logo192.png",
+      },
+    ],
+  }),
+  // ... rest of the code
+});
+```
+
+**Meta Tags Explained:**
+- `theme-color`: Sets the color of the browser's address bar and status bar
+- `apple-mobile-web-app-capable`: Enables standalone mode on iOS (removes Safari UI)
+- `apple-mobile-web-app-status-bar-style`: Controls iOS status bar appearance
+  - `black-translucent`: Black text on transparent background
+- `apple-mobile-web-app-title`: Name displayed under the icon on iOS home screen
+
+**Links Explained:**
+- `rel="manifest"`: Links to the web app manifest file
+- `rel="apple-touch-icon"`: Icon used when adding to iOS home screen
+
+### Icon Requirements
+
+**Required Files in `public/` directory:**
+1. `favicon.ico` - 64x64, 32x32, 24x24, 16x16 (multi-size ICO file)
+2. `logo192.png` - 192x192px PNG (Android home screen, iOS bookmark)
+3. `logo512.png` - 512x512px PNG (Android splash screen, high-res displays)
+
+**Icon Design Guidelines:**
+- Use simple, recognizable design (Corgi Quest logo or Bumi portrait)
+- Ensure icon works on both light and dark backgrounds
+- Avoid text in icons (may be unreadable at small sizes)
+- Use transparent background or solid color
+- Test on actual devices to verify appearance
+
+### Installation Flow
+
+#### iOS (Safari)
+```
+User opens app in Safari
+       │
+       ▼
+User taps Share button (square with arrow)
+       │
+       ▼
+User scrolls and taps "Add to Home Screen"
+       │
+       ▼
+iOS shows preview with icon and name
+       │
+       ▼
+User taps "Add"
+       │
+       ▼
+Icon appears on home screen
+       │
+       ▼
+User taps icon to launch
+       │
+       ▼
+App opens in standalone mode (no Safari UI)
+```
+
+#### Android (Chrome)
+```
+User opens app in Chrome
+       │
+       ▼
+Chrome shows install banner (automatic)
+  OR
+User taps menu (⋮) → "Add to Home screen" or "Install app"
+       │
+       ▼
+Android shows install dialog with icon and name
+       │
+       ▼
+User taps "Install" or "Add"
+       │
+       ▼
+Icon appears on home screen
+       │
+       ▼
+User taps icon to launch
+       │
+       ▼
+App opens as standalone app
+```
+
+#### Desktop (Chrome/Edge)
+```
+User opens app in Chrome/Edge
+       │
+       ▼
+Browser shows install button in address bar (⊕ icon)
+       │
+       ▼
+User clicks install button
+       │
+       ▼
+Browser shows install dialog
+       │
+       ▼
+User clicks "Install"
+       │
+       ▼
+App opens in standalone window
+       │
+       ▼
+App icon added to desktop/taskbar
+```
+
+### Expected Behavior After Installation
+
+**When Installed:**
+- ✅ Opens in standalone mode (no browser UI)
+- ✅ Uses app icon on home screen
+- ✅ Shows app name "Corgi Quest" under icon
+- ✅ Black status bar on iOS (matches theme-color)
+- ✅ Full screen experience (no address bar, no browser chrome)
+- ✅ Works offline (Convex queueing already handles this)
+- ✅ Launches instantly from home screen
+
+**What Users Will See:**
+- **iOS**: Share → "Add to Home Screen" option
+- **Android**: Install banner or menu option "Install app"
+- **Desktop Chrome**: Install button in address bar (optional)
+
+### Testing PWA Installation
+
+#### iOS Testing (Safari on iPhone/iPad)
+1. Open app in Safari
+2. Tap Share button (square with arrow)
+3. Scroll and tap "Add to Home Screen"
+4. Confirm icon and name are correct
+5. Tap "Add"
+6. Open from home screen
+7. Verify it opens in standalone mode (no Safari UI)
+8. Verify status bar is black
+9. Test navigation and features work normally
+
+#### Android Testing (Chrome on Android)
+1. Open app in Chrome
+2. Look for install banner or tap menu (⋮)
+3. Tap "Add to Home screen" or "Install app"
+4. Confirm installation
+5. Open from home screen
+6. Verify it opens as standalone app (no Chrome UI)
+7. Test navigation and features work normally
+
+#### Desktop Testing (Chrome DevTools)
+1. Open Chrome DevTools → Application tab
+2. Check "Manifest" section
+   - Verify all properties are correct
+   - Verify all icons load successfully
+3. Check "Service Workers" section (should be empty - we're not using one)
+4. Test "Add to Home Screen" button in DevTools
+5. Verify manifest has no errors or warnings
+
+### PWA Limitations (Without Service Worker)
+
+**What We Have:**
+- ✅ Installable on home screen
+- ✅ Standalone mode (no browser UI)
+- ✅ Custom app icon and name
+- ✅ Offline support via Convex queueing
+
+**What We Don't Have (and don't need):**
+- ❌ Service Worker (not required for basic PWA)
+- ❌ Offline caching of assets (Convex handles data offline)
+- ❌ Push notifications (explicitly excluded from requirements)
+- ❌ Background sync (Convex handles this)
+- ❌ Custom splash screen (uses default with icon + background color)
+
+### Optional Future Enhancements
+
+**If Time Permits:**
+1. **Service Worker** - For better offline asset caching
+2. **Custom Splash Screen** - Branded loading screen
+3. **Shortcuts** - Quick actions from home screen long-press
+4. **Share Target API** - Receive shared content from other apps
+5. **App Shortcuts** - Jump directly to specific screens (e.g., "Log Activity")
+
+### Implementation Checklist
+
+**Files to Modify:**
+- [ ] `public/manifest.json` - Update with app metadata
+- [ ] `src/routes/__root.tsx` - Add manifest link and Apple meta tags
+
+**Files to Verify:**
+- [ ] `public/favicon.ico` - Exists and is correct size
+- [ ] `public/logo192.png` - Exists and is 192x192px
+- [ ] `public/logo512.png` - Exists and is 512x512px
+
+**Testing:**
+- [ ] Test on iOS Safari (iPhone/iPad)
+- [ ] Test on Android Chrome
+- [ ] Test on Desktop Chrome (optional)
+- [ ] Verify manifest in DevTools
+- [ ] Verify icons load correctly
+- [ ] Verify standalone mode works
+
+### Deployment Notes
+
+**No Backend Changes Required:**
+- PWA is entirely client-side
+- No environment variables needed
+- No Convex changes required
+- Works immediately after deployment
+
+**Netlify Configuration:**
+- No special Netlify configuration needed
+- Manifest and icons are served as static files
+- HTTPS is already enabled (required for PWA)
+
+### Estimated Implementation Time
+
+**Total Time: 15-30 minutes**
+
+**Breakdown:**
+- Update `manifest.json`: 5 minutes
+- Update `__root.tsx`: 5 minutes
+- Verify icons: 5 minutes
+- Test on iOS: 5 minutes
+- Test on Android: 5 minutes
+- Test in DevTools: 5 minutes
+
+**Difficulty: Easy**
+- No complex code changes
+- No dependencies to install
+- No breaking changes
+- Works with existing infrastructure
+
+### Success Criteria
+
+**PWA is successfully implemented when:**
+1. ✅ Manifest file is valid and accessible at `/manifest.json`
+2. ✅ Manifest link is present in HTML head
+3. ✅ Apple meta tags are present in HTML head
+4. ✅ All icon files exist and are correct sizes
+5. ✅ iOS shows "Add to Home Screen" option
+6. ✅ Android shows install banner or menu option
+7. ✅ App opens in standalone mode after installation
+8. ✅ App icon and name appear correctly on home screen
+9. ✅ No console errors related to manifest or icons
+10. ✅ DevTools Application tab shows no manifest errors
+
+### PWA Benefits for Corgi Quest
+
+**User Experience:**
+- Faster access (one tap from home screen)
+- Native app feel (no browser UI)
+- Better immersion (full screen)
+- Easier to find (icon on home screen)
+
+**Technical Benefits:**
+- No app store submission required
+- Instant updates (just deploy to Netlify)
+- Works on all platforms (iOS, Android, Desktop)
+- Smaller download size than native app
+- No platform-specific code needed
+
+**Hackathon Demo:**
+- Shows modern web capabilities
+- Demonstrates mobile-first design
+- Highlights progressive enhancement
+- Easy for judges to install and test
