@@ -9,5 +9,6 @@ count.txt
 .tanstack
 .wrangler
 .output
+.netlify
 .vinxi
 todos.json
