@@ -4,7 +4,7 @@ import { v } from "convex/values";
 /**
  * Corgi Quest Database Schema
  *
- * This schema defines 9 tables for the dog training RPG:
+ * This schema defines 11 tables for the dog training RPG:
  * - users: Partners in a household
  * - households: Shared account containing users and a dog
  * - dogs: The pet character being trained
@@ -14,6 +14,8 @@ import { v } from "convex/values";
  * - daily_goals: Daily physical and mental stimulation tracking
  * - streaks: Consecutive days meeting goals
  * - mood_logs: Dog mood tracking throughout the day
+ * - cosmetic_items: Unlockable cosmetic items for dog customization
+ * - equipped_items: Currently equipped cosmetic items per dog
  */
 
 export default defineSchema({
@@ -141,4 +143,22 @@ export default defineSchema({
   })
     .index("by_dog", ["dogId"])
     .index("by_dog_and_date", ["dogId", "date"]),
+
+  // Cosmetic items table - unlockable items for dog customization
+  cosmetic_items: defineTable({
+    name: v.string(),
+    description: v.string(),
+    unlockLevel: v.number(), // Level required to unlock (1 per level, starting at level 2)
+    itemType: v.string(), // e.g., "warrior", "mage", "ranger", etc.
+    icon: v.string(), // Emoji or icon identifier
+    createdAt: v.number(),
+  }).index("by_unlock_level", ["unlockLevel"]),
+
+  // Equipped items table - currently equipped cosmetic items per dog
+  equipped_items: defineTable({
+    dogId: v.id("dogs"),
+    itemId: v.id("cosmetic_items"),
+    generatedImageUrl: v.string(), // AI-generated image URL
+    equippedAt: v.number(), // Timestamp
+  }).index("by_dog", ["dogId"]),
 });

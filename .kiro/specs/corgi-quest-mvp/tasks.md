@@ -760,7 +760,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Ensure mobile-responsive layout
   - _Requirements: 28_
 
-- [ ] 82. Create cosmetic_items and equipped_items database tables
+- [x] 82. Create cosmetic_items and equipped_items database tables
   - Add cosmetic_items table to convex/schema.ts
   - Add equipped_items table to convex/schema.ts
   - Define item unlock levels (1 per level, starting at level 2)
@@ -768,7 +768,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test schema in Convex dashboard
   - _Requirements: 28_
 
-- [ ] 83. Seed cosmetic items data
+- [x] 83. Seed cosmetic items data
   - Create seed data for cosmetic items (1 per 3 levels, starting at level 2)
   - Define item types: fire, water, grass, sun, moon, ground
   - Add icons/emojis for each item
@@ -776,7 +776,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Update seed mutation to include cosmetic items
   - _Requirements: 28_
 
-- [ ] 84. Create RadarChart component
+- [x] 84. Create RadarChart component
   - Create src/components/dog/RadarChart.tsx
   - Use recharts library or custom SVG
   - Display 4 stats in pentagon/spider chart format
@@ -785,7 +785,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Make it responsive
   - _Requirements: 28_
 
-- [ ] 85. Create StatsView component (STATS sub-tab)
+- [x] 85. Create StatsView component (STATS sub-tab)
   - Create src/components/dog/StatsView.tsx
   - Display Bumi portrait with current outfit
   - Display name + level badge
@@ -796,7 +796,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Style to match app design
   - _Requirements: 28_
 
-- [ ] 86. Create ItemCard component
+- [x] 86. Create ItemCard component
   - Create src/components/dog/ItemCard.tsx
   - Display item icon, name, description
   - Show "UNLOCKED" or "LOCKED" state
@@ -806,7 +806,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Style to match app design
   - _Requirements: 28_
 
-- [ ] 87. Create ItemsView component (ITEMS sub-tab)
+- [x] 87. Create ItemsView component (ITEMS sub-tab)
   - Create src/components/dog/ItemsView.tsx
   - Display large Bumi portrait at top (with current outfit)
   - Display "Currently Wearing: [Item Name]"

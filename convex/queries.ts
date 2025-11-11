@@ -437,3 +437,92 @@ export const getCachedRecommendations = query({
     }
   },
 });
+
+/**
+ * Query to get all cosmetic items with unlock status
+ * Returns all items with a flag indicating if they're unlocked based on dog's level
+ */
+export const getAllCosmeticItems = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get dog to check current level
+    const dog = await ctx.db.get(args.dogId);
+    if (!dog) {
+      return [];
+    }
+
+    // Get all cosmetic items
+    const items = await ctx.db.query("cosmetic_items").collect();
+
+    // Add unlock status to each item
+    const itemsWithStatus = items.map((item) => ({
+      ...item,
+      isUnlocked: dog.overallLevel >= item.unlockLevel,
+    }));
+
+    // Sort by unlock level
+    return itemsWithStatus.sort((a, b) => a.unlockLevel - b.unlockLevel);
+  },
+});
+
+/**
+ * Query to get currently equipped item for a dog
+ * Returns the equipped item with full item details, or null if nothing equipped
+ */
+export const getEquippedItem = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get equipped item record
+    const equippedItem = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .first();
+
+    if (!equippedItem) {
+      return null;
+    }
+
+    // Get the full item details
+    const item = await ctx.db.get(equippedItem.itemId);
+    if (!item) {
+      return null;
+    }
+
+    return {
+      ...equippedItem,
+      item,
+    };
+  },
+});
+
+/**
+ * Query to get unlocked items for a dog
+ * Returns only items that the dog has unlocked based on level
+ */
+export const getUnlockedItems = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get dog to check current level
+    const dog = await ctx.db.get(args.dogId);
+    if (!dog) {
+      return [];
+    }
+
+    // Get all cosmetic items
+    const items = await ctx.db.query("cosmetic_items").collect();
+
+    // Filter to only unlocked items
+    const unlockedItems = items.filter(
+      (item) => dog.overallLevel >= item.unlockLevel
+    );
+
+    // Sort by unlock level
+    return unlockedItems.sort((a, b) => a.unlockLevel - b.unlockLevel);
+  },
+});

@@ -408,3 +408,28 @@ export const invalidateRecommendationCache = mutation({
     return { success: true, deleted: false };
   },
 });
+
+/**
+ * Equip Item Mutation (Placeholder)
+ *
+ * Equips a cosmetic item to a dog.
+ * This is a placeholder for task 91 - full implementation coming soon.
+ */
+export const equipItem = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    itemId: v.id("cosmetic_items"),
+  },
+  handler: async (ctx, args) => {
+    // TODO: Implement in task 91
+    // - Check if image already exists for this item
+    // - If not, call generateItemImage action
+    // - Delete any existing equipped_items record for this dog
+    // - Insert new equipped_items record
+    // - Return equipped item with image URL
+
+    throw new Error(
+      "equipItem mutation not yet implemented - coming in task 91"
+    );
+  },
+});

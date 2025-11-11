@@ -10,6 +10,13 @@ import { mutation } from "./_generated/server";
  * - Today's daily goals with partial progress
  * - Streak record
  * - 3-4 sample activities from past few hours
+ * - 6 cosmetic items (1 per 3 levels, starting at level 2)
+ *   - Level 2: Flame Bandana (fire type) 🔥
+ *   - Level 5: Ocean Collar (water type) 💧
+ *   - Level 8: Forest Cape (grass type) 🌿
+ *   - Level 11: Solar Crown (sun type) ☀️
+ *   - Level 14: Lunar Scarf (moon type) 🌙
+ *   - Level 17: Earth Vest (ground type) 🪨
  */
 export const seedDemoData = mutation({
   args: {},
@@ -188,6 +195,67 @@ export const seedDemoData = mutation({
       xpAmount: 30,
     });
 
+    // Step 9: Create cosmetic items (1 per 3 levels, starting at level 2)
+    // Level 2: Fire type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Flame Bandana",
+      description: "A fiery red bandana that radiates warmth and energy",
+      unlockLevel: 2,
+      itemType: "fire",
+      icon: "🔥",
+      createdAt: now,
+    });
+
+    // Level 5: Water type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Ocean Collar",
+      description: "A cool blue collar adorned with wave patterns",
+      unlockLevel: 5,
+      itemType: "water",
+      icon: "💧",
+      createdAt: now,
+    });
+
+    // Level 8: Grass type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Forest Cape",
+      description: "A leafy green cape that brings nature's vitality",
+      unlockLevel: 8,
+      itemType: "grass",
+      icon: "🌿",
+      createdAt: now,
+    });
+
+    // Level 11: Sun type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Solar Crown",
+      description: "A radiant golden crown that shines like the sun",
+      unlockLevel: 11,
+      itemType: "sun",
+      icon: "☀️",
+      createdAt: now,
+    });
+
+    // Level 14: Moon type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Lunar Scarf",
+      description: "A mystical silver scarf that glows with moonlight",
+      unlockLevel: 14,
+      itemType: "moon",
+      icon: "🌙",
+      createdAt: now,
+    });
+
+    // Level 17: Ground type
+    await ctx.db.insert("cosmetic_items", {
+      name: "Earth Vest",
+      description: "A sturdy brown vest made from the finest earth materials",
+      unlockLevel: 17,
+      itemType: "ground",
+      icon: "🪨",
+      createdAt: now,
+    });
+
     return {
       success: true,
       message: "Demo data seeded successfully",
@@ -196,6 +264,7 @@ export const seedDemoData = mutation({
         dogId,
         userIds: { thomasId, hollyId },
         activityCount: 4,
+        cosmeticItemsCount: 6,
       },
     };
   },
