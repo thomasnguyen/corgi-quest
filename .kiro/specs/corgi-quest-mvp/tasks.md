@@ -938,7 +938,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Configure automatic deployments from main branch in Netlify dashboard
   - _Requirements: 30_
 
-- [ ] 104. Add Netlify badge to footer
+- [ ] *104. Add Netlify badge to footer
   - Update footer component (or create if doesn't exist)
   - Add "Deployed on Netlify" badge with Netlify logo
   - Link badge to Netlify website
@@ -1019,7 +1019,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
 
 ### Sentry Integration (Est. 15 min)
 
-- [ ] 113. Install and configure Sentry
+- [x] 113. Install and configure Sentry
   - Install @sentry/react: `npm install @sentry/react`
   - Create Sentry account and get DSN
   - Add SENTRY_DSN to environment variables
@@ -1028,14 +1028,14 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test error reporting by triggering a test error
   - _Requirements: 33_
 
-- [ ] 114. Add Sentry error boundaries
+- [-] 114. Add Sentry error boundaries
   - Wrap app with Sentry ErrorBoundary component
   - Configure fallback UI for caught errors
   - Test error boundary catches and reports errors
   - Verify errors appear in Sentry dashboard
   - _Requirements: 33_
 
-- [ ] 115. Add Sentry mention to footer
+- [x] 115. Add Sentry mention to footer
   - Update footer component
   - Add "Monitored by Sentry" text or logo
   - Link to Sentry website
@@ -1044,21 +1044,21 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
 
 ### CodeRabbit Integration (Est. 10 min setup)
 
-- [ ] 116. Install CodeRabbit GitHub App
+- [x] 116. Install CodeRabbit GitHub App
   - Go to GitHub Marketplace and install CodeRabbit app
   - Grant CodeRabbit access to repository
   - Configure CodeRabbit settings (optional: customize review rules)
   - Verify CodeRabbit is active on repository
   - _Requirements: 34_
 
-- [ ] 117. Create demo PRs with CodeRabbit reviews
+- [x] 117. Create demo PRs with CodeRabbit reviews
   - Create 1-2 pull requests with code changes
   - Wait for CodeRabbit to review and provide feedback
   - Take screenshots of CodeRabbit reviews
   - Merge PRs after addressing feedback
   - _Requirements: 34_
 
-- [ ] 118. Document CodeRabbit in README
+- [x] 118. Document CodeRabbit in README
   - Update README.md with "Development Tools" section
   - Add CodeRabbit mention with description
   - Include screenshots of CodeRabbit reviews

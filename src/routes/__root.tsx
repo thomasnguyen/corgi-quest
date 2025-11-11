@@ -2,11 +2,16 @@ import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ConvexProvider } from "convex/react";
+import * as Sentry from "@sentry/react";
 
 import { convex } from "../lib/convex";
 import { ToastProvider } from "../contexts/ToastContext";
+import { initSentry } from "../lib/sentry";
 
-import appCss from "../styles.css?url";
+import "../styles.css";
+
+// Initialize Sentry as early as possible
+initSentry();
 
 export const Route = createRootRoute({
   head: () => ({
@@ -23,10 +28,6 @@ export const Route = createRootRoute({
       },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
       {
         rel: "preload",
         as: "image",
@@ -45,22 +46,53 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ConvexProvider client={convex}>
-          <ToastProvider>
-            {children}
-            {/*  <TanStackDevtools
-              config={{
-                position: "bottom-right",
-              }}
-              plugins={[
-                {
-                  name: "Tanstack Router",
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-              ]}
-            /> */}
-          </ToastProvider>
-        </ConvexProvider>
+        <Sentry.ErrorBoundary
+          fallback={({ error, resetError }) => {
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error occurred";
+            return (
+              <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+                <div className="max-w-md w-full text-center">
+                  <h1 className="text-2xl font-bold mb-4">
+                    Oops! Something went wrong
+                  </h1>
+                  <p className="text-gray-400 mb-6">
+                    We've been notified and are working on a fix.
+                  </p>
+                  <div className="bg-gray-900 p-4 rounded-lg mb-6 text-left">
+                    <p className="text-sm text-red-400 font-mono break-all">
+                      {errorMessage}
+                    </p>
+                  </div>
+                  <button
+                    onClick={resetError}
+                    className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            );
+          }}
+          showDialog={false}
+        >
+          <ConvexProvider client={convex}>
+            <ToastProvider>
+              {children}
+              {/*  <TanStackDevtools
+                config={{
+                  position: "bottom-right",
+                }}
+                plugins={[
+                  {
+                    name: "Tanstack Router",
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                ]}
+              /> */}
+            </ToastProvider>
+          </ConvexProvider>
+        </Sentry.ErrorBoundary>
         <Scripts />
       </body>
     </html>
