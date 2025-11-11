@@ -9,6 +9,7 @@ import MoodPicker, { MoodType } from "../components/mood/MoodPicker";
 import { useToast } from "../contexts/ToastContext";
 import { useState, useMemo } from "react";
 import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
+import { Smile } from "lucide-react";
 
 export const Route = createFileRoute("/activity")({
   component: ActivityPage,
@@ -195,7 +196,7 @@ function ActivityPage() {
             onClick={() => setShowMoodPicker(true)}
             className="bg-[#f5c35f] text-[#121216] py-2 px-4 rounded-lg font-medium hover:bg-[#f5c35f]/90 transition-colors flex items-center justify-center gap-2 text-sm"
           >
-            <span className="text-base">😊</span>
+            <Smile className="w-4 h-4" strokeWidth={2} />
             <span>LOG MOOD</span>
           </button>
         </div>

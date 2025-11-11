@@ -11,7 +11,7 @@ import type { RealtimeMessage } from "../../hooks/useOpenAIRealtime";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { Toast } from "../ui/Toast";
+import { useToast } from "../../contexts/ToastContext";
 import { useNavigate } from "@tanstack/react-router";
 import { Mic, MicOff, Eye, X } from "lucide-react";
 
@@ -110,8 +110,9 @@ export function RealtimeVoiceInterface({
   const [savedActivity, setSavedActivity] = useState<SavedActivityInfo | null>(
     null
   );
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+
+  // Use ToastContext instead of local state
+  const { showToast: showToastNotification } = useToast();
 
   // Dynamically load CircularWaveform only on client side
   // Use a ref to store the component to avoid state updates triggering renders
@@ -651,27 +652,20 @@ export function RealtimeVoiceInterface({
         levelUps: result.levelUps,
       });
 
-      // Show toast notification
-      setToastMessage(`Activity logged! +${result.totalXpGained} XP earned`);
-      setShowToast(true);
+      // Show toast notification - combine activity and level-ups into one message
+      let toastMessage = `Activity logged! +${result.totalXpGained} XP earned`;
 
-      // Show level-up toasts for each level-up
       if (result.levelUps && result.levelUps.length > 0) {
-        result.levelUps.forEach((levelUp, index) => {
-          // Delay each toast slightly to stack them nicely
-          setTimeout(
-            () => {
-              const statName =
-                levelUp.statType === "OVERALL" ? "Overall" : levelUp.statType;
-              setToastMessage(
-                `🎉 ${statName} leveled up to ${levelUp.newLevel}!`
-              );
-              setShowToast(true);
-            },
-            (index + 1) * 500
-          ); // 500ms delay between each level-up toast
+        const levelUpMessages = result.levelUps.map((levelUp) => {
+          const statName =
+            levelUp.statType === "OVERALL" ? "Overall" : levelUp.statType;
+          return `${statName} → L${levelUp.newLevel}`;
         });
+        toastMessage += ` | 🎉 ${levelUpMessages.join(", ")}`;
       }
+
+      // Show single toast to prevent duplicates
+      showToastNotification(toastMessage, "success");
 
       // Send success response back to OpenAI
       sendMessage({
@@ -1071,15 +1065,6 @@ export function RealtimeVoiceInterface({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[500px] p-6">
-      {/* Toast Notification */}
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          level="success"
-          onDismiss={() => setShowToast(false)}
-        />
-      )}
-
       {/* Success Confirmation Card */}
       {savedActivity && (
         <div className="w-full max-w-md mb-8 p-6 bg-[#1a1a1e] border-2 border-[#f5c35f] rounded-lg animate-slide-in">

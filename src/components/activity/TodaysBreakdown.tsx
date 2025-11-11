@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Id } from "../../../convex/_generated/dataModel";
+import { Dumbbell, Brain } from "lucide-react";
 
 interface Activity {
   _id: Id<"activities">;
@@ -88,7 +89,7 @@ export default function TodaysBreakdown({
           {/* Physical column */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💪</span>
+              <Dumbbell className="w-5 h-5 text-[#f5c35f]" strokeWidth={2} />
               <h3 className="text-sm font-semibold text-[#feefd0]">
                 Physical ({totalPhysical} pts)
               </h3>
@@ -124,7 +125,7 @@ export default function TodaysBreakdown({
           {/* Mental column */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🧠</span>
+              <Brain className="w-5 h-5 text-[#f5c35f]" strokeWidth={2} />
               <h3 className="text-sm font-semibold text-[#feefd0]">
                 Mental ({totalMental} pts)
               </h3>
