@@ -938,13 +938,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Configure automatic deployments from main branch in Netlify dashboard
   - _Requirements: 30_
 
-- [ ] *104. Add Netlify badge to footer
-  - Update footer component (or create if doesn't exist)
-  - Add "Deployed on Netlify" badge with Netlify logo
-  - Link badge to Netlify website
-  - Style badge to match app design (black/white theme)
-  - Test badge appears on all screens
-  - _Requirements: 30_
+
 
 ### Cloudflare Integration (Est. 1.5 hr total)
 
@@ -1028,7 +1022,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test error reporting by triggering a test error
   - _Requirements: 33_
 
-- [-] 114. Add Sentry error boundaries
+- [x] 114. Add Sentry error boundaries
   - Wrap app with Sentry ErrorBoundary component
   - Configure fallback UI for caught errors
   - Test error boundary catches and reports errors
@@ -1072,8 +1066,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Display "Thanks for Playing Corgi Quest!" header
   - Display Bumi image or animation
   - Display "Tip Corgi Quest Pro" section
-  - Add "Powered by Autumn" mention
-  - Style page to match app design (black/white theme)
+  - Style page to match app design 
   - _Requirements: 35_
 
 - [ ] 120. Integrate Autumn sandbox checkout
@@ -1094,12 +1087,6 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test trigger appears at appropriate times
   - _Requirements: 35_
 
-- [ ] 122. Add Autumn mention to footer
-  - Update footer component
-  - Add "Payments by Autumn" text or logo
-  - Link to Autumn website
-  - Style to match app design
-  - _Requirements: 35_
 
 ---
 

@@ -1,9 +1,9 @@
 # Fix Deployment Issues - Quick Guide
 
 ## The Problem
-Your site is stuck on "Loading..." with no CSS because **environment variables aren't set in Netlify**.
+Your site has 404 errors for assets because **Netlify is serving a cached/incomplete build** and environment variables aren't set.
 
-## The Solution - 3 Steps
+## The Solution - 4 Steps
 
 ### Step 1: Set Environment Variables in Netlify
 
@@ -24,15 +24,22 @@ OPENAI_API_KEY = [Your OpenAI API key from .env.local]
 
 ⚠️ **IMPORTANT**: Make sure the variable name is exactly `VITE_CONVEX_URL` (not `CONVEX_URL`)
 
-### Step 2: Trigger a Redeploy
+### Step 2: Clear Deploy Cache
 
-After adding the environment variables:
+1. Go to **Site settings** → **Build & deploy** → **Build settings**
+2. Scroll down and click **Clear cache and retry deploy**
+3. OR: Click **Trigger deploy** → **Clear cache and deploy site**
+
+### Step 3: Trigger a Fresh Deploy
+
+After clearing cache:
 
 1. Go to **Deploys** tab
 2. Click **Trigger deploy** → **Deploy site**
 3. Wait for build to complete (2-3 minutes)
+4. Watch the build logs - should see "Nitro Server built" at the end
 
-### Step 3: Verify It Works
+### Step 4: Verify It Works
 
 1. Open your Netlify site URL
 2. Open browser DevTools (F12) → Console tab
