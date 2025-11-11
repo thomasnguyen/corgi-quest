@@ -1,6 +1,10 @@
 // Client-only wrapper for RealtimeVoiceInterface
-// This ensures the component is never analyzed or bundled in the server function
+// This component uses dynamic imports to prevent server bundling
 "use client";
 
-export { RealtimeVoiceInterface } from "./RealtimeVoiceInterface";
+import { lazy } from "react";
 
+// Dynamically import the actual component - this prevents it from being bundled in server functions
+export const RealtimeVoiceInterface = lazy(
+  () => import("./RealtimeVoiceInterface").then((mod) => ({ default: mod.RealtimeVoiceInterface }))
+);

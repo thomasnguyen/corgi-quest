@@ -11,6 +11,10 @@
   SECRETS_SCAN_OMIT_KEYS = "VITE_CONVEX_URL"
   SECRETS_SCAN_OMIT_PATHS = "TASK_92_TESTING.md,.netlify/functions-internal/**"
 
+[functions]
+  # Use esbuild for better ESM support in Netlify Functions
+  node_bundler = "esbuild"
+
 # Note: Nitro handles redirects automatically via dist/_redirects
 
 # Headers for security and performance
