@@ -1,8 +1,8 @@
 // NO TOP-LEVEL IMPORT - This prevents server bundling
 // CircularWaveform will be dynamically imported inside the component
 
+import React, { useEffect, useState, useRef } from "react";
 import { useOpenAIRealtime } from "../../hooks/useOpenAIRealtime";
-import { useEffect, useState, useRef } from "react";
 import {
   OPENAI_SYSTEM_INSTRUCTIONS,
   SAVE_ACTIVITY_FUNCTION_DEFINITION,
@@ -10,6 +10,7 @@ import {
 import type { RealtimeMessage } from "../../hooks/useOpenAIRealtime";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { Toast } from "../ui/Toast";
 import { useNavigate } from "@tanstack/react-router";
 import { Mic, MicOff, Eye, X } from "lucide-react";
@@ -51,7 +52,7 @@ interface RealtimeVoiceInterfaceProps {
   questName?: string;
   onActivitySaved?: (activityId: string) => void;
   onError?: (error: Error) => void;
-  userId?: string; // Selected character ID
+  userId?: Id<"users">; // Selected character ID
 }
 
 interface SaveActivityParams {
@@ -113,14 +114,15 @@ export function RealtimeVoiceInterface({
   const [toastMessage, setToastMessage] = useState("");
 
   // Dynamically load CircularWaveform only on client side
-  const [CircularWaveform, setCircularWaveform] = useState<any>(null);
+  const [CircularWaveform, setCircularWaveform] =
+    useState<React.ComponentType<any> | null>(null);
 
   useEffect(() => {
     // Only import on client side to prevent server bundling
     if (typeof window !== "undefined") {
       import("@pipecat-ai/voice-ui-kit")
         .then((mod) => {
-          setCircularWaveform(() => mod.CircularWaveform);
+          setCircularWaveform(mod.CircularWaveform);
         })
         .catch((err) => {
           console.error("Failed to load CircularWaveform:", err);

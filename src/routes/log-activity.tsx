@@ -6,7 +6,7 @@ import Layout from "../components/layout/Layout";
 import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
 
 // Dynamically import the client-only wrapper to avoid bundling browser-only deps in server function
-// The .client.tsx extension and "use client" directive ensure this is never bundled in server functions
+// Single lazy load - the .client.tsx wrapper ensures it's never bundled in server functions
 const RealtimeVoiceInterface = lazy(
   () =>
     import("../components/voice/RealtimeVoiceInterface.client").then((mod) => ({
