@@ -32,6 +32,21 @@ const config = defineConfig({
       include: [/node_modules/],
     },
   },
+  ssr: {
+    // Exclude browser-only packages from SSR bundle
+    // These packages use browser APIs and CommonJS modules that don't work in serverless functions
+    noExternal: [
+      // Keep these packages bundled for client, but exclude from server
+    ],
+    external: [
+      "@pipecat-ai/client-js",
+      "@pipecat-ai/client-react",
+      "@pipecat-ai/voice-ui-kit",
+      "@pipecat-ai/daily-transport",
+      "@pipecat-ai/small-webrtc-transport",
+      "@daily-co/daily-js",
+    ],
+  },
   server: {
     headers: {
       "Cache-Control": "no-cache, no-store, must-revalidate",

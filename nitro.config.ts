@@ -9,4 +9,6 @@ export default defineNitroConfig({
       dir: "public",
     },
   ],
+  // Note: Browser-only packages are excluded via Vite SSR config
+  // to prevent CommonJS/ESM import issues in serverless functions
 });
