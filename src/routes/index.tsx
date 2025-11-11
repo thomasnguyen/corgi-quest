@@ -8,6 +8,16 @@ import LogActivityButton from "../components/layout/LogActivityButton";
 import TopResourceBar from "../components/layout/TopResourceBar";
 import { ProgressBar } from "../components/ui/ProgressBar";
 
+// Preload background images for faster loading
+function preloadImage(src: string) {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  link.href = src;
+  link.setAttribute("fetchpriority", "high");
+  document.head.appendChild(link);
+}
+
 export const Route = createFileRoute("/")({
   component: OverviewPage,
 });
@@ -75,6 +85,13 @@ function OverviewPage() {
   const backgroundImage = equippedItem?.item?.itemType === "moon" 
     ? "/mage_bg.png" 
     : "/smoke_bg.svg";
+
+  // Preload the background image for faster rendering
+  useEffect(() => {
+    if (backgroundImage) {
+      preloadImage(backgroundImage);
+    }
+  }, [backgroundImage]);
 
   return (
     <Layout>

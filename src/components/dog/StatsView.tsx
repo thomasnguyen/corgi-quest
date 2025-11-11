@@ -78,6 +78,7 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
             <img
               src="/Border.svg"
               alt=""
+              loading="lazy"
               className="absolute inset-0 w-full h-full object-contain"
             />
             {/* Portrait placeholder */}
@@ -85,6 +86,7 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
               <img
                 src={equippedItem?.item?.itemType === "moon" ? "/mage_avatar.png" : "/default_avatar.png"}
                 alt={dog.name}
+                fetchPriority="high"
                 className="w-full h-full object-cover"
               />
             </div>

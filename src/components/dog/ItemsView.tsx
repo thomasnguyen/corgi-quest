@@ -94,6 +94,7 @@ export default function ItemsView({ dog }: ItemsViewProps) {
             <img
               src="/Border.svg"
               alt=""
+              loading="lazy"
               className="absolute inset-0 w-full h-full object-contain"
             />
             {/* Portrait - shows equipped item or base portrait */}
@@ -102,18 +103,21 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                 <img
                   src="/mage_avatar.png"
                   alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                  fetchPriority="high"
                   className="w-full h-full object-cover"
                 />
               ) : equippedItem?.generatedImageUrl ? (
                 <img
                   src={equippedItem.generatedImageUrl}
                   alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                  fetchPriority="high"
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <img
                   src="/default_avatar.png"
                   alt={dog.name}
+                  fetchPriority="high"
                   className="w-full h-full object-cover"
                 />
               )}
@@ -133,36 +137,42 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                     <img
                       src="/fire_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : equippedItem.item.itemType === "water" ? (
                     <img
                       src="/water_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : equippedItem.item.itemType === "grass" ? (
                     <img
                       src="/grass_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : equippedItem.item.itemType === "sun" ? (
                     <img
                       src="/sun_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : equippedItem.item.itemType === "ground" ? (
                     <img
                       src="/earth_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : equippedItem.item.itemType === "moon" ? (
                     <img
                       src="/moon_emblem.svg"
                       alt={equippedItem.item.name}
+                      loading="lazy"
                       className="w-4 h-4"
                     />
                   ) : (

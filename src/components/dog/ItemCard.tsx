@@ -77,36 +77,42 @@ export default function ItemCard({
           <img
             src="/fire_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : itemType === "water" ? (
           <img
             src="/water_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : itemType === "grass" ? (
           <img
             src="/grass_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : itemType === "sun" ? (
           <img
             src="/sun_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : itemType === "ground" ? (
           <img
             src="/earth_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : itemType === "moon" ? (
           <img
             src="/moon_emblem.svg"
             alt={name}
+            loading="lazy"
             className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
           />
         ) : (

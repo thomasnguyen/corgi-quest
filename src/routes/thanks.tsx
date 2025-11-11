@@ -107,6 +107,7 @@ function ThanksPage() {
               <img
                 src="/summon.png"
                 alt="Bumi"
+                loading="lazy"
                 className="w-48 h-48 object-contain"
               />
             </div>

@@ -33,6 +33,7 @@ export default function Header() {
             <img
               src="/tanstack-word-logo-white.svg"
               alt="TanStack Logo"
+              loading="lazy"
               className="h-10"
             />
           </Link>

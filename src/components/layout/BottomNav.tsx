@@ -45,7 +45,7 @@ export default function BottomNav() {
                         : "drop-shadow(0 0 0px rgba(245, 195, 95, 0))",
                     }}
                   >
-                    <img src={tab.image} alt={tab.name} />
+                    <img src={tab.image} alt={tab.name} loading="eager" fetchPriority="high" />
                   </div>
                 </div>
               </div>

@@ -67,6 +67,8 @@ export default function CharacterCard({
       <img
         src={avatarUrl}
         alt={name}
+        loading="eager"
+        fetchPriority="high"
         className="relative w-full h-full object-cover z-0"
       />
     </div>
@@ -84,6 +86,8 @@ export default function CharacterCard({
             <img
               src={avatarUrl}
               alt={name}
+              loading="eager"
+              fetchPriority="high"
               className="w-full h-full object-cover"
             />
           ) : (
