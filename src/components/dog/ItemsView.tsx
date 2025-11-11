@@ -100,12 +100,15 @@ export default function ItemsView({ dog }: ItemsViewProps) {
             {/* Portrait - shows equipped item or base portrait */}
             <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
               {equippedItem?.item?.itemType === "moon" ? (
-                <img
-                  src="/mage_avatar.png"
-                  alt={`${dog.name} wearing ${equippedItem.item.name}`}
-                  fetchPriority="high"
-                  className="w-full h-full object-cover"
-                />
+                <picture>
+                  <source srcSet="/mage_avatar.webp" type="image/webp" />
+                  <img
+                    src="/mage_avatar.png"
+                    alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                    fetchPriority="high"
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
               ) : equippedItem?.generatedImageUrl ? (
                 <img
                   src={equippedItem.generatedImageUrl}
@@ -114,12 +117,15 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <img
-                  src="/default_avatar.png"
-                  alt={dog.name}
-                  fetchPriority="high"
-                  className="w-full h-full object-cover"
-                />
+                <picture>
+                  <source srcSet="/default_avatar.webp" type="image/webp" />
+                  <img
+                    src="/default_avatar.png"
+                    alt={dog.name}
+                    fetchPriority="high"
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
               )}
             </div>
           </div>

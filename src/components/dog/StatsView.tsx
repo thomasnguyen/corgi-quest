@@ -83,12 +83,27 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
             />
             {/* Portrait placeholder */}
             <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
-              <img
-                src={equippedItem?.item?.itemType === "moon" ? "/mage_avatar.png" : "/default_avatar.png"}
-                alt={dog.name}
-                fetchPriority="high"
-                className="w-full h-full object-cover"
-              />
+              {equippedItem?.item?.itemType === "moon" ? (
+                <picture>
+                  <source srcSet="/mage_avatar.webp" type="image/webp" />
+                  <img
+                    src="/mage_avatar.png"
+                    alt={dog.name}
+                    fetchPriority="high"
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
+              ) : (
+                <picture>
+                  <source srcSet="/default_avatar.webp" type="image/webp" />
+                  <img
+                    src="/default_avatar.png"
+                    alt={dog.name}
+                    fetchPriority="high"
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
+              )}
             </div>
           </div>
 

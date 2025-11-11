@@ -30,12 +30,16 @@ export default function Header() {
         </button>
         <h1 className="ml-4 text-xl font-semibold">
           <Link to="/">
-            <img
-              src="/tanstack-word-logo-white.svg"
-              alt="TanStack Logo"
-              loading="lazy"
-              className="h-10"
-            />
+            <picture>
+              <source srcSet="/favicon.webp" type="image/webp" />
+              <img
+                src="/favicon.png"
+                alt="Corgi Quest"
+                loading="eager"
+                fetchPriority="high"
+                className="h-12 w-12"
+              />
+            </picture>
           </Link>
         </h1>
       </header>

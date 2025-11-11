@@ -104,12 +104,15 @@ function ThanksPage() {
           <div className="flex justify-center mb-8">
             <div className="relative">
               {/* Using the summon.png image as Bumi representation */}
-              <img
-                src="/summon.png"
-                alt="Bumi"
-                loading="lazy"
-                className="w-48 h-48 object-contain"
-              />
+              <picture>
+                <source srcSet="/summon.webp" type="image/webp" />
+                <img
+                  src="/summon.png"
+                  alt="Bumi"
+                  loading="lazy"
+                  className="w-48 h-48 object-contain"
+                />
+              </picture>
             </div>
           </div>
 

@@ -50,12 +50,23 @@ export const Route = createRootRoute({
         href: "/favicon.png",
       },
       {
+        rel: "icon",
+        type: "image/webp",
+        href: "/favicon.webp",
+      },
+      {
         rel: "manifest",
         href: "/manifest.json",
       },
       {
         rel: "apple-touch-icon",
         href: "/logo192.png",
+        sizes: "192x192",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/logo512.png",
+        sizes: "512x512",
       },
       {
         rel: "preload",
@@ -66,19 +77,19 @@ export const Route = createRootRoute({
       {
         rel: "preload",
         as: "image",
-        href: "/mage_bg.png",
+        href: "/mage_bg.webp",
         fetchPriority: "high",
       },
       {
         rel: "preload",
         as: "image",
-        href: "/default_avatar.png",
+        href: "/default_avatar.webp",
         fetchPriority: "high",
       },
       {
         rel: "preload",
         as: "image",
-        href: "/mage_avatar.png",
+        href: "/mage_avatar.webp",
         fetchPriority: "high",
       },
     ],

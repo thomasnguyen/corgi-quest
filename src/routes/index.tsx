@@ -83,6 +83,11 @@ function OverviewPage() {
 
   // Determine background based on equipped item
   const backgroundImage = equippedItem?.item?.itemType === "moon" 
+    ? "/mage_bg.webp" 
+    : "/smoke_bg.svg";
+  
+  // Fallback for browsers that don't support WebP
+  const backgroundImageFallback = equippedItem?.item?.itemType === "moon" 
     ? "/mage_bg.png" 
     : "/smoke_bg.svg";
 
@@ -90,14 +95,20 @@ function OverviewPage() {
   useEffect(() => {
     if (backgroundImage) {
       preloadImage(backgroundImage);
+      // Also preload fallback for non-WebP browsers
+      if (backgroundImageFallback && backgroundImage !== backgroundImageFallback) {
+        preloadImage(backgroundImageFallback);
+      }
     }
-  }, [backgroundImage]);
+  }, [backgroundImage, backgroundImageFallback]);
 
   return (
     <Layout>
       <div 
         className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
-        style={{ backgroundImage: `url('${backgroundImage}')` }}
+        style={{ 
+          backgroundImage: `url('${backgroundImage}'), url('${backgroundImageFallback}')` 
+        }}
       >
         {/* Content */}
         <div className="relative z-10 pb-32">
