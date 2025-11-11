@@ -47,7 +47,7 @@ export default function StatsView({ dog, stats }: StatsViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#121216] pb-32 pt-4 px-4">
+    <div className="min-h-screen pb-32 pt-4 px-4">
       <div className="max-w-md mx-auto space-y-6">
         {/* Dog Portrait Section */}
         <div className="text-center">
@@ -59,7 +59,6 @@ export default function StatsView({ dog, stats }: StatsViewProps) {
           {/* Dog Name and Level */}
           <h2
             className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent mb-2"
-            style={{ fontFamily: "serif" }}
           >
             {dog.name}
           </h2>

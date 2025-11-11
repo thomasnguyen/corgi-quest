@@ -158,10 +158,7 @@ function ActivityPage() {
     return (
       <Layout>
         <div className="min-h-screen bg-[#121216] p-6">
-          <h1
-            className="text-3xl font-bold mb-6 bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
-            style={{ fontFamily: "serif" }}
-          >
+          <h1 className="text-3xl font-bold mb-6 bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent">
             ACTIVITY FEED
           </h1>
           <div className="flex items-center justify-center mt-20">
@@ -180,10 +177,7 @@ function ActivityPage() {
   return (
     <Layout>
       <div className="min-h-screen bg-[#121216] p-6 pb-32">
-        <h1
-          className="text-3xl font-bold mb-6 bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
-          style={{ fontFamily: "serif" }}
-        >
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent">
           ACTIVITY FEED
         </h1>
 

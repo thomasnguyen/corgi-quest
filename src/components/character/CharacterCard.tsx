@@ -57,7 +57,6 @@ export default function CharacterCard({
         <h2
           className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
           style={{
-            fontFamily: "serif",
             filter:
               "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.2)) drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))",
           }}

@@ -163,7 +163,6 @@ function StatDetailPage() {
                   className="text-3xl font-bold text-[#fcd587]"
                   style={{
                     textShadow: "0px 1px 1px #1e1e1e",
-                    fontFamily: "serif",
                   }}
                 >
                   {statName}

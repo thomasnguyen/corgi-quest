@@ -35,7 +35,7 @@ export default function BottomNav() {
               </div>
 
               {/* Label */}
-              <span style={{ fontFamily: "serif", color: "#F5C35F" }}>
+              <span style={{ color: "#F5C35F" }}>
                 {tab.name}
               </span>
             </Link>

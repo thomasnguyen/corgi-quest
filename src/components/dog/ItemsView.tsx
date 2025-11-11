@@ -67,7 +67,7 @@ export default function ItemsView({ dog }: ItemsViewProps) {
   // Loading state
   if (allItems === undefined || equippedItem === undefined) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#121216]">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f5c35f] border-t-transparent"></div>
           <p className="mt-4 text-[#f9dca0] text-sm">Loading items...</p>
@@ -84,12 +84,12 @@ export default function ItemsView({ dog }: ItemsViewProps) {
   const equippedItemId = equippedItem?.itemId;
 
   return (
-    <div className="min-h-screen bg-[#121216] pb-32 pt-4 px-4">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen pb-32 pt-4 px-4">
+      <div className="max-w-md mx-auto space-y-4">
         {/* Dog Portrait Section */}
         <div className="text-center">
           {/* Portrait - shows equipped item or base portrait */}
-          <div className="w-48 h-48 mx-auto mb-4 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border-2 border-[#D4AF37] flex items-center justify-center overflow-hidden">
+          <div className="w-32 h-32 mx-auto mb-3 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border-2 border-[#D4AF37] flex items-center justify-center overflow-hidden">
             {equippedItem?.generatedImageUrl ? (
               <img
                 src={equippedItem.generatedImageUrl}
@@ -97,21 +97,62 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="text-6xl">🐕</div>
+              <div className="text-4xl">🐕</div>
             )}
           </div>
 
           {/* Currently Wearing */}
-          <div className="mb-6">
+          <div className="mb-4">
             <p className="text-[#888] text-sm mb-1">Currently Wearing</p>
             <p className="text-white font-semibold">
               {equippedItem ? equippedItem.item.name : "Nothing"}
             </p>
             {equippedItem && (
               <>
-                <p className="text-[#f5c35f] text-xs mt-1">
-                  {equippedItem.item.icon} {equippedItem.item.description}
-                </p>
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  {equippedItem.item.itemType === "fire" ? (
+                    <img
+                      src="/fire_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : equippedItem.item.itemType === "water" ? (
+                    <img
+                      src="/water_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : equippedItem.item.itemType === "grass" ? (
+                    <img
+                      src="/grass_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : equippedItem.item.itemType === "sun" ? (
+                    <img
+                      src="/sun_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : equippedItem.item.itemType === "ground" ? (
+                    <img
+                      src="/earth_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : equippedItem.item.itemType === "moon" ? (
+                    <img
+                      src="/moon_emblem.svg"
+                      alt={equippedItem.item.name}
+                      className="w-4 h-4"
+                    />
+                  ) : (
+                    <span className="text-[#f5c35f]">{equippedItem.item.icon}</span>
+                  )}
+                  <p className="text-[#f5c35f] text-xs">
+                    {equippedItem.item.description}
+                  </p>
+                </div>
                 {/* Unequip Button */}
                 <button
                   onClick={handleUnequip}
@@ -128,10 +169,10 @@ export default function ItemsView({ dog }: ItemsViewProps) {
         {/* Unlocked Items Section */}
         {unlockedItems.length > 0 && (
           <div>
-            <h3 className="text-white text-center text-sm font-semibold uppercase tracking-wide mb-4">
+            <h3 className="text-white text-center text-xs font-semibold uppercase tracking-wide mb-3">
               Unlocked Items ({unlockedItems.length})
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               {unlockedItems.map((item) => (
                 <ItemCard
                   key={item._id}
@@ -139,6 +180,7 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                   name={item.name}
                   description={item.description}
                   icon={item.icon}
+                  itemType={item.itemType}
                   unlockLevel={item.unlockLevel}
                   isUnlocked={true}
                   isEquipped={item._id === equippedItemId}
@@ -155,10 +197,10 @@ export default function ItemsView({ dog }: ItemsViewProps) {
         {/* Locked Items Section */}
         {lockedItems.length > 0 && (
           <div>
-            <h3 className="text-white text-center text-sm font-semibold uppercase tracking-wide mb-4">
+            <h3 className="text-white text-center text-xs font-semibold uppercase tracking-wide mb-3">
               Locked Items ({lockedItems.length})
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               {lockedItems.map((item) => (
                 <ItemCard
                   key={item._id}
@@ -166,6 +208,7 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                   name={item.name}
                   description={item.description}
                   icon={item.icon}
+                  itemType={item.itemType}
                   unlockLevel={item.unlockLevel}
                   isUnlocked={false}
                   isEquipped={false}

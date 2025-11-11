@@ -5,6 +5,7 @@ interface ItemCardProps {
   name: string;
   description: string;
   icon: string;
+  itemType?: string;
   unlockLevel: number;
   isUnlocked: boolean;
   isEquipped: boolean;
@@ -24,6 +25,7 @@ export default function ItemCard({
   name,
   description,
   icon,
+  itemType,
   unlockLevel,
   isUnlocked,
   isEquipped,
@@ -40,7 +42,7 @@ export default function ItemCard({
 
   return (
     <div
-      className={`relative bg-[#1a1a1e]/80 backdrop-blur-sm border rounded-lg p-4 transition-all duration-200 ${
+      className={`relative bg-[#1a1a1e]/80 backdrop-blur-sm border rounded-lg p-2 transition-all duration-200 ${
         isUnlocked
           ? isEquipped
             ? "border-[#f5c35f] bg-[#f5c35f]/10"
@@ -50,35 +52,73 @@ export default function ItemCard({
     >
       {/* Currently Equipped Badge */}
       {isEquipped && (
-        <div className="absolute top-2 right-2 bg-[#f5c35f] text-[#121216] text-xs font-bold px-2 py-1 rounded">
+        <div className="absolute top-1 right-1 bg-[#f5c35f] text-[#121216] text-[10px] font-bold px-1.5 py-0.5 rounded">
           EQUIPPED
         </div>
       )}
 
       {/* New Badge */}
       {!isEquipped && isUnlocked && isNew && (
-        <div className="absolute top-2 right-2 bg-gradient-to-r from-[#ff6b6b] to-[#ff8e53] text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
+        <div className="absolute top-1 right-1 bg-gradient-to-r from-[#ff6b6b] to-[#ff8e53] text-white text-[10px] font-bold px-1.5 py-0.5 rounded animate-pulse">
           NEW!
         </div>
       )}
 
       {/* Locked Badge */}
       {!isUnlocked && (
-        <div className="absolute top-2 right-2 bg-[#3d3d3d] text-[#888] text-xs font-bold px-2 py-1 rounded">
+        <div className="absolute top-1 right-1 bg-[#3d3d3d] text-[#888] text-[10px] font-bold px-1.5 py-0.5 rounded">
           LOCKED
         </div>
       )}
 
       {/* Item Icon */}
-      <div className="flex justify-center mb-3">
-        <div className={`text-5xl ${isUnlocked ? "" : "grayscale opacity-50"}`}>
-          {icon}
-        </div>
+      <div className="flex justify-center mb-2">
+        {itemType === "fire" ? (
+          <img
+            src="/fire_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : itemType === "water" ? (
+          <img
+            src="/water_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : itemType === "grass" ? (
+          <img
+            src="/grass_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : itemType === "sun" ? (
+          <img
+            src="/sun_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : itemType === "ground" ? (
+          <img
+            src="/earth_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : itemType === "moon" ? (
+          <img
+            src="/moon_emblem.svg"
+            alt={name}
+            className={`w-8 h-8 ${isUnlocked ? "" : "grayscale opacity-50"}`}
+          />
+        ) : (
+          <div className={`text-3xl ${isUnlocked ? "" : "grayscale opacity-50"}`}>
+            {icon}
+          </div>
+        )}
       </div>
 
       {/* Item Name */}
       <h3
-        className={`font-semibold text-center mb-2 ${
+        className={`font-semibold text-center mb-1 text-xs ${
           isUnlocked ? "text-white" : "text-[#888]"
         }`}
       >
@@ -87,7 +127,7 @@ export default function ItemCard({
 
       {/* Item Description */}
       <p
-        className={`text-sm text-center mb-3 ${
+        className={`text-[10px] text-center mb-2 leading-tight ${
           isUnlocked ? "text-[#f9dca0]" : "text-[#666]"
         }`}
       >
@@ -97,27 +137,26 @@ export default function ItemCard({
       {/* Unlock Requirement or Equip Button */}
       {!isUnlocked ? (
         <div className="text-center">
-          <span className="inline-block bg-[#3d3d3d]/50 text-[#888] text-xs font-mono font-bold px-3 py-1.5 rounded">
-            UNLOCK AT LVL {unlockLevel}
+          <span className="inline-block bg-[#3d3d3d]/50 text-[#888] text-[10px] font-mono font-bold px-2 py-1 rounded">
+            LVL {unlockLevel}
           </span>
           {currentLevel < unlockLevel && (
-            <p className="text-[#666] text-xs mt-2">
-              {unlockLevel - currentLevel} level
-              {unlockLevel - currentLevel !== 1 ? "s" : ""} to go
+            <p className="text-[#666] text-[9px] mt-1">
+              {unlockLevel - currentLevel} to go
             </p>
           )}
         </div>
       ) : isEquipped ? (
         <div className="text-center">
-          <span className="inline-block text-[#f5c35f] text-sm font-medium">
-            ✓ Currently Wearing
+          <span className="inline-block text-[#f5c35f] text-[10px] font-medium">
+            ✓ Wearing
           </span>
         </div>
       ) : (
         <button
           onClick={handleEquip}
           disabled={isLoading}
-          className="w-full bg-[#f5c35f] text-[#121216] py-2 rounded-lg font-semibold hover:bg-[#f5c35f]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#f5c35f] text-[#121216] py-1.5 rounded text-[11px] font-semibold hover:bg-[#f5c35f]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Equipping..." : "Equip"}
         </button>

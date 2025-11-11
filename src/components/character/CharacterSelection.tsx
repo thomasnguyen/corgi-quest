@@ -61,12 +61,7 @@ export default function CharacterSelection() {
       <div className="min-h-screen bg-[url('/smoke_spark_bg.svg')] bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
         <div className="max-w-md mx-auto">
           {/* Title */}
-          <h1
-            className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent text-center mb-2"
-            style={{
-              fontFamily: "serif",
-            }}
-          >
+          <h1 className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent text-center mb-2">
             Choose Your Character
           </h1>
           <p

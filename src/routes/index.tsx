@@ -74,7 +74,7 @@ function OverviewPage() {
           <TopResourceBar />
 
           {/* Dog Name and Level */}
-          <div className="text-center mt-2 mb-2">
+          <div className="text-center mt-2">
             <p
               className="text-[#feefd0] text-sm mb-1"
               style={{ textShadow: "0px 1px 1px #1e1e1e" }}
@@ -84,7 +84,6 @@ function OverviewPage() {
             <h1
               className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
               style={{
-                fontFamily: "serif",
                 color: "linear-gradient(180deg, #FEEFD0 0%, #FCD587 100%)",
               }}
             >
