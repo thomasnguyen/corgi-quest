@@ -114,73 +114,115 @@ export function RealtimeVoiceInterface({
   const [toastMessage, setToastMessage] = useState("");
 
   // Dynamically load CircularWaveform only on client side
-  const [CircularWaveform, setCircularWaveform] =
-    useState<React.ComponentType<any> | null>(null);
+  // Use a ref to store the component to avoid state updates triggering renders
+  const circularWaveformRef = useRef<React.ComponentType<any> | null>(null);
+  const [circularWaveformLoaded, setCircularWaveformLoaded] = useState(false);
 
   useEffect(() => {
     // Only import on client side to prevent server bundling
     if (typeof window !== "undefined") {
       import("@pipecat-ai/voice-ui-kit")
         .then((mod) => {
-          setCircularWaveform(mod.CircularWaveform);
+          // Verify the component exists and is a valid React component
+          if (
+            mod &&
+            mod.CircularWaveform &&
+            typeof mod.CircularWaveform === "function"
+          ) {
+            // Store in ref to avoid triggering re-renders
+            circularWaveformRef.current = mod.CircularWaveform;
+            // Add a small delay to ensure the component is fully initialized
+            setTimeout(() => {
+              setCircularWaveformLoaded(true);
+            }, 100);
+          } else {
+            console.error("CircularWaveform is not a valid component");
+          }
         })
         .catch((err) => {
           console.error("Failed to load CircularWaveform:", err);
+          circularWaveformRef.current = null;
+          setCircularWaveformLoaded(false);
         });
     }
   }, []);
 
   // State to track if we can safely render the waveform
   const [isWaveformReady, setIsWaveformReady] = useState(false);
-  const waveformReadyRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Determine if CircularWaveform can be safely rendered
   useEffect(() => {
-    // Only check on client side
-    if (typeof window === "undefined") {
+    // Only check on client side after mount
+    if (!mounted || typeof window === "undefined") {
       setIsWaveformReady(false);
-      waveformReadyRef.current = false;
       return;
     }
 
-    if (!CircularWaveform || !audioTrack) {
+    if (
+      !circularWaveformRef.current ||
+      !circularWaveformLoaded ||
+      !audioTrack
+    ) {
       setIsWaveformReady(false);
-      waveformReadyRef.current = false;
       return;
     }
 
     // Check that audioTrack is in a valid state (must be "live")
     if (audioTrack.readyState !== "live") {
       setIsWaveformReady(false);
-      waveformReadyRef.current = false;
       return;
     }
 
-    // Validate that audioTrack has valid settings (CircularWaveform may access these)
+    // Validate that audioTrack has valid settings and constraints
+    // CircularWaveform may access these and expect them to have certain properties
     try {
       const settings = audioTrack.getSettings();
       if (!settings || typeof settings !== "object") {
         setIsWaveformReady(false);
-        waveformReadyRef.current = false;
         return;
       }
       // Additional check: ensure settings object has expected structure
       if (typeof settings !== "object" || Object.keys(settings).length === 0) {
         setIsWaveformReady(false);
-        waveformReadyRef.current = false;
+        return;
+      }
+
+      // Also check constraints - some components access this
+      const constraints = audioTrack.getConstraints();
+      if (constraints && typeof constraints !== "object") {
+        setIsWaveformReady(false);
+        return;
+      }
+
+      // Ensure audioTrack has required methods
+      if (typeof audioTrack.getSettings !== "function") {
+        setIsWaveformReady(false);
+        return;
+      }
+
+      // Additional validation: ensure audioTrack has an id
+      if (!audioTrack.id || typeof audioTrack.id !== "string") {
+        setIsWaveformReady(false);
         return;
       }
     } catch (error) {
-      // If getSettings() fails, don't render
+      // If any check fails, don't render
+      console.error("Audio track validation failed:", error);
       setIsWaveformReady(false);
-      waveformReadyRef.current = false;
       return;
     }
 
-    // All checks passed
-    setIsWaveformReady(true);
-    waveformReadyRef.current = true;
-  }, [CircularWaveform, audioTrack]);
+    // All checks passed - set ready in next tick to ensure everything is settled
+    requestAnimationFrame(() => {
+      setIsWaveformReady(true);
+    });
+  }, [mounted, circularWaveformLoaded, audioTrack]);
 
   // Track if recording has been started to prevent double-start in strict mode
   const recordingStartedRef = useRef(false);
@@ -1152,31 +1194,81 @@ export function RealtimeVoiceInterface({
                   : "animate-voice-glow"
             }`}
           >
-            {typeof window !== "undefined" &&
-            isWaveformReady &&
-            waveformReadyRef.current &&
-            CircularWaveform &&
-            audioTrack &&
-            audioTrack.readyState === "live" ? (
-              <CircularWaveform
-                key={`waveform-${audioTrack.id}`}
-                size={300}
-                numBars={32}
-                barWidth={10}
-                color1="#f5c35f"
-                color2="#f9dca0"
-                backgroundColor="transparent"
-                sensitivity={1.5}
-                rotationEnabled={true}
-                audioTrack={audioTrack}
-              />
-            ) : (
-              <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
-                <div className="text-gray-400 text-sm">
-                  Loading visualizer...
-                </div>
-              </div>
-            )}
+            {(() => {
+              const CircularWaveform = circularWaveformRef.current;
+
+              // Final safety check - don't render if anything is missing
+              // This must be checked BEFORE any component instantiation
+              const canRender =
+                mounted &&
+                isWaveformReady &&
+                circularWaveformLoaded &&
+                CircularWaveform !== null &&
+                audioTrack !== null &&
+                audioTrack.readyState === "live" &&
+                audioTrack.id !== undefined;
+
+              if (!canRender) {
+                return (
+                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                    <div className="text-gray-400 text-sm">
+                      {!CircularWaveform || !circularWaveformLoaded
+                        ? "Loading visualizer..."
+                        : !audioTrack
+                          ? "Waiting for audio..."
+                          : "Initializing..."}
+                    </div>
+                  </div>
+                );
+              }
+
+              // One final check: ensure audioTrack.getSettings() returns a valid object
+              // This prevents the "Cannot destructure property 'size'" error
+              let settingsValid = false;
+              try {
+                const settings = audioTrack.getSettings();
+                settingsValid =
+                  settings !== null && typeof settings === "object";
+              } catch (error) {
+                console.error("Error checking audio track settings:", error);
+                settingsValid = false;
+              }
+
+              if (!settingsValid) {
+                return (
+                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                    <div className="text-gray-400 text-sm">
+                      Initializing audio...
+                    </div>
+                  </div>
+                );
+              }
+
+              // All checks passed - render the component
+              // Only render if we have a valid component reference
+              if (CircularWaveform === null) {
+                return (
+                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                    <div className="text-gray-400 text-sm">Loading...</div>
+                  </div>
+                );
+              }
+
+              return (
+                <CircularWaveform
+                  key={`waveform-${audioTrack.id}`}
+                  size={300}
+                  numBars={32}
+                  barWidth={10}
+                  color1="#f5c35f"
+                  color2="#f9dca0"
+                  backgroundColor="transparent"
+                  sensitivity={1.5}
+                  rotationEnabled={true}
+                  audioTrack={audioTrack}
+                />
+              );
+            })()}
 
             {/* Conversation State - Inside the orb (centered) */}
             {isConnected && sessionConfigured && (
