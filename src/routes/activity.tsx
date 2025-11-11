@@ -190,12 +190,12 @@ function ActivityPage() {
         <TodaysBreakdown activities={todaysActivities} users={householdUsers} />
 
         {/* LOG MOOD Button */}
-        <div className="mt-8 mb-6">
+        <div className="mt-6 mb-4 flex justify-center">
           <button
             onClick={() => setShowMoodPicker(true)}
-            className="w-full bg-[#f5c35f] text-[#121216] py-4 rounded-lg font-semibold hover:bg-[#f5c35f]/90 transition-colors flex items-center justify-center gap-2"
+            className="bg-[#f5c35f] text-[#121216] py-2 px-4 rounded-lg font-medium hover:bg-[#f5c35f]/90 transition-colors flex items-center justify-center gap-2 text-sm"
           >
-            <span className="text-xl">😊</span>
+            <span className="text-base">😊</span>
             <span>LOG MOOD</span>
           </button>
         </div>

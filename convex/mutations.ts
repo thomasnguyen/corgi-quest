@@ -556,3 +556,47 @@ export const unequipItem = mutation({
     };
   },
 });
+
+/**
+ * Add Guest User Mutation
+ *
+ * Creates a guest user for a specific household
+ */
+export const addGuestUser = mutation({
+  args: {
+    householdId: v.id("households"),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Check if guest user already exists for this household
+    const existingGuest = await ctx.db
+      .query("users")
+      .withIndex("by_household", (q) => q.eq("householdId", args.householdId))
+      .filter((q) => q.eq(q.field("name"), "Guest"))
+      .first();
+
+    if (existingGuest) {
+      return {
+        success: false,
+        message: "Guest user already exists for this household",
+        userId: existingGuest._id,
+      };
+    }
+
+    // Create guest user
+    const guestId = await ctx.db.insert("users", {
+      name: "Guest",
+      email: "guest@example.com",
+      householdId: args.householdId,
+      title: "Training Buddy",
+      avatarUrl: "🧑",
+      createdAt: now,
+    });
+
+    return {
+      success: true,
+      userId: guestId,
+    };
+  },
+});

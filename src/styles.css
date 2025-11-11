@@ -5,8 +5,13 @@
   --font-family-sans: "Marcellus", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
 }
 
+html {
+  background-color: #121216;
+}
+
 body {
   @apply m-0;
+  background-color: #121216;
   font-family: "Marcellus", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;

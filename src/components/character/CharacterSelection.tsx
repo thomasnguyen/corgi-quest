@@ -45,7 +45,7 @@ export default function CharacterSelection() {
   // Error state - no dog or users found
   if (!firstDog || !householdUsers || householdUsers.length === 0) {
     return (
-      <div className="min-h-screen bg-[#121216] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#121216] bg-[url('/smoke_spark_bg.svg')] bg-cover bg-bottom flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-white text-lg mb-2">No characters available</p>
           <p className="text-gray-400 text-sm">
@@ -57,30 +57,42 @@ export default function CharacterSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121216] py-8 px-6">
-      <div className="max-w-md mx-auto">
-        {/* Title */}
-        <h1 className="text-4xl font-bold text-[#D4AF37] text-center mb-2">
-          Choose Your Character
-        </h1>
-        <p className="text-gray-400 text-center mb-8">
-          Select which dog parent you want to play as
-        </p>
+    <>
+      <div className="min-h-screen bg-[url('/smoke_spark_bg.svg')] bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
+        <div className="max-w-md mx-auto">
+          {/* Title */}
+          <h1
+            className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent text-center mb-2"
+            style={{
+              fontFamily: "serif",
+            }}
+          >
+            Choose Your Character
+          </h1>
+          <p
+            className="text-[#feefd0] text-sm text-center mb-8"
+            style={{ textShadow: "0px 1px 1px #1e1e1e" }}
+          >
+            Select which dog parent you want to play as
+          </p>
 
-        {/* Character Cards */}
-        <div className="space-y-6">
-          {householdUsers.map((user) => (
-            <CharacterCard
-              key={user._id}
-              userId={user._id}
-              name={user.name}
-              title={user.title}
-              avatarUrl={user.avatarUrl}
-              onSelect={handleSelectCharacter}
-            />
-          ))}
+          {/* Character Cards */}
+          <div className="space-y-6">
+            {householdUsers.map((user) => (
+              <CharacterCard
+                key={user._id}
+                userId={user._id}
+                name={user.name}
+                title={user.title}
+                avatarUrl={user.avatarUrl}
+                onSelect={handleSelectCharacter}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+      {/* dark background under the content*/}
+      <div className="bg-[#121216] h-screen w-full absolute bottom-0 left-0 right-0 z-0"></div>
+    </>
   );
 }

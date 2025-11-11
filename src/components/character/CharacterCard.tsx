@@ -24,6 +24,55 @@ export default function CharacterCard({
     onSelect(userId);
   };
 
+  // display holly with holly_avatar.svg
+  if (name === "Holly") {
+    avatarUrl = "/holly_avatar.svg";
+  } else if (name === "Thomas") {
+    avatarUrl = "/thomas_avatar.svg";
+  } else if (name === "Guest") {
+    avatarUrl = "/guest_avatar.svg";
+  }
+
+  return (
+    <div
+      className="relative bg-[#121216] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 active:scale-100"
+      onClick={handleSelect}
+    >
+      {/* Dark background under the image */}
+      <div className="absolute inset-0 bg-[#121216] z-0"></div>
+
+      {/* add blur effect to the background */}
+      <div className="absolute top-8 right-5 text-right px-2 z-10">
+        {title && (
+          <p
+            className="text-[#D4AF37] text-base font-medium"
+            style={{
+              textShadow:
+                "0px 1px 2px rgba(0, 0, 0, 0.8), 0px 0px 8px rgba(0, 0, 0, 0.6)",
+            }}
+          >
+            {title}
+          </p>
+        )}
+        <h2
+          className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent"
+          style={{
+            fontFamily: "serif",
+            filter:
+              "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.2)) drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.25)) drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))",
+          }}
+        >
+          {name}
+        </h2>
+      </div>
+      <img
+        src={avatarUrl}
+        alt={name}
+        className="relative w-full h-full object-cover z-0"
+      />
+    </div>
+  );
+
   return (
     <div className="relative bg-[#121216] border-2 border-[#D4AF37] rounded-xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] active:scale-100">
       {/* Golden glow effect on hover */}
