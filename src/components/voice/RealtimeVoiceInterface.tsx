@@ -130,26 +130,56 @@ export function RealtimeVoiceInterface({
     }
   }, []);
 
+  // State to track if we can safely render the waveform
+  const [isWaveformReady, setIsWaveformReady] = useState(false);
+  const waveformReadyRef = useRef(false);
+
   // Determine if CircularWaveform can be safely rendered
-  const canRenderWaveform = React.useMemo(() => {
-    if (!CircularWaveform || !audioTrack) {
-      return false;
+  useEffect(() => {
+    // Only check on client side
+    if (typeof window === "undefined") {
+      setIsWaveformReady(false);
+      waveformReadyRef.current = false;
+      return;
     }
+
+    if (!CircularWaveform || !audioTrack) {
+      setIsWaveformReady(false);
+      waveformReadyRef.current = false;
+      return;
+    }
+
     // Check that audioTrack is in a valid state (must be "live")
     if (audioTrack.readyState !== "live") {
-      return false;
+      setIsWaveformReady(false);
+      waveformReadyRef.current = false;
+      return;
     }
+
     // Validate that audioTrack has valid settings (CircularWaveform may access these)
     try {
       const settings = audioTrack.getSettings();
       if (!settings || typeof settings !== "object") {
-        return false;
+        setIsWaveformReady(false);
+        waveformReadyRef.current = false;
+        return;
+      }
+      // Additional check: ensure settings object has expected structure
+      if (typeof settings !== "object" || Object.keys(settings).length === 0) {
+        setIsWaveformReady(false);
+        waveformReadyRef.current = false;
+        return;
       }
     } catch (error) {
       // If getSettings() fails, don't render
-      return false;
+      setIsWaveformReady(false);
+      waveformReadyRef.current = false;
+      return;
     }
-    return true;
+
+    // All checks passed
+    setIsWaveformReady(true);
+    waveformReadyRef.current = true;
   }, [CircularWaveform, audioTrack]);
 
   // Track if recording has been started to prevent double-start in strict mode
@@ -1122,34 +1152,25 @@ export function RealtimeVoiceInterface({
                   : "animate-voice-glow"
             }`}
           >
-            {canRenderWaveform && CircularWaveform ? (
+            {typeof window !== "undefined" &&
+            isWaveformReady &&
+            waveformReadyRef.current &&
+            CircularWaveform &&
+            audioTrack &&
+            audioTrack.readyState === "live" ? (
               <CircularWaveform
+                key={`waveform-${audioTrack.id}`}
                 size={300}
                 numBars={32}
                 barWidth={10}
                 color1="#f5c35f"
                 color2="#f9dca0"
-                /*                   color1={
-                    conversationState === "speaking"
-                      ? "#60a5fa"
-                      : isListeningSmoothed
-                        ? "#fff1ab"
-                        : "#f5c35f"
-                  }
-                  color2={
-                    conversationState === "speaking"
-                      ? "#93c5fd"
-                      : isListeningSmoothed
-                        ? "#fcd587"
-                        : "#f9dca0"
-                  } */
                 backgroundColor="transparent"
                 sensitivity={1.5}
                 rotationEnabled={true}
-                audioTrack={audioTrack!}
+                audioTrack={audioTrack}
               />
             ) : (
-              // Fallback while loading
               <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
                 <div className="text-gray-400 text-sm">
                   Loading visualizer...
