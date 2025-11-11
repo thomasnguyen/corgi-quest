@@ -727,7 +727,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Add AI Recommendations view in "AI RECOMMENDATIONS" tab
   - _Requirements: 27_
 
-- [ ] 77. Link recommendations to activity logging
+- [x] 77. Link recommendations to activity logging
   - When user taps "Log Activity" on recommendation
   - Navigate to /log-activity route
   - Pass activity name in route state or search params
@@ -735,7 +735,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - OpenAI should acknowledge the recommended activity
   - _Requirements: 27_
 
-- [ ] 78. Add recommendation caching (optional)
+- [x] 78. Add recommendation caching (optional)
   - Create recommendations table in Convex schema (optional)
   - Or cache in component state (simpler)
   - Cache recommendations for current day
@@ -752,7 +752,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Show fallback message if no recommendations available
   - _Requirements: 27_
 
-- [ ] 80. Polish AI recommendations UI
+- [ ] *80. Polish AI recommendations UI
   - Style recommendation cards to match app design
   - Add visual distinction from regular quests
   - Show AI icon/badge

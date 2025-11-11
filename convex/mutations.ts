@@ -191,6 +191,18 @@ export const logActivity = mutation({
       });
     }
 
+    // Step 7: Invalidate AI recommendation cache (new activity affects recommendations)
+    const cachedRec = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (cachedRec) {
+      await ctx.db.delete(cachedRec._id);
+    }
+
     return {
       success: true,
       activityId,
@@ -293,6 +305,7 @@ export const logMood = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
 
     // Insert mood log record
     const moodLogId = await ctx.db.insert("mood_logs", {
@@ -303,6 +316,18 @@ export const logMood = mutation({
       activityId: args.activityId,
       createdAt: now,
     });
+
+    // Invalidate AI recommendation cache (new mood affects recommendations)
+    const cachedRec = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (cachedRec) {
+      await ctx.db.delete(cachedRec._id);
+    }
 
     return {
       success: true,
@@ -351,5 +376,35 @@ export const cacheRecommendations = mutation({
       });
       return { success: true, updated: false };
     }
+  },
+});
+
+/**
+ * Invalidate Recommendation Cache Mutation
+ *
+ * Deletes cached AI recommendations for a dog for today.
+ * Called when new activities or moods are logged to ensure fresh recommendations.
+ */
+export const invalidateRecommendationCache = mutation({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+    // Find today's cached recommendations
+    const cached = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (cached) {
+      await ctx.db.delete(cached._id);
+      return { success: true, deleted: true };
+    }
+
+    return { success: true, deleted: false };
   },
 });

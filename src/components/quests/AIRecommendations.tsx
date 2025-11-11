@@ -26,15 +26,43 @@ interface Recommendation {
   durationMinutes?: number;
 }
 
+// Helper function to format relative time
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+
+  if (diffMins < 1) {
+    return "just now";
+  } else if (diffMins < 60) {
+    return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+  } else {
+    return "today";
+  }
+}
+
 export default function AIRecommendations() {
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [, setTick] = useState(0); // Force re-render for relative time updates
 
   // Get first dog
   const firstDog = useQuery(api.queries.getFirstDog);
+
+  // Update relative time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Get cached recommendations for today
   const cachedData = useQuery(
@@ -49,6 +77,7 @@ export default function AIRecommendations() {
   const cacheRecommendations = useMutation(api.mutations.cacheRecommendations);
 
   // Load cached recommendations or generate new ones
+  // Cache is automatically invalidated when new activities or moods are logged
   useEffect(() => {
     if (!firstDog) return;
 
@@ -213,7 +242,7 @@ export default function AIRecommendations() {
       {/* Last updated timestamp */}
       {lastUpdated && (
         <p className="text-[#f9dca0]/60 text-xs mb-4">
-          Generated today at {lastUpdated.toLocaleTimeString()}
+          Last updated: {getRelativeTime(lastUpdated)}
         </p>
       )}
 
