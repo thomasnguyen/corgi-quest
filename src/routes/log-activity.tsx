@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import { RealtimeVoiceInterface } from "../components/voice/RealtimeVoiceInterface";
+import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
 
 // Define search params schema
 interface LogActivitySearch {
@@ -29,14 +30,8 @@ function LogActivityPage() {
   // Use questName if provided, otherwise use prefilledActivity
   const activityContext = questName || prefilledActivity;
 
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
-
-  // Get the first user (current user for demo purposes)
-  const firstUser = useQuery(
-    api.queries.getFirstUser,
-    firstDog ? { householdId: firstDog.householdId } : "skip"
-  );
+  // Get selected character
+  const { selectedCharacterId, selectedUser } = useSelectedCharacter();
 
   // Presence mutations
   const updatePresence = useMutation(api.mutations.updatePresence);
@@ -44,26 +39,29 @@ function LogActivityPage() {
 
   // Update presence when entering this screen
   useEffect(() => {
-    if (firstUser) {
+    if (selectedCharacterId) {
       updatePresence({
-        userId: firstUser._id,
+        userId: selectedCharacterId,
         location: "log-activity",
       });
     }
 
     // Clear presence when leaving this screen
     return () => {
-      if (firstUser) {
+      if (selectedCharacterId) {
         clearPresence({
-          userId: firstUser._id,
+          userId: selectedCharacterId,
         });
       }
     };
-  }, [firstUser, updatePresence, clearPresence]);
+  }, [selectedCharacterId, updatePresence, clearPresence]);
 
   return (
     <Layout>
-      <RealtimeVoiceInterface questName={activityContext} />
+      <RealtimeVoiceInterface
+        questName={activityContext}
+        userId={selectedCharacterId || undefined}
+      />
     </Layout>
   );
 }

@@ -2,7 +2,7 @@
 
 This implementation plan breaks down the Corgi Quest MVP into discrete, incremental coding tasks. Each task builds on previous tasks and focuses on getting real-time functionality working first, as this is the core showcase feature for the hackathon.
 
-**Status:** Core MVP features are complete! Voice logging with OpenAI Realtime API, real-time sync, and all 6 main screens are working. Remaining tasks focus on new features (mood tracking, AI recommendations, BUMI character sheet, character selection) and polish.
+**Status:** Core MVP features are complete! Voice logging with OpenAI Realtime API, real-time sync, and all main screens are working. Mood tracking and AI recommendations are implemented. BUMI character sheet with cosmetic items is mostly complete. Remaining tasks focus on character selection system and final polish.
 
 ## Implementation Summary
 
@@ -31,57 +31,35 @@ This implementation plan breaks down the Corgi Quest MVP into discrete, incremen
 - Timestamp formatting utility (relative time display)
 
 ### 🚧 Remaining Features (Tasks 17.1-104)
-**New features from updated requirements (not in original MVP):**
-- Project foundation with TanStack Start and Convex
-- Complete database schema (8 tables)
-- All Convex queries and mutations
-- XP calculation utilities with unit tests
-- All 6 main screens (Overview, Activity, Quests, Stat Detail, Quest Detail, Voice Logging)
-- Real-time activity feed with toast notifications
-- Voice interface with OpenAI Realtime API integration
-- Audio visualization with @pipecat-ai/voice-ui-kit
-- Function calling for automatic activity saving
-- Optimistic UI updates
-- Activity confirmation display
-- All core components (StatOrb, StatGrid, ActivityFeedItem, QuestCard, etc.)
 
-**Quest Enhancements (Tasks 17.1-17.2):**
+**Quest Enhancements (Tasks 17.1-17.2) - NOT STARTED:**
 - Quest completion counter (show "Done 2x today")
 - Highlight quests that help with incomplete daily goals
 
-**Mood Tracking System (Tasks 61-71):**
-- Mood logging with 6 mood options (calm, anxious, reactive, playful, tired, neutral)
-- Mood entries in activity feed
-- Mood indicator in TopResourceBar
-- Daily mood reminder popup (after 6pm)
-- Real-time mood sync and toast notifications
+**BUMI Character Sheet - Final Polish (Tasks 94-96) - IN PROGRESS:**
+- ✅ BUMI tab with STATS and ITEMS sub-tabs complete
+- ✅ Cosmetic items database and queries complete
+- ✅ Item equipping with equipItem mutation complete
+- ⏳ Real-time portrait updates (toast notifications for partner equipping items)
+- ⏳ Unequip functionality (remove equipped item, return to base portrait)
+- ⏳ UI polish and mobile responsiveness
 
-**AI-Powered Recommendations (Tasks 72-80):**
-- OpenAI API integration for personalized activity suggestions
-- Analyze mood patterns and activity history
-- Generate 3-5 daily recommendations
-- AI Recommendations tab in Quests screen
-- Recommendation caching and refresh
+**Character Selection System (Tasks 97-104) - NOT STARTED:**
+- Add 3rd user to seed data with titles/avatars
+- Create CharacterCard component (gacha-style)
+- Create CharacterSelection component
+- Create select-character route
+- Add character selection check to app entry
+- Update app to use selected character for all actions
+- Add character change functionality
+- Polish character selection UI
 
-**BUMI Character Sheet Tab (Tasks 81-96):**
-- 4th bottom nav tab for BUMI character sheet
-- STATS sub-tab with radar chart and progress bars
-- ITEMS sub-tab with cosmetic items (unlocked per level)
-- AI image generation for dog wearing items
-- Item equipping/unequipping with real-time portrait updates
-- Cosmetic items database tables
-
-**Character Selection (Tasks 97-104):**
-- Character selection screen (gacha-style cards)
-- 3 playable characters per household
-- Character persistence in localStorage
-- Character-specific activity logging and mood tracking
-
-**Optional Testing & Polish (Tasks 52-55):**
+**Optional Testing & Polish (Tasks 52-55, 71) - OPTIONAL:**
 - Accessibility tests
 - Demo preparation features
 - Performance optimizations
 - Real-time sync testing on devices
+- Add sample mood logs to seed data
 
 ## Current State Analysis
 
@@ -816,7 +794,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Show loading state during image generation
   - _Requirements: 28_
 
-- [ ] 88. Create BumiCharacterSheet component
+- [x] 88. Create BumiCharacterSheet component
   - Create src/components/dog/BumiCharacterSheet.tsx
   - Add sub-tab navigation: "STATS" and "ITEMS"
   - Conditionally render StatsView or ItemsView
@@ -824,7 +802,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Style tabs to match app design
   - _Requirements: 28_
 
-- [ ] 89. Create BUMI route
+- [x] 89. Create BUMI route
   - Create src/routes/bumi.tsx
   - Use BumiCharacterSheet component
   - Subscribe to dog profile data
@@ -832,59 +810,52 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Handle loading states
   - _Requirements: 28_
 
-- [ ] 90. Create generateItemImage Convex action
-  - Create convex/actions/generateItemImage.ts
-  - Accept args: dogId, itemId, baseImageUrl (Bumi photo)
-  - Create prompt: "A corgi dog wearing [item name], [item type] style, [description], high quality, photorealistic"
-  - Call OpenAI DALL-E API or Stable Diffusion API
-  - Upload generated image to Convex file storage or external storage
-  - Return image URL
-  - Handle errors gracefully
+- [x] 90. Create generateItemImage Convex action
+  - SKIPPED: For hackathon demo, images will be manually created and stored
+  - Images will be added to public folder or external storage
+  - Image URLs will be hardcoded in seed data
   - _Requirements: 28_
 
-- [ ] 91. Create equipItem mutation
+- [x] 91. Create equipItem mutation
   - Create equipItem mutation in convex/mutations.ts
-  - Accept args: dogId, itemId
-  - Check if image already exists for this item
-  - If not, call generateItemImage action
+  - Accept args: dogId, itemId, imageUrl (manually created image)
   - Delete any existing equipped_items record for this dog (only one item at a time)
-  - Insert new equipped_items record
-  - Update dog's portrait URL (or reference equipped item)
+  - Insert new equipped_items record with provided imageUrl
   - Return equipped item with image URL
   - _Requirements: 28_
 
-- [ ] 92. Create queries for cosmetic items
+- [x] 92. Create queries for cosmetic items
   - Create getUnlockedItems query (based on dog's level)
   - Create getEquippedItem query (current equipped item)
   - Create getAllCosmeticItems query (all items with unlock status)
   - Test queries in Convex dashboard
   - _Requirements: 28_
 
-- [ ] 93. Integrate item unlock on level up
+- [x] 93. Integrate item unlock on level up
   - Update logActivity mutation to check for level ups
   - When level up detected, check if new item unlocks
-  - If yes, automatically generate image for new item (background)
-  - Store generated image in equipped_items (but don't equip)
-  - Show "New!" badge in ITEMS tab
+  - Show "New!" badge in ITEMS tab for newly unlocked items
+  - (Image generation skipped for hackathon - images will be pre-created)
   - _Requirements: 28_
 
-- [ ] 94. Add real-time portrait updates
-  - Subscribe to equipped_items in BumiCharacterSheet
-  - Update portrait when partner equips item
-  - Show toast notification: "Sarah equipped [Item Name]"
-  - Ensure portrait updates instantly on both devices
+- [ ] *94. Add real-time portrait updates
+  - Subscribe to equipped_items in Layout component (similar to activity/mood feed)
+  - Track previous equipped item to detect changes
+  - Show toast notification: "Holly equipped [Item Name]" when partner equips item
+  - Ensure portrait updates instantly on both devices via existing real-time subscriptions
   - Test with two browsers
   - _Requirements: 28_
 
-- [ ] 95. Add unequip functionality
-  - Add "Unequip" button to currently equipped item
-  - Create unequipItem mutation
-  - Remove equipped_items record
-  - Return to base Bumi portrait
-  - Update in real-time
+- [x] 95. Add unequip functionality
+  - Add "Unequip" button to ItemsView component (show when item is equipped)
+  - Create unequipItem mutation in convex/mutations.ts
+  - Mutation should delete the equipped_items record for the dog
+  - Update ItemsView to call unequipItem mutation
+  - Portrait should return to base dog image (🐕 emoji or default image)
+  - Update in real-time on both devices
   - _Requirements: 28_
 
-- [ ] 96. Polish BUMI tab UI
+- [ ] *96. Polish BUMI tab UI
   - Ensure mobile-responsive layout
   - Style radar chart and progress bars
   - Add smooth transitions
@@ -893,66 +864,264 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test on various screen sizes
   - _Requirements: 28_
 
-- [ ] 97. Add 3rd user to seed data
-  - Update seed mutation to include 3rd user Guest
-  - Add character title/role for each user (optional)
-  - Add avatar/portrait URLs for each user (optional, can use placeholder)
+- [x] 97. Add 3rd user to seed data
+  - Update convex/seed.ts to include 3rd user Guest
+  - Add optional title/role field for each user (e.g., "Primary Trainer", "Play Partner", "Training Buddy")
+  - Add optional avatarUrl field for each user (can use placeholder URLs or emojis)
   - Ensure all 3 users are in the same household
-  - Test seed mutation includes all 3 users
+  - Test seed mutation creates all 3 users correctly
   - _Requirements: 29_
 
-- [ ] 98. Create CharacterCard component
+- [x] 98. Create CharacterCard component
+  - Create src/components/character/ folder
   - Create src/components/character/CharacterCard.tsx
-  - Style like gacha character card: dark background, golden border, character art
-  - Display character name, optional title, avatar/portrait
-  - Add "Select" button
-  - Add hover/press animations
-  - Style to match app's black/white/gold aesthetic
-  - _Requirements: 29_
-
-- [ ] 99. Create CharacterSelection component
-  - Create src/components/character/CharacterSelection.tsx
-  - Query all users in household (getHouseholdUsers)
-  - Display character cards in vertical scrollable list
-  - Handle character selection
-  - Store selected character ID in localStorage
-  - Navigate to Overview after selection
-  - Show loading state while fetching characters
-  - _Requirements: 29_
-
-- [ ] 100. Create select-character route
-  - Create src/routes/select-character.tsx
-  - Use CharacterSelection component
-  - Handle case when no characters available
-  - Redirect to Overview if character already selected
-  - _Requirements: 29_
-
-- [ ] 101. Add character selection check to app entry
-  - Update root route or Layout component
-  - Check localStorage for selected character
-  - If no character selected → redirect to /select-character
-  - If character selected → proceed to normal app flow
-  - _Requirements: 29_
-
-- [ ] 102. Update app to use selected character
-  - Create context or hook to manage selected character
-  - Update all queries/mutations to use selected character ID
-  - Update activity feed to show selected character's name
-  - Update mood logging to use selected character
-  - Ensure real-time sync works with character selection
-  - _Requirements: 29_
-
-- [ ] 103. Add character change functionality
-  - Add "Change Character" option in settings or profile
-  - Clear localStorage and redirect to character selection
-  - Or add character switcher in UI (optional)
-  - _Requirements: 29_
-
-- [ ] 104. Polish character selection UI
+  - Accept props: userId, name, title (optional), avatarUrl (optional), onSelect callback
+  - Style like gacha character card: dark background (#121216), golden border (#D4AF37), prominent character art
+  - Display character name in white text, title in gold text below name
+  - Display avatar/portrait (use placeholder if not provided)
+  - Add "Select" button with golden styling
+  - Add hover/press animations (scale, glow effect)
   - Ensure mobile-responsive layout
-  - Add smooth card animations
-  - Add character selection confirmation
-  - Style to match gacha game aesthetic (dark, golden accents)
-  - Test on various screen sizes
   - _Requirements: 29_
+
+- [x] 99. Create CharacterSelection component
+  - Create src/components/character/CharacterSelection.tsx
+  - Create getHouseholdUsers query in convex/queries.ts (if not exists)
+  - Query all users in household using useQuery
+  - Display 3 CharacterCard components in vertical scrollable list
+  - Handle character selection: store selected userId in localStorage (key: "selectedCharacterId")
+  - Use router.navigate() to navigate to "/" (Overview) after selection
+  - Show loading state while fetching characters (spinner + "Loading characters...")
+  - Handle error state if query fails
+  - _Requirements: 29_
+
+- [x] 100. Create select-character route
+  - Create src/routes/select-character.tsx
+  - Import and render CharacterSelection component
+  - Check localStorage for "selectedCharacterId" on mount
+  - If character already selected, redirect to "/" (Overview) using router.navigate()
+  - Handle case when no characters available (show error message)
+  - Style page with dark background matching app theme
+  - _Requirements: 29_
+
+- [x] 101. Add character selection check to app entry
+  - Update src/routes/index.tsx (Overview route) or Layout component
+  - Check localStorage for "selectedCharacterId" on mount
+  - If no character selected → redirect to "/select-character" using router.navigate()
+  - If character selected → proceed to normal app flow (show Overview)
+  - Ensure check runs before rendering main content
+  - _Requirements: 29_
+
+- [x] 102. Update app to use selected character
+  - Create useSelectedCharacter hook in src/hooks/ to read from localStorage
+  - Update logActivity mutation calls to use selected character ID (instead of hardcoded firstUser)
+  - Update logMood mutation calls to use selected character ID
+  - Update activity feed to show selected character's name for their activities
+  - Update voice logging interface to use selected character ID
+  - Ensure real-time sync works correctly with character selection
+  - Test with two browsers: select different characters, log activities, verify correct attribution
+  - _Requirements: 29_
+
+---
+
+## Sponsor Integration Tasks
+
+### Netlify Deployment (Est. 20-30 min)
+
+- [ ] 103. Deploy to Netlify with CI/CD
+  - Install netlify-cli: `npm install -g netlify-cli`
+  - Create netlify.toml configuration file with build settings
+  - Configure build command: `npm run build`
+  - Configure publish directory: `dist` or `.output/public`
+  - Run `netlify deploy --prod` to deploy
+  - Verify deployment is accessible via HTTPS
+  - Configure automatic deployments from main branch in Netlify dashboard
+  - _Requirements: 30_
+
+- [ ] 104. Add Netlify badge to footer
+  - Update footer component (or create if doesn't exist)
+  - Add "Deployed on Netlify" badge with Netlify logo
+  - Link badge to Netlify website
+  - Style badge to match app design (black/white theme)
+  - Test badge appears on all screens
+  - _Requirements: 30_
+
+### Cloudflare Integration (Est. 1.5 hr total)
+
+- [ ] 105. Set up Cloudflare Images for Bumi photo
+  - Create Cloudflare account and enable Cloudflare Images
+  - Upload Bumi's base photo to Cloudflare Images
+  - Get Cloudflare Images URL for the photo
+  - Update seed data to use Cloudflare Images URL for dog photoUrl
+  - Add CLOUDFLARE_IMAGES_API_KEY to environment variables
+  - Test image loads correctly in Overview screen
+  - _Requirements: 31_
+
+- [ ] 106. Create Cloudflare Worker for training tips
+  - Create new Cloudflare Worker in Cloudflare dashboard
+  - Implement Worker that fetches from Firecrawl API
+  - Worker should accept dog training topic as query param
+  - Worker should return formatted training tip JSON
+  - Deploy Worker and get Worker URL
+  - Add CLOUDFLARE_WORKER_URL to environment variables
+  - Test Worker endpoint returns valid data
+  - _Requirements: 31_
+
+- [ ] 107. Add Cloudflare mention to footer
+  - Update footer component
+  - Add "Powered by Cloudflare" text or logo
+  - Link to Cloudflare website
+  - Style to match app design
+  - _Requirements: 31_
+
+### Firecrawl Integration (Est. 1 hr)
+
+- [ ] 108. Create TanStack Start server function for Firecrawl
+  - Create server function in src/routes/api/fetch-tips.ts
+  - Install firecrawl-js package: `npm install firecrawl-js`
+  - Add FIRECRAWL_API_KEY to environment variables
+  - Implement function to call Firecrawl API to scrape dog training websites
+  - Parse scraped content and extract training tips
+  - Return structured tip data (activity name, description, XP values)
+  - Handle errors gracefully (return fallback tips)
+  - _Requirements: 32_
+
+- [ ] 109. Create Convex mutation to store Firecrawl tips
+  - Create firecrawl_tips table in schema (if needed) or reuse quests structure
+  - Create storeFirecrawlTip mutation
+  - Accept args: tipName, description, category, points, source
+  - Insert tip into database with createdAt timestamp
+  - Return tip ID
+  - _Requirements: 32_
+
+- [ ] 110. Create daily cron job to fetch Firecrawl tips
+  - Add new cron job to convex/crons.ts
+  - Schedule to run once per day at 6am: `0 6 * * *`
+  - Call TanStack server function to fetch tips
+  - Store tips in Convex using storeFirecrawlTip mutation
+  - Log success/failure for monitoring
+  - _Requirements: 32_
+
+- [ ] 111. Display Firecrawl tips in Quests screen
+  - Update Quests screen to query Firecrawl tips from database
+  - Display tips in a separate section: "Daily Training Ideas"
+  - Show tip source: "Powered by Firecrawl"
+  - Style tips differently from static quests (different border/badge)
+  - Allow users to log activities from Firecrawl tips
+  - _Requirements: 32_
+
+- [ ] 112. Integrate Cloudflare Worker with Firecrawl
+  - Update Cloudflare Worker to call Firecrawl API directly
+  - TanStack server function calls Cloudflare Worker instead of Firecrawl directly
+  - This demonstrates sponsor synergy (Cloudflare + Firecrawl)
+  - Update documentation to mention this integration
+  - _Requirements: 31, 32_
+
+### Sentry Integration (Est. 15 min)
+
+- [ ] 113. Install and configure Sentry
+  - Install @sentry/react: `npm install @sentry/react`
+  - Create Sentry account and get DSN
+  - Add SENTRY_DSN to environment variables
+  - Initialize Sentry in app entry point (src/router.tsx or src/main.tsx)
+  - Configure Sentry with environment (production/development)
+  - Test error reporting by triggering a test error
+  - _Requirements: 33_
+
+- [ ] 114. Add Sentry error boundaries
+  - Wrap app with Sentry ErrorBoundary component
+  - Configure fallback UI for caught errors
+  - Test error boundary catches and reports errors
+  - Verify errors appear in Sentry dashboard
+  - _Requirements: 33_
+
+- [ ] 115. Add Sentry mention to footer
+  - Update footer component
+  - Add "Monitored by Sentry" text or logo
+  - Link to Sentry website
+  - Style to match app design
+  - _Requirements: 33_
+
+### CodeRabbit Integration (Est. 10 min setup)
+
+- [ ] 116. Install CodeRabbit GitHub App
+  - Go to GitHub Marketplace and install CodeRabbit app
+  - Grant CodeRabbit access to repository
+  - Configure CodeRabbit settings (optional: customize review rules)
+  - Verify CodeRabbit is active on repository
+  - _Requirements: 34_
+
+- [ ] 117. Create demo PRs with CodeRabbit reviews
+  - Create 1-2 pull requests with code changes
+  - Wait for CodeRabbit to review and provide feedback
+  - Take screenshots of CodeRabbit reviews
+  - Merge PRs after addressing feedback
+  - _Requirements: 34_
+
+- [ ] 118. Document CodeRabbit in README
+  - Update README.md with "Development Tools" section
+  - Add CodeRabbit mention with description
+  - Include screenshots of CodeRabbit reviews
+  - Link to CodeRabbit website
+  - _Requirements: 34_
+
+### Autumn Tip Jar Integration (Est. 30 min)
+
+- [ ] 119. Create /thanks route
+  - Create src/routes/thanks.tsx
+  - Display "Thanks for Playing Corgi Quest!" header
+  - Display Bumi image or animation
+  - Display "Tip Corgi Quest Pro" section
+  - Add "Powered by Autumn" mention
+  - Style page to match app design (black/white theme)
+  - _Requirements: 35_
+
+- [ ] 120. Integrate Autumn sandbox checkout
+  - Research Autumn API documentation for sandbox mode
+  - Install Autumn SDK if available: `npm install @autumn/sdk` (or similar)
+  - Add AUTUMN_API_KEY to environment variables (sandbox key)
+  - Create tip amount options: $3, $5, $10, Custom
+  - Implement checkout modal or redirect to Autumn checkout
+  - Handle successful tip submission (show thank you message)
+  - Handle errors gracefully (show error message)
+  - _Requirements: 35_
+
+- [ ] 121. Add tip jar trigger after milestones
+  - Detect when user completes a quest or reaches level milestone
+  - Show modal or navigate to /thanks route
+  - Provide "Skip" or "Maybe Later" option
+  - Store dismissal state in localStorage to avoid spam
+  - Test trigger appears at appropriate times
+  - _Requirements: 35_
+
+- [ ] 122. Add Autumn mention to footer
+  - Update footer component
+  - Add "Payments by Autumn" text or logo
+  - Link to Autumn website
+  - Style to match app design
+  - _Requirements: 35_
+
+---
+
+## Summary of Sponsor Integration
+
+**Total Estimated Time: ~4 hours**
+
+**Sponsor Checklist:**
+- ✅ Convex (already core feature - real-time backend)
+- ✅ TanStack Start (already core framework)
+- [ ] Netlify (hosting + CI/CD) - 20-30 min
+- [ ] Cloudflare (edge utilities + media) - 1.5 hr
+- [ ] Firecrawl (AI quest generation) - 1 hr
+- [ ] Sentry (error monitoring) - 15 min
+- [ ] CodeRabbit (AI code review) - 10 min setup
+- [ ] Autumn (tip jar) - 30 min
+
+**Priority Order for Hackathon:**
+1. Netlify (easiest, most visible)
+2. Sentry (quick win, professional)
+3. CodeRabbit (zero code changes, just setup)
+4. Cloudflare + Firecrawl (impressive synergy)
+5. Autumn (nice-to-have, adds monetization angle)
+
 

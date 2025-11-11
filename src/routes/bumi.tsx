@@ -2,13 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
-import StatsView from "../components/dog/StatsView";
+import BumiCharacterSheet from "../components/dog/BumiCharacterSheet";
 
 export const Route = createFileRoute("/bumi")({
-  component: BumiScreen,
+  component: BumiPage,
 });
 
-function BumiScreen() {
+/**
+ * BUMI Character Sheet Page
+ * Displays detailed stats and cosmetic items for the dog
+ * Requirements: 28
+ */
+function BumiPage() {
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
 
@@ -18,8 +23,18 @@ function BumiScreen() {
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
+  // Get equipped item
+  const equippedItem = useQuery(
+    api.queries.getEquippedItem,
+    firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
   // Loading state
-  if (firstDog === undefined || dogProfile === undefined) {
+  if (
+    firstDog === undefined ||
+    dogProfile === undefined ||
+    equippedItem === undefined
+  ) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
@@ -32,26 +47,26 @@ function BumiScreen() {
     );
   }
 
-  // No dog found
-  if (!firstDog || !dogProfile) {
+  // Error state - no dog found
+  if (!dogProfile || !dogProfile.dog) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-screen bg-[#121216]">
-          <div className="text-center px-6">
-            <p className="text-[#f9dca0] text-sm">
-              No dog found. Run the seed mutation to create demo data.
-            </p>
+        <div className="min-h-screen bg-[#121216] p-6">
+          <div className="flex items-center justify-center mt-20">
+            <div className="text-center px-6">
+              <p className="text-[#888] text-sm">
+                No dog profile found. Please seed the database.
+              </p>
+            </div>
           </div>
         </div>
       </Layout>
     );
   }
 
-  const { dog, stats } = dogProfile;
-
   return (
     <Layout>
-      <StatsView dog={dog} stats={stats} />
+      <BumiCharacterSheet dog={dogProfile.dog} stats={dogProfile.stats} />
     </Layout>
   );
 }

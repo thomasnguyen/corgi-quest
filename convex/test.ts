@@ -237,3 +237,271 @@ export const testGenerateRecommendations = query({
     };
   },
 });
+
+/**
+ * Test query for getAllCosmeticItems
+ * Verifies that getAllCosmeticItems returns all items with unlock status
+ */
+export const testGetAllCosmeticItems = query({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+
+    if (!dog) {
+      return {
+        success: false,
+        message: "No dog found. Please run seedDemoData first.",
+      };
+    }
+
+    // Get all cosmetic items
+    const items = await ctx.db.query("cosmetic_items").collect();
+
+    // Add unlock status to each item
+    const itemsWithStatus = items.map((item) => ({
+      ...item,
+      isUnlocked: dog.overallLevel >= item.unlockLevel,
+    }));
+
+    // Sort by unlock level
+    const sortedItems = itemsWithStatus.sort(
+      (a, b) => a.unlockLevel - b.unlockLevel
+    );
+
+    return {
+      success: true,
+      message: "getAllCosmeticItems test successful",
+      dogLevel: dog.overallLevel,
+      totalItems: sortedItems.length,
+      unlockedCount: sortedItems.filter((item) => item.isUnlocked).length,
+      lockedCount: sortedItems.filter((item) => !item.isUnlocked).length,
+      items: sortedItems,
+    };
+  },
+});
+
+/**
+ * Test query for getUnlockedItems
+ * Verifies that getUnlockedItems returns only unlocked items based on dog's level
+ */
+export const testGetUnlockedItems = query({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+
+    if (!dog) {
+      return {
+        success: false,
+        message: "No dog found. Please run seedDemoData first.",
+      };
+    }
+
+    // Get all cosmetic items
+    const items = await ctx.db.query("cosmetic_items").collect();
+
+    // Filter to only unlocked items
+    const unlockedItems = items.filter(
+      (item) => dog.overallLevel >= item.unlockLevel
+    );
+
+    // Sort by unlock level
+    const sortedItems = unlockedItems.sort(
+      (a, b) => a.unlockLevel - b.unlockLevel
+    );
+
+    return {
+      success: true,
+      message: "getUnlockedItems test successful",
+      dogLevel: dog.overallLevel,
+      unlockedCount: sortedItems.length,
+      items: sortedItems,
+    };
+  },
+});
+
+/**
+ * Test query for getEquippedItem
+ * Verifies that getEquippedItem returns the currently equipped item with full details
+ */
+export const testGetEquippedItem = query({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+
+    if (!dog) {
+      return {
+        success: false,
+        message: "No dog found. Please run seedDemoData first.",
+      };
+    }
+
+    // Get equipped item record
+    const equippedItem = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", dog._id))
+      .first();
+
+    if (!equippedItem) {
+      return {
+        success: true,
+        message: "No item currently equipped",
+        equippedItem: null,
+      };
+    }
+
+    // Get the full item details
+    const item = await ctx.db.get(equippedItem.itemId);
+    if (!item) {
+      return {
+        success: false,
+        message: "Equipped item not found in cosmetic_items table",
+        equippedItem: null,
+      };
+    }
+
+    return {
+      success: true,
+      message: "getEquippedItem test successful",
+      equippedItem: {
+        ...equippedItem,
+        item,
+      },
+    };
+  },
+});
+
+/**
+ * Test mutation for item unlock on level up
+ * Simulates logging an activity that causes a level up and verifies items are unlocked
+ */
+export const testItemUnlockOnLevelUp = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+    const user = await ctx.db.query("users").first();
+
+    if (!dog || !user) {
+      return {
+        success: false,
+        message: "No dog or user found. Please run seedDemoData first.",
+      };
+    }
+
+    // Get current level and XP
+    const currentLevel = dog.overallLevel;
+    const currentXp = dog.overallXp;
+
+    // Calculate XP needed to level up (assuming 100 XP per level)
+    const xpToNextLevel = 100 - currentXp;
+    const xpToGain = xpToNextLevel + 10; // Gain enough to level up with overflow
+
+    // Log an activity with enough XP to level up
+    const activityId = await ctx.db.insert("activities", {
+      dogId: dog._id,
+      userId: user._id,
+      activityName: "Test Level Up Activity",
+      description: "Testing item unlock on level up",
+      physicalPoints: 10,
+      mentalPoints: 10,
+      createdAt: Date.now(),
+    });
+
+    // Insert stat gains
+    await ctx.db.insert("activity_stat_gains", {
+      activityId,
+      statType: "PHY",
+      xpAmount: xpToGain,
+    });
+
+    // Update dog's overall XP and level
+    const newXp = (currentXp + xpToGain) % 100;
+    const newLevel = currentLevel + Math.floor((currentXp + xpToGain) / 100);
+
+    await ctx.db.patch(dog._id, {
+      overallLevel: newLevel,
+      overallXp: newXp,
+      xpToNextLevel: 100,
+    });
+
+    // Check for newly unlocked items
+    const allItems = await ctx.db.query("cosmetic_items").collect();
+    const newlyUnlockedItems = [];
+
+    for (const item of allItems) {
+      if (currentLevel < item.unlockLevel && newLevel >= item.unlockLevel) {
+        newlyUnlockedItems.push({
+          itemId: item._id,
+          itemName: item.name,
+          unlockLevel: item.unlockLevel,
+        });
+
+        // Mark as newly unlocked
+        await ctx.db.insert("newly_unlocked_items", {
+          dogId: dog._id,
+          itemId: item._id,
+          unlockedAt: Date.now(),
+        });
+      }
+    }
+
+    // Get newly unlocked items from database
+    const newlyUnlockedRecords = await ctx.db
+      .query("newly_unlocked_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", dog._id))
+      .collect();
+
+    return {
+      success: true,
+      message: "Item unlock test completed",
+      levelUp: {
+        oldLevel: currentLevel,
+        newLevel: newLevel,
+        xpGained: xpToGain,
+      },
+      newlyUnlockedItems,
+      newlyUnlockedRecordsCount: newlyUnlockedRecords.length,
+    };
+  },
+});
+
+/**
+ * Test query to check newly unlocked items
+ * Verifies that newly unlocked items are tracked correctly
+ */
+export const testGetNewlyUnlockedItems = query({
+  args: {},
+  handler: async (ctx) => {
+    const dog = await ctx.db.query("dogs").first();
+
+    if (!dog) {
+      return {
+        success: false,
+        message: "No dog found. Please run seedDemoData first.",
+      };
+    }
+
+    // Get newly unlocked items
+    const newlyUnlockedItems = await ctx.db
+      .query("newly_unlocked_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", dog._id))
+      .collect();
+
+    // Get full item details
+    const itemsWithDetails = await Promise.all(
+      newlyUnlockedItems.map(async (record) => {
+        const item = await ctx.db.get(record.itemId);
+        return {
+          ...record,
+          item,
+        };
+      })
+    );
+
+    return {
+      success: true,
+      message: "Newly unlocked items retrieved",
+      count: itemsWithDetails.length,
+      items: itemsWithDetails,
+    };
+  },
+});

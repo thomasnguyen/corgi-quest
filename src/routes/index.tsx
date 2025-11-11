@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
+import { useEffect } from "react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import StatGrid from "../components/dog/StatGrid";
@@ -12,6 +13,18 @@ export const Route = createFileRoute("/")({
 });
 
 function OverviewPage() {
+  const navigate = useNavigate();
+
+  // Check for character selection before rendering main content
+  useEffect(() => {
+    const selectedCharacterId = localStorage.getItem("selectedCharacterId");
+
+    if (!selectedCharacterId) {
+      // No character selected, redirect to character selection
+      navigate({ to: "/select-character" });
+    }
+  }, [navigate]);
+
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
 

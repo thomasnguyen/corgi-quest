@@ -5,6 +5,7 @@ import BottomNav from "./BottomNav";
 import { useToast } from "../../contexts/ToastContext";
 import { useMoodReminder } from "../../hooks/useMoodReminder";
 import MoodReminderPopup from "../mood/MoodReminderPopup";
+import { useSelectedCharacter } from "../../hooks/useSelectedCharacter";
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,14 +21,11 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { showToast } = useToast();
 
+  // Get selected character
+  const { selectedCharacterId } = useSelectedCharacter();
+
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
-
-  // Get the first user (demo purposes)
-  const firstUser = useQuery(
-    api.queries.getFirstUser,
-    firstDog ? { householdId: firstDog.householdId } : "skip"
-  );
 
   // Subscribe to activity feed for real-time updates
   const activityFeed = useQuery(
@@ -102,7 +100,7 @@ export default function Layout({ children }: LayoutProps) {
 
   // Detect new moods and show toasts (only for partner's moods, not current user's)
   useEffect(() => {
-    if (!moodFeed || moodFeed.length === 0 || !firstUser) {
+    if (!moodFeed || moodFeed.length === 0 || !selectedCharacterId) {
       return;
     }
 
@@ -122,7 +120,7 @@ export default function Layout({ children }: LayoutProps) {
 
     // Filter out current user's own moods - only show partner's moods
     const partnerMoods = newMoods.filter(
-      (mood) => mood.userId !== firstUser._id
+      (mood) => mood.userId !== selectedCharacterId
     );
 
     // Mood emoji mapping
@@ -154,7 +152,7 @@ export default function Layout({ children }: LayoutProps) {
 
     // Update previous mood IDs
     previousMoodIdsRef.current = currentMoodIds;
-  }, [moodFeed, showToast, firstUser]);
+  }, [moodFeed, showToast, selectedCharacterId]);
 
   // Detect level-ups by watching stat changes
   useEffect(() => {
@@ -199,10 +197,10 @@ export default function Layout({ children }: LayoutProps) {
       <BottomNav />
 
       {/* Mood reminder popup */}
-      {shouldShowReminder && firstDog && firstUser && (
+      {shouldShowReminder && firstDog && selectedCharacterId && (
         <MoodReminderPopup
           dogId={firstDog._id}
-          userId={firstUser._id}
+          userId={selectedCharacterId}
           onDismiss={dismissReminder}
         />
       )}

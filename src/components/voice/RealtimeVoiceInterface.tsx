@@ -49,6 +49,7 @@ interface RealtimeVoiceInterfaceProps {
   questName?: string;
   onActivitySaved?: (activityId: string) => void;
   onError?: (error: Error) => void;
+  userId?: string; // Selected character ID
 }
 
 interface SaveActivityParams {
@@ -94,6 +95,7 @@ export function RealtimeVoiceInterface({
   questName,
   onActivitySaved,
   onError,
+  userId: selectedUserId,
 }: RealtimeVoiceInterfaceProps) {
   const navigate = useNavigate();
   const [sessionConfigured, setSessionConfigured] = useState(false);
@@ -114,16 +116,18 @@ export function RealtimeVoiceInterface({
   // Track when listening started to enforce minimum duration
   const listeningStartTimeRef = useRef<number | null>(null);
 
-  // Get dog and user IDs for activity logging
+  // Get dog ID for activity logging
   const firstDog = useQuery(api.queries.getFirstDog);
   const dogId = firstDog?._id;
 
-  // Get first user for demo purposes (in real app, this would come from auth)
-  const firstUser = useQuery(
-    api.queries.getFirstUser,
-    firstDog?.householdId ? { householdId: firstDog.householdId } : "skip"
+  // Use selected user ID from props
+  const userId = selectedUserId;
+
+  // Get selected user data for optimistic updates
+  const selectedUser = useQuery(
+    api.queries.getUserById,
+    userId ? { userId } : "skip"
   );
-  const userId = firstUser?._id;
 
   /**
    * Convex mutation for logging activities with optimistic updates.
@@ -166,7 +170,7 @@ export function RealtimeVoiceInterface({
         description: args.description,
         durationMinutes: args.durationMinutes,
         createdAt: Date.now(),
-        userName: firstUser?.name || "You", // Use current user's name
+        userName: selectedUser?.name || "You", // Use selected character's name
         statGains: optimisticStatGains,
       };
 

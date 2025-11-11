@@ -8,6 +8,7 @@ interface ItemCardProps {
   unlockLevel: number;
   isUnlocked: boolean;
   isEquipped: boolean;
+  isNew?: boolean;
   currentLevel: number;
   onEquip?: (itemId: Id<"cosmetic_items">) => void;
   isLoading?: boolean;
@@ -26,6 +27,7 @@ export default function ItemCard({
   unlockLevel,
   isUnlocked,
   isEquipped,
+  isNew = false,
   currentLevel,
   onEquip,
   isLoading = false,
@@ -50,6 +52,13 @@ export default function ItemCard({
       {isEquipped && (
         <div className="absolute top-2 right-2 bg-[#f5c35f] text-[#121216] text-xs font-bold px-2 py-1 rounded">
           EQUIPPED
+        </div>
+      )}
+
+      {/* New Badge */}
+      {!isEquipped && isUnlocked && isNew && (
+        <div className="absolute top-2 right-2 bg-gradient-to-r from-[#ff6b6b] to-[#ff8e53] text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
+          NEW!
         </div>
       )}
 

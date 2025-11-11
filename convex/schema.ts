@@ -24,6 +24,8 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     householdId: v.id("households"),
+    avatarUrl: v.optional(v.string()), // Optional character portrait/avatar URL
+    title: v.optional(v.string()), // Optional title/role (e.g., "Primary Trainer", "Play Partner")
     createdAt: v.number(),
   })
     .index("by_household", ["householdId"])
@@ -161,4 +163,13 @@ export default defineSchema({
     generatedImageUrl: v.string(), // AI-generated image URL
     equippedAt: v.number(), // Timestamp
   }).index("by_dog", ["dogId"]),
+
+  // Newly unlocked items table - tracks items that were recently unlocked to show "New!" badge
+  newly_unlocked_items: defineTable({
+    dogId: v.id("dogs"),
+    itemId: v.id("cosmetic_items"),
+    unlockedAt: v.number(), // Timestamp when item was unlocked
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_item", ["dogId", "itemId"]),
 });

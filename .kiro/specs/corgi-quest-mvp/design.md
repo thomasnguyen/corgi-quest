@@ -1627,6 +1627,11 @@ const RealtimeVoiceInterface = () => {
 # .env.local
 OPENAI_API_KEY=sk-proj-...
 CONVEX_DEPLOYMENT=...
+CLOUDFLARE_IMAGES_API_KEY=...
+CLOUDFLARE_WORKER_URL=https://training-tips.your-worker.workers.dev
+FIRECRAWL_API_KEY=...
+SENTRY_DSN=https://...@sentry.io/...
+AUTUMN_API_KEY=... # Sandbox key for demo
 ```
 
 ### Key Implementation Notes
@@ -1639,4 +1644,500 @@ CONVEX_DEPLOYMENT=...
 6. **Error Recovery**: Always provide a way for users to retry or cancel the voice logging session
 7. **Microphone Permissions**: Request permissions before attempting to connect to OpenAI
 8. **Audio Playback**: OpenAI's audio responses must be played through the device speakers for the user to hear confirmations
+
+---
+
+## Sponsor Integration Architecture
+
+### Overview
+
+Corgi Quest integrates 8 sponsor technologies to demonstrate their capabilities in a real-world hackathon project. Each sponsor provides a specific value to the application while being prominently featured for judges.
+
+### Sponsor Technology Stack
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Sponsor Integrations                     │
+├─────────────────────────────────────────────────────────────┤
+│  1. Convex          - Real-time backend (CORE FEATURE)      │
+│  2. TanStack Start  - Full-stack framework (CORE FEATURE)   │
+│  3. Netlify         - Hosting + CI/CD                        │
+│  4. Cloudflare      - Edge utilities + media hosting         │
+│  5. Firecrawl       - AI quest generation                    │
+│  6. Sentry          - Error monitoring                       │
+│  7. CodeRabbit      - AI code review                         │
+│  8. Autumn          - Tip jar / payments                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 1. Convex Integration (Already Implemented)
+
+**Role:** Real-time backend database and serverless functions
+
+**Implementation:**
+- All queries, mutations, and actions use Convex
+- Real-time subscriptions for instant updates across devices
+- Scheduled functions for daily goal resets
+- Session token generation for OpenAI Realtime API
+
+**Visibility:**
+- Mentioned in README as core technology
+- Real-time sync is the primary demo feature
+- "Powered by Convex" in footer
+
+### 2. TanStack Start Integration (Already Implemented)
+
+**Role:** Full-stack React framework with file-based routing
+
+**Implementation:**
+- All routes use TanStack Start file-based routing
+- Server functions for Firecrawl API integration
+- SSR capabilities for performance
+
+**Visibility:**
+- Mentioned in README as framework
+- "Built with TanStack Start" in footer
+- Server function usage highlighted in code
+
+### 3. Netlify Integration
+
+**Role:** Hosting platform with CI/CD
+
+**Architecture:**
+```
+GitHub Repository
+       │
+       │ (push to main)
+       ▼
+Netlify CI/CD Pipeline
+       │
+       ├─► Build: npm run build
+       ├─► Deploy: .output/public
+       └─► HTTPS: corgi-quest.netlify.app
+```
+
+**Configuration (netlify.toml):**
+```toml
+[build]
+  command = "npm run build"
+  publish = ".output/public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+**Visibility:**
+- Netlify badge in footer
+- Live demo URL shared with judges
+- Automatic deployments on PR merge
+
+### 4. Cloudflare Integration
+
+**Role:** Edge utilities and media hosting
+
+**Architecture:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Cloudflare Services                       │
+├─────────────────────────────────────────────────────────────┤
+│  1. Cloudflare Images                                        │
+│     - Host Bumi's base photo                                 │
+│     - Fast CDN delivery                                      │
+│     - URL: https://imagedelivery.net/[account]/[image-id]   │
+│                                                              │
+│  2. Cloudflare Worker                                        │
+│     - Fetch training tips from Firecrawl                     │
+│     - Edge caching for performance                           │
+│     - URL: https://training-tips.workers.dev                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Cloudflare Worker Implementation:**
+```typescript
+// Cloudflare Worker: training-tips.workers.dev
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const topic = url.searchParams.get("topic") || "dog training";
+    
+    // Call Firecrawl API
+    const firecrawlResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: `https://www.akc.org/expert-advice/training/${topic}`,
+        formats: ["markdown"],
+      }),
+    });
+    
+    const data = await firecrawlResponse.json();
+    
+    // Parse and format tip
+    const tip = {
+      title: extractTitle(data.markdown),
+      description: extractDescription(data.markdown),
+      source: "AKC",
+    };
+    
+    return new Response(JSON.stringify(tip), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "s-maxage=3600", // Cache for 1 hour
+      },
+    });
+  },
+};
+```
+
+**Visibility:**
+- "Powered by Cloudflare" in footer
+- Cloudflare Images URL visible in network tab
+- Edge performance highlighted in README
+
+### 5. Firecrawl Integration
+
+**Role:** AI-powered web scraping for quest generation
+
+**Architecture:**
+```
+TanStack Start Server Function
+       │
+       ▼
+Cloudflare Worker (Edge)
+       │
+       ▼
+Firecrawl API
+       │
+       ├─► Scrape: akc.org/training
+       ├─► Scrape: cesarsway.com
+       └─► Scrape: dogtime.com
+       │
+       ▼
+Parse & Format Tips
+       │
+       ▼
+Store in Convex Database
+       │
+       ▼
+Display in Quests Screen
+```
+
+**TanStack Server Function:**
+```typescript
+// src/routes/api/fetch-tips.ts
+import { createServerFn } from "@tanstack/start";
+
+export const fetchTrainingTips = createServerFn("GET", async () => {
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
+  
+  const topics = ["basic-training", "socialization", "impulse-control"];
+  const tips = [];
+  
+  for (const topic of topics) {
+    const response = await fetch(`${workerUrl}?topic=${topic}`);
+    const tip = await response.json();
+    tips.push(tip);
+  }
+  
+  return tips;
+});
+```
+
+**Daily Cron Job (Convex):**
+```typescript
+// convex/crons.ts
+export default crons;
+
+crons.daily(
+  "fetch-firecrawl-tips",
+  { hourUTC: 6, minuteUTC: 0 }, // 6am UTC
+  internal.actions.fetchAndStoreTips
+);
+```
+
+**Visibility:**
+- "Tips powered by Firecrawl" in Quests screen
+- Firecrawl logo next to AI-generated quests
+- Mentioned in README as AI content source
+
+### 6. Sentry Integration
+
+**Role:** Error monitoring and performance tracking
+
+**Architecture:**
+```
+React Error Boundary
+       │
+       ▼
+Sentry SDK
+       │
+       ├─► Capture: JavaScript errors
+       ├─► Capture: API errors
+       ├─► Capture: Performance metrics
+       └─► Capture: User feedback
+       │
+       ▼
+Sentry Dashboard
+       │
+       └─► Alerts: Email/Slack on errors
+```
+
+**Implementation:**
+```typescript
+// src/router.tsx
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: import.meta.env.SENTRY_DSN,
+  environment: import.meta.env.MODE,
+  integrations: [
+    new Sentry.BrowserTracing(),
+    new Sentry.Replay(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
+
+// Wrap app with ErrorBoundary
+export const App = () => (
+  <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
+    <Router />
+  </Sentry.ErrorBoundary>
+);
+```
+
+**Visibility:**
+- "Monitored by Sentry" in footer
+- Sentry logo in settings/about page
+- Error tracking mentioned in README
+
+### 7. CodeRabbit Integration
+
+**Role:** AI-powered code review on pull requests
+
+**Architecture:**
+```
+GitHub Pull Request
+       │
+       ▼
+CodeRabbit GitHub App
+       │
+       ├─► Analyze: Code changes
+       ├─► Check: Best practices
+       ├─► Suggest: Improvements
+       └─► Comment: On PR
+       │
+       ▼
+Developer Reviews Feedback
+       │
+       └─► Merge PR
+```
+
+**Setup:**
+1. Install CodeRabbit GitHub App from marketplace
+2. Grant access to repository
+3. Configure review rules (optional)
+4. Create PRs to trigger reviews
+
+**Visibility:**
+- CodeRabbit reviews visible in PR comments
+- Screenshots in README
+- "Code reviewed by CodeRabbit" badge in README
+
+### 8. Autumn Integration
+
+**Role:** Tip jar / payment processing
+
+**Architecture:**
+```
+User Completes Milestone
+       │
+       ▼
+Navigate to /thanks Route
+       │
+       ▼
+Display Tip Options
+       │
+       ├─► $3 - Coffee for the devs
+       ├─► $5 - Support Corgi Quest
+       ├─► $10 - Premium supporter
+       └─► Custom amount
+       │
+       ▼
+Autumn Checkout Modal
+       │
+       ├─► Sandbox Mode (Demo)
+       └─► Test Card: 4242 4242 4242 4242
+       │
+       ▼
+Thank You Message
+```
+
+**Implementation:**
+```typescript
+// src/routes/thanks.tsx
+import { AutumnCheckout } from "@autumn/react";
+
+export default function ThanksRoute() {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(5);
+  
+  return (
+    <div className="thanks-screen">
+      <h1>Thanks for Playing Corgi Quest!</h1>
+      <img src="/bumi-happy.png" alt="Happy Bumi" />
+      
+      <div className="tip-section">
+        <h2>Tip Corgi Quest Pro</h2>
+        <p>Support future development and get Bumi a treat!</p>
+        
+        <div className="tip-options">
+          <button onClick={() => handleTip(3)}>$3</button>
+          <button onClick={() => handleTip(5)}>$5</button>
+          <button onClick={() => handleTip(10)}>$10</button>
+        </div>
+        
+        {showCheckout && (
+          <AutumnCheckout
+            apiKey={import.meta.env.AUTUMN_API_KEY}
+            amount={selectedAmount * 100} // cents
+            mode="sandbox"
+            onSuccess={() => showToast("Thank you! 🐕")}
+            onCancel={() => setShowCheckout(false)}
+          />
+        )}
+      </div>
+      
+      <p className="powered-by">Payments by Autumn</p>
+      
+      <button onClick={() => router.navigate("/")}>
+        Back to App
+      </button>
+    </div>
+  );
+}
+```
+
+**Trigger Logic:**
+```typescript
+// Trigger tip jar after milestones
+const checkMilestone = (dog: Dog) => {
+  const milestones = [5, 10, 15, 20, 25];
+  
+  if (milestones.includes(dog.overallLevel)) {
+    const dismissed = localStorage.getItem(`tip-dismissed-${dog.overallLevel}`);
+    
+    if (!dismissed) {
+      router.navigate("/thanks");
+    }
+  }
+};
+```
+
+**Visibility:**
+- "Payments by Autumn" on /thanks page
+- Autumn logo in footer
+- Tip jar mentioned in README
+
+### Sponsor Footer Component
+
+**Implementation:**
+```typescript
+// src/components/layout/Footer.tsx
+export const Footer = () => {
+  return (
+    <footer className="sponsor-footer">
+      <div className="sponsor-badges">
+        <a href="https://convex.dev" target="_blank">
+          <img src="/badges/convex.svg" alt="Powered by Convex" />
+        </a>
+        <a href="https://tanstack.com" target="_blank">
+          <img src="/badges/tanstack.svg" alt="Built with TanStack" />
+        </a>
+        <a href="https://netlify.com" target="_blank">
+          <img src="/badges/netlify.svg" alt="Deployed on Netlify" />
+        </a>
+        <a href="https://cloudflare.com" target="_blank">
+          <img src="/badges/cloudflare.svg" alt="Powered by Cloudflare" />
+        </a>
+        <a href="https://firecrawl.dev" target="_blank">
+          <img src="/badges/firecrawl.svg" alt="Tips by Firecrawl" />
+        </a>
+        <a href="https://sentry.io" target="_blank">
+          <img src="/badges/sentry.svg" alt="Monitored by Sentry" />
+        </a>
+        <a href="https://coderabbit.ai" target="_blank">
+          <img src="/badges/coderabbit.svg" alt="Reviewed by CodeRabbit" />
+        </a>
+        <a href="https://autumn.com" target="_blank">
+          <img src="/badges/autumn.svg" alt="Payments by Autumn" />
+        </a>
+      </div>
+    </footer>
+  );
+};
+```
+
+### Sponsor Integration Summary
+
+| Sponsor | Role | Est. Time | Visibility | Priority |
+|---------|------|-----------|------------|----------|
+| Convex | Real-time backend | ✅ Done | Core feature | Critical |
+| TanStack Start | Framework | ✅ Done | Core feature | Critical |
+| Netlify | Hosting + CI/CD | 20-30 min | Badge + URL | High |
+| Cloudflare | Edge + Media | 1.5 hr | Badge + Worker | High |
+| Firecrawl | AI Quests | 1 hr | In-app feature | Medium |
+| Sentry | Error Monitoring | 15 min | Badge + Dashboard | Medium |
+| CodeRabbit | Code Review | 10 min | README + PRs | Low |
+| Autumn | Tip Jar | 30 min | /thanks page | Low |
+
+**Total Additional Time: ~4 hours**
+
+### Implementation Priority for Hackathon
+
+1. **Netlify** (30 min) - Easiest, most visible to judges
+2. **Sentry** (15 min) - Quick win, shows professionalism
+3. **CodeRabbit** (10 min) - Zero code changes, just setup
+4. **Cloudflare + Firecrawl** (2.5 hr) - Impressive synergy, shows technical depth
+5. **Autumn** (30 min) - Nice-to-have, adds monetization angle
+
+### Testing Sponsor Integrations
+
+**Netlify:**
+- [ ] Verify deployment succeeds
+- [ ] Test live URL loads correctly
+- [ ] Verify automatic deployments work
+
+**Cloudflare:**
+- [ ] Verify Bumi image loads from Cloudflare Images
+- [ ] Test Worker returns training tips
+- [ ] Check edge caching works
+
+**Firecrawl:**
+- [ ] Test server function fetches tips
+- [ ] Verify tips display in Quests screen
+- [ ] Test error handling if Firecrawl fails
+
+**Sentry:**
+- [ ] Trigger test error, verify appears in dashboard
+- [ ] Test error boundary catches errors
+- [ ] Verify performance metrics tracked
+
+**CodeRabbit:**
+- [ ] Create test PR, verify CodeRabbit reviews
+- [ ] Screenshot reviews for README
+
+**Autumn:**
+- [ ] Test checkout modal opens
+- [ ] Test sandbox payment flow
+- [ ] Verify thank you message displays
 

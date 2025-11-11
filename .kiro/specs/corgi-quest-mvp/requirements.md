@@ -412,6 +412,78 @@ Corgi Quest is a real-time multiplayer dog training RPG designed for couples to 
 12. THE System SHALL show a loading state while fetching available characters
 13. THE System SHALL handle the case when no characters are available (show error message)
 
+### Requirement 30: Sponsor Integration - Netlify Deployment
+
+**User Story:** As a developer, I want to deploy the application to Netlify with CI/CD, so that the hackathon judges can see the live demo and recognize Netlify as a sponsor.
+
+#### Acceptance Criteria
+
+1. THE System SHALL be deployed to Netlify using netlify-cli
+2. THE System SHALL include a Netlify badge or mention in the footer
+3. THE System SHALL configure automatic deployments from the main branch
+4. THE System SHALL include a netlify.toml configuration file with build settings
+5. THE System SHALL verify the production deployment is accessible via HTTPS
+
+### Requirement 31: Sponsor Integration - Cloudflare Edge Services
+
+**User Story:** As a developer, I want to use Cloudflare for edge utilities and media hosting, so that the application demonstrates Cloudflare's capabilities and recognizes them as a sponsor.
+
+#### Acceptance Criteria
+
+1. THE System SHALL host Bumi's photo via Cloudflare Images
+2. THE System SHALL create a Cloudflare Worker that fetches training tips from Firecrawl API
+3. THE System SHALL display the edge-fetched training tip in the Quests screen or Overview screen
+4. THE System SHALL include a "Powered by Cloudflare" mention in the footer or settings
+5. THE System SHALL configure Cloudflare Images API with proper authentication
+
+### Requirement 32: Sponsor Integration - Firecrawl AI Quest Generation
+
+**User Story:** As a User, I want AI-powered quest generation using Firecrawl to scrape training ideas, so that I receive fresh activity suggestions daily.
+
+#### Acceptance Criteria
+
+1. THE System SHALL create a TanStack Start server function that calls Firecrawl API
+2. THE System SHALL fetch dog training tips from reputable sources once per day
+3. THE System SHALL store fetched tips in Convex database
+4. THE System SHALL display Firecrawl-generated quests in the Quests screen
+6. THE System SHALL handle Firecrawl API errors gracefully with fallback to static quests
+7. THE System SHALL combine Firecrawl tips with Cloudflare Worker for sponsor synergy
+
+### Requirement 33: Sponsor Integration - Sentry Error Monitoring
+
+**User Story:** As a developer, I want to monitor errors in production using Sentry, so that I can quickly identify and fix issues during the hackathon demo.
+
+#### Acceptance Criteria
+
+1. THE System SHALL integrate @sentry/react package
+2. THE System SHALL initialize Sentry with DSN in the app entry point
+3. THE System SHALL capture and report JavaScript errors to Sentry dashboard
+4. THE System SHALL capture and report API errors to Sentry
+
+### Requirement 34: Sponsor Integration - CodeRabbit AI Code Review
+
+**User Story:** As a developer, I want AI-powered code reviews on pull requests using CodeRabbit, so that code quality is maintained and CodeRabbit is recognized as a sponsor.
+
+#### Acceptance Criteria
+
+1. THE System SHALL have CodeRabbit GitHub App installed on the repository
+2. THE System SHALL create 1-2 pull requests demonstrating CodeRabbit feedback
+3. THE System SHALL include screenshots of CodeRabbit reviews in the README
+4. THE System SHALL mention CodeRabbit in the README under "Development Tools"
+5. THE System SHALL configure CodeRabbit settings for optimal feedback
+
+### Requirement 35: Sponsor Integration - Autumn Tip Jar
+
+**User Story:** As a User, I want to see a "Thanks for Playing" screen with a tip jar option, so that I can support the project and Autumn is recognized as a sponsor.
+
+#### Acceptance Criteria
+
+1. THE System SHALL create a /thanks route displaying a "Tip Corgi Quest Pro" screen
+2. THE System SHALL integrate Autumn sandbox checkout or mock modal
+3. THE System SHALL display the tip jar option after completing a quest or reaching a milestone
+5. THE System SHALL handle tip submission gracefully (sandbox mode for demo)
+6. THE System SHALL provide a "Skip" or "Maybe Later" option on the thanks screen
+
 ---
 
 ## Implementation Notes

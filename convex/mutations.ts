@@ -124,6 +124,8 @@ export const logActivity = mutation({
     );
 
     const dog = await ctx.db.get(args.dogId);
+    const newlyUnlockedItems = [];
+
     if (dog) {
       const dogLevelResult = calculateLevelUp(
         dog.overallLevel,
@@ -143,6 +145,31 @@ export const logActivity = mutation({
           oldLevel: dog.overallLevel,
           newLevel: dogLevelResult.newLevel,
         });
+
+        // Check for newly unlocked items
+        // Items unlock at specific levels (2, 5, 8, 11, 14, 17, etc.)
+        const allItems = await ctx.db.query("cosmetic_items").collect();
+
+        for (const item of allItems) {
+          // Check if this item was just unlocked (level went from below to at/above unlock level)
+          if (
+            dog.overallLevel < item.unlockLevel &&
+            dogLevelResult.newLevel >= item.unlockLevel
+          ) {
+            newlyUnlockedItems.push({
+              itemId: item._id,
+              itemName: item.name,
+              unlockLevel: item.unlockLevel,
+            });
+
+            // Mark this item as newly unlocked
+            await ctx.db.insert("newly_unlocked_items", {
+              dogId: args.dogId,
+              itemId: item._id,
+              unlockedAt: now,
+            });
+          }
+        }
       }
     }
 
@@ -208,6 +235,7 @@ export const logActivity = mutation({
       activityId,
       levelUps: levelUpResults,
       totalXpGained,
+      newlyUnlockedItems,
     };
   },
 });
@@ -410,26 +438,121 @@ export const invalidateRecommendationCache = mutation({
 });
 
 /**
- * Equip Item Mutation (Placeholder)
+ * Mark Item as Seen Mutation
  *
- * Equips a cosmetic item to a dog.
- * This is a placeholder for task 91 - full implementation coming soon.
+ * Removes the "New!" badge from a newly unlocked item.
+ * Called when user views the ITEMS tab or equips the item.
  */
-export const equipItem = mutation({
+export const markItemAsSeen = mutation({
   args: {
     dogId: v.id("dogs"),
     itemId: v.id("cosmetic_items"),
   },
   handler: async (ctx, args) => {
-    // TODO: Implement in task 91
-    // - Check if image already exists for this item
-    // - If not, call generateItemImage action
-    // - Delete any existing equipped_items record for this dog
-    // - Insert new equipped_items record
-    // - Return equipped item with image URL
+    // Find the newly_unlocked_items record
+    const newlyUnlockedItem = await ctx.db
+      .query("newly_unlocked_items")
+      .withIndex("by_dog_and_item", (q) =>
+        q.eq("dogId", args.dogId).eq("itemId", args.itemId)
+      )
+      .first();
 
-    throw new Error(
-      "equipItem mutation not yet implemented - coming in task 91"
-    );
+    if (newlyUnlockedItem) {
+      await ctx.db.delete(newlyUnlockedItem._id);
+      return { success: true, removed: true };
+    }
+
+    return { success: true, removed: false };
+  },
+});
+
+/**
+ * Equip Item Mutation
+ *
+ * Equips a cosmetic item to a dog.
+ * Only one item can be equipped at a time - equipping a new item automatically unequips the previous one.
+ * For hackathon demo, images are manually created and passed as imageUrl parameter.
+ */
+export const equipItem = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    itemId: v.id("cosmetic_items"),
+    imageUrl: v.string(), // Manually created image URL
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Step 1: Delete any existing equipped_items record for this dog (only one item at a time)
+    const existingEquippedItem = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .first();
+
+    if (existingEquippedItem) {
+      await ctx.db.delete(existingEquippedItem._id);
+    }
+
+    // Step 2: Insert new equipped_items record with provided imageUrl
+    const equippedItemId = await ctx.db.insert("equipped_items", {
+      dogId: args.dogId,
+      itemId: args.itemId,
+      generatedImageUrl: args.imageUrl,
+      equippedAt: now,
+    });
+
+    // Step 3: Mark item as seen (remove "New!" badge)
+    const newlyUnlockedItem = await ctx.db
+      .query("newly_unlocked_items")
+      .withIndex("by_dog_and_item", (q) =>
+        q.eq("dogId", args.dogId).eq("itemId", args.itemId)
+      )
+      .first();
+
+    if (newlyUnlockedItem) {
+      await ctx.db.delete(newlyUnlockedItem._id);
+    }
+
+    // Step 4: Get the item details to return
+    const item = await ctx.db.get(args.itemId);
+
+    return {
+      success: true,
+      equippedItemId,
+      itemName: item?.name,
+      imageUrl: args.imageUrl,
+    };
+  },
+});
+
+/**
+ * Unequip Item Mutation
+ *
+ * Removes the currently equipped cosmetic item from a dog.
+ * The dog's portrait will return to the base image (🐕 emoji or default image).
+ * Updates in real-time on all connected devices.
+ */
+export const unequipItem = mutation({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Find and delete the equipped_items record for this dog
+    const existingEquippedItem = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .first();
+
+    if (existingEquippedItem) {
+      await ctx.db.delete(existingEquippedItem._id);
+      return {
+        success: true,
+        unequipped: true,
+      };
+    }
+
+    return {
+      success: true,
+      unequipped: false, // No item was equipped
+    };
   },
 });

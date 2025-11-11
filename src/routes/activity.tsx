@@ -8,6 +8,7 @@ import TodaysBreakdown from "../components/activity/TodaysBreakdown";
 import MoodPicker, { MoodType } from "../components/mood/MoodPicker";
 import { useToast } from "../contexts/ToastContext";
 import { useState, useMemo } from "react";
+import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
 
 export const Route = createFileRoute("/activity")({
   component: ActivityPage,
@@ -40,6 +41,9 @@ function ActivityPage() {
   const [showMoodPicker, setShowMoodPicker] = useState(false);
   const { showToast } = useToast();
   const logMoodMutation = useMutation(api.mutations.logMood);
+
+  // Get selected character
+  const { selectedCharacterId } = useSelectedCharacter();
 
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
@@ -99,15 +103,12 @@ function ActivityPage() {
 
   // Handle mood logging
   const handleMoodConfirm = async (mood: MoodType, note?: string) => {
-    if (!firstDog || !householdUsers || householdUsers.length === 0) return;
+    if (!firstDog || !selectedCharacterId) return;
 
     try {
-      // Use first user as default (in real app, would use authenticated user)
-      const userId = householdUsers[0]._id;
-
       await logMoodMutation({
         dogId: firstDog._id,
-        userId,
+        userId: selectedCharacterId,
         mood,
         note,
       });

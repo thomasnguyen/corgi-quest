@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectCharacterRouteImport } from './routes/select-character'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as LogActivityRouteImport } from './routes/log-activity'
 import { Route as BumiRouteImport } from './routes/bumi'
@@ -25,6 +26,11 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const SelectCharacterRoute = SelectCharacterRouteImport.update({
+  id: '/select-character',
+  path: '/select-character',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestsRoute = QuestsRouteImport.update({
   id: '/quests',
   path: '/quests',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
+  '/select-character': typeof SelectCharacterRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/activity': typeof ActivityRoute
   '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
+  '/select-character': typeof SelectCharacterRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests': typeof QuestsIndexRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
+  '/select-character': typeof SelectCharacterRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/bumi'
     | '/log-activity'
     | '/quests'
+    | '/select-character'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/bumi'
     | '/log-activity'
+    | '/select-character'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/bumi'
     | '/log-activity'
     | '/quests'
+    | '/select-character'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   BumiRoute: typeof BumiRoute
   LogActivityRoute: typeof LogActivityRoute
   QuestsRoute: typeof QuestsRouteWithChildren
+  SelectCharacterRoute: typeof SelectCharacterRoute
   StatsStatTypeRoute: typeof StatsStatTypeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -223,6 +236,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-character': {
+      id: '/select-character'
+      path: '/select-character'
+      fullPath: '/select-character'
+      preLoaderRoute: typeof SelectCharacterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quests': {
       id: '/quests'
       path: '/quests'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   BumiRoute: BumiRoute,
   LogActivityRoute: LogActivityRoute,
   QuestsRoute: QuestsRouteWithChildren,
+  SelectCharacterRoute: SelectCharacterRoute,
   StatsStatTypeRoute: StatsStatTypeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,

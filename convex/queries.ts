@@ -48,6 +48,20 @@ export const getHouseholdUsers = query({
 });
 
 /**
+ * Query to get a user by ID
+ * Returns the user with the specified ID
+ */
+export const getUserById = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    return user;
+  },
+});
+
+/**
  * Query to get dog profile with all stats
  * Returns dog info and all 4 stat records
  */
@@ -441,6 +455,7 @@ export const getCachedRecommendations = query({
 /**
  * Query to get all cosmetic items with unlock status
  * Returns all items with a flag indicating if they're unlocked based on dog's level
+ * and if they're newly unlocked (show "New!" badge)
  */
 export const getAllCosmeticItems = query({
   args: {
@@ -456,10 +471,21 @@ export const getAllCosmeticItems = query({
     // Get all cosmetic items
     const items = await ctx.db.query("cosmetic_items").collect();
 
-    // Add unlock status to each item
+    // Get newly unlocked items for this dog
+    const newlyUnlockedItems = await ctx.db
+      .query("newly_unlocked_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    const newlyUnlockedItemIds = new Set(
+      newlyUnlockedItems.map((item) => item.itemId)
+    );
+
+    // Add unlock status and "new" status to each item
     const itemsWithStatus = items.map((item) => ({
       ...item,
       isUnlocked: dog.overallLevel >= item.unlockLevel,
+      isNew: newlyUnlockedItemIds.has(item._id),
     }));
 
     // Sort by unlock level

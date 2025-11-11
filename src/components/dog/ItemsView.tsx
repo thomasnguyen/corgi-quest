@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Dog } from "../../lib/types";
 import { Id } from "convex/_generated/dataModel";
@@ -17,6 +17,7 @@ interface ItemsViewProps {
 export default function ItemsView({ dog }: ItemsViewProps) {
   const [loadingItemId, setLoadingItemId] =
     useState<Id<"cosmetic_items"> | null>(null);
+  const [isUnequipping, setIsUnequipping] = useState(false);
 
   // Get all cosmetic items with unlock status
   const allItems = useQuery(api.queries.getAllCosmeticItems, {
@@ -28,19 +29,38 @@ export default function ItemsView({ dog }: ItemsViewProps) {
     dogId: dog._id,
   });
 
-  // Equip item mutation (placeholder - will be implemented in task 91)
-  // const equipItemMutation = useMutation(api.mutations.equipItem);
+  // Mutations
+  const unequipItemMutation = useMutation(api.mutations.unequipItem);
+  const equipItemMutation = useMutation(api.mutations.equipItem);
 
   const handleEquip = async (itemId: Id<"cosmetic_items">) => {
     try {
       setLoadingItemId(itemId);
-      // TODO: Implement equipItem mutation in task 91
-      // await equipItemMutation({ dogId: dog._id, itemId });
-      console.log("Equip item:", itemId);
+
+      // For hackathon demo: use placeholder image URL
+      // In production, this would call an AI image generation service
+      const placeholderImageUrl = `https://placehold.co/400x400/1a1a1a/f5c35f?text=${encodeURIComponent("🐕")}`;
+
+      await equipItemMutation({
+        dogId: dog._id,
+        itemId,
+        imageUrl: placeholderImageUrl,
+      });
     } catch (error) {
       console.error("Failed to equip item:", error);
     } finally {
       setLoadingItemId(null);
+    }
+  };
+
+  const handleUnequip = async () => {
+    try {
+      setIsUnequipping(true);
+      await unequipItemMutation({ dogId: dog._id });
+    } catch (error) {
+      console.error("Failed to unequip item:", error);
+    } finally {
+      setIsUnequipping(false);
     }
   };
 
@@ -88,9 +108,19 @@ export default function ItemsView({ dog }: ItemsViewProps) {
               {equippedItem ? equippedItem.item.name : "Nothing"}
             </p>
             {equippedItem && (
-              <p className="text-[#f5c35f] text-xs mt-1">
-                {equippedItem.item.icon} {equippedItem.item.description}
-              </p>
+              <>
+                <p className="text-[#f5c35f] text-xs mt-1">
+                  {equippedItem.item.icon} {equippedItem.item.description}
+                </p>
+                {/* Unequip Button */}
+                <button
+                  onClick={handleUnequip}
+                  disabled={isUnequipping}
+                  className="mt-3 px-4 py-2 bg-[#2a2a2a] text-white text-sm rounded-lg border border-[#444] hover:bg-[#333] hover:border-[#666] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUnequipping ? "Unequipping..." : "Unequip"}
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -112,6 +142,7 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                   unlockLevel={item.unlockLevel}
                   isUnlocked={true}
                   isEquipped={item._id === equippedItemId}
+                  isNew={item.isNew}
                   currentLevel={dog.overallLevel}
                   onEquip={handleEquip}
                   isLoading={loadingItemId === item._id}

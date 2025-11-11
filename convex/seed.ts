@@ -4,7 +4,7 @@ import { mutation } from "./_generated/server";
  * Seed mutation to create demo household data
  *
  * Creates:
- * - Household with two users (Thomas and Holly)
+ * - Household with three users (Thomas, Holly, and Guest)
  * - Dog "Bumi" at level 8
  * - Four dog stats with varying levels
  * - Today's daily goals with partial progress
@@ -42,11 +42,13 @@ export const seedDemoData = mutation({
     // Step 3: Update household with dog reference
     await ctx.db.patch(householdId, { dogId });
 
-    // Step 4: Create two users
+    // Step 4: Create three users
     const thomasId = await ctx.db.insert("users", {
       name: "Thomas",
       email: "thomas@example.com",
       householdId,
+      title: "Primary Trainer",
+      avatarUrl: "👨",
       createdAt: now,
     });
 
@@ -54,6 +56,17 @@ export const seedDemoData = mutation({
       name: "Holly",
       email: "holly@example.com",
       householdId,
+      title: "Play Partner",
+      avatarUrl: "👩",
+      createdAt: now,
+    });
+
+    const guestId = await ctx.db.insert("users", {
+      name: "Guest",
+      email: "guest@example.com",
+      householdId,
+      title: "Training Buddy",
+      avatarUrl: "🧑",
       createdAt: now,
     });
 
@@ -217,7 +230,7 @@ export const seedDemoData = mutation({
     });
 
     // Level 8: Grass type
-    await ctx.db.insert("cosmetic_items", {
+    const forestCapeId = await ctx.db.insert("cosmetic_items", {
       name: "Forest Cape",
       description: "A leafy green cape that brings nature's vitality",
       unlockLevel: 8,
@@ -256,15 +269,25 @@ export const seedDemoData = mutation({
       createdAt: now,
     });
 
+    // Step 10: Equip the Forest Cape (level 8 item) since Bumi is level 8
+    // Using placeholder image URL - replace with actual image path
+    await ctx.db.insert("equipped_items", {
+      dogId,
+      itemId: forestCapeId,
+      generatedImageUrl: "/images/bumi-forest-cape.png", // Placeholder - replace with actual image
+      equippedAt: now,
+    });
+
     return {
       success: true,
       message: "Demo data seeded successfully",
       data: {
         householdId,
         dogId,
-        userIds: { thomasId, hollyId },
+        userIds: { thomasId, hollyId, guestId },
         activityCount: 4,
         cosmeticItemsCount: 6,
+        equippedItemId: forestCapeId,
       },
     };
   },
