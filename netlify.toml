@@ -7,6 +7,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # VITE_ prefixed vars are public and safe to expose in browser
+  SECRETS_SCAN_OMIT_KEYS = "VITE_CONVEX_URL"
+  SECRETS_SCAN_OMIT_PATHS = "TASK_92_TESTING.md,.netlify/functions-internal/**"
 
 # Note: Nitro handles redirects automatically via dist/_redirects
 
