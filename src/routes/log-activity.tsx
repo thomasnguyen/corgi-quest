@@ -1,10 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
-import { RealtimeVoiceInterface } from "../components/voice/RealtimeVoiceInterface";
 import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
+
+// Dynamically import the client-only wrapper to avoid bundling browser-only deps in server function
+// The .client.tsx extension and "use client" directive ensure this is never bundled in server functions
+const RealtimeVoiceInterface = lazy(
+  () =>
+    import("../components/voice/RealtimeVoiceInterface.client").then((mod) => ({
+      default: mod.RealtimeVoiceInterface,
+    }))
+);
 
 // Define search params schema
 interface LogActivitySearch {
@@ -58,10 +66,12 @@ function LogActivityPage() {
 
   return (
     <Layout>
-      <RealtimeVoiceInterface
-        questName={activityContext}
-        userId={selectedCharacterId || undefined}
-      />
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading voice interface...</div>}>
+        <RealtimeVoiceInterface
+          questName={activityContext}
+          userId={selectedCharacterId || undefined}
+        />
+      </Suspense>
     </Layout>
   );
 }

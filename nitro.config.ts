@@ -9,6 +9,9 @@ export default defineNitroConfig({
       dir: "public",
     },
   ],
-  // Note: Browser-only packages are excluded via Vite SSR config
-  // to prevent CommonJS/ESM import issues in serverless functions
+  // Exclude browser-only packages from server bundle
+  // These packages use browser APIs and CommonJS modules that don't work in serverless functions
+  // The vite.config.ts ssr.external should handle this, but we configure it here too for Nitro
+  // Note: With TanStack Start and Netlify plugin, these should be excluded automatically
+  // but we're being explicit here to ensure they're not bundled
 });
