@@ -20,6 +20,9 @@ const config = defineConfig({
     headers: {
       "Cache-Control": "no-cache, no-store, must-revalidate",
     },
+    watch: {
+      ignored: ["**/.nitro/**", "**/.output/**", "**/.tanstack/**"],
+    },
   },
 });
 

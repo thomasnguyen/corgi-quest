@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as LogActivityRouteImport } from './routes/log-activity'
+import { Route as BumiRouteImport } from './routes/bumi'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestsIndexRouteImport } from './routes/quests.index'
@@ -32,6 +33,11 @@ const QuestsRoute = QuestsRouteImport.update({
 const LogActivityRoute = LogActivityRouteImport.update({
   id: '/log-activity',
   path: '/log-activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BumiRoute = BumiRouteImport.update({
+  id: '/bumi',
+  path: '/bumi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivityRoute = ActivityRouteImport.update({
@@ -98,6 +104,7 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
   '/quests/$questId': typeof QuestsQuestIdRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
+  '/bumi': typeof BumiRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
   '/quests/$questId': typeof QuestsQuestIdRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activity'
+    | '/bumi'
     | '/log-activity'
     | '/quests'
     | '/quests/$questId'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activity'
+    | '/bumi'
     | '/log-activity'
     | '/quests/$questId'
     | '/stats/$statType'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activity'
+    | '/bumi'
     | '/log-activity'
     | '/quests'
     | '/quests/$questId'
@@ -196,6 +208,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivityRoute: typeof ActivityRoute
+  BumiRoute: typeof BumiRoute
   LogActivityRoute: typeof LogActivityRoute
   QuestsRoute: typeof QuestsRouteWithChildren
   StatsStatTypeRoute: typeof StatsStatTypeRoute
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/log-activity'
       fullPath: '/log-activity'
       preLoaderRoute: typeof LogActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bumi': {
+      id: '/bumi'
+      path: '/bumi'
+      fullPath: '/bumi'
+      preLoaderRoute: typeof BumiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activity': {
@@ -327,6 +347,7 @@ const QuestsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityRoute: ActivityRoute,
+  BumiRoute: BumiRoute,
   LogActivityRoute: LogActivityRoute,
   QuestsRoute: QuestsRouteWithChildren,
   StatsStatTypeRoute: StatsStatTypeRoute,

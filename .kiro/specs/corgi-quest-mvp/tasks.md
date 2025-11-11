@@ -743,7 +743,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Show "Last updated: X minutes ago" in UI
   - _Requirements: 27_
 
-- [ ] 79. Add error handling for AI recommendations
+- [x] 79. Add error handling for AI recommendations
   - Handle OpenAI API failures gracefully
   - Show user-friendly error message
   - Provide retry button
@@ -752,16 +752,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Show fallback message if no recommendations available
   - _Requirements: 27_
 
-- [ ] *80. Polish AI recommendations UI
-  - Style recommendation cards to match app design
-  - Add visual distinction from regular quests
-  - Show AI icon/badge
-  - Add smooth loading animations
-  - Ensure mobile-responsive layout
-  - Test on various screen sizes
-  - _Requirements: 27_
-
-- [ ] 81. Add BUMI tab to bottom navigation
+- [x] 81. Add BUMI tab to bottom navigation
   - Update src/components/layout/BottomNav.tsx
   - Add 4th tab: "BUMI"
   - Add navigation route /bumi
@@ -778,8 +769,8 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - _Requirements: 28_
 
 - [ ] 83. Seed cosmetic items data
-  - Create seed data for cosmetic items (1 per level, starting at level 2)
-  - Define item types: warrior, mage, ranger, paladin, etc.
+  - Create seed data for cosmetic items (1 per 3 levels, starting at level 2)
+  - Define item types: fire, water, grass, sun, moon, ground
   - Add icons/emojis for each item
   - Add descriptions for each item
   - Update seed mutation to include cosmetic items

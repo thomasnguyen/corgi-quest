@@ -5,6 +5,7 @@ export default function BottomNav() {
     { name: "Overview", path: "/", image: "/overview_menu.svg" },
     { name: "Quests", path: "/quests", image: "/quests_menu.svg" },
     { name: "Activity", path: "/activity", image: "/activity_menu.svg" },
+    { name: "BUMI", path: "/bumi", image: "/overview_menu.svg" },
   ];
 
   return (

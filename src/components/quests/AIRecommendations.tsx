@@ -105,6 +105,16 @@ export default function AIRecommendations() {
 
     try {
       const result = await generateRecommendations({ dogId: firstDog._id });
+
+      // Handle empty results
+      if (!result || result.length === 0) {
+        setError(
+          "No recommendations available. Log some activities and moods to get personalized suggestions."
+        );
+        setRecommendations([]);
+        return;
+      }
+
       setRecommendations(result);
       const now = new Date();
       setLastUpdated(now);
@@ -116,11 +126,31 @@ export default function AIRecommendations() {
       });
     } catch (err) {
       console.error("Failed to generate recommendations:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to generate recommendations. Please try again."
-      );
+
+      // Provide user-friendly error messages
+      let errorMessage =
+        "Failed to generate recommendations. Please try again.";
+
+      if (err instanceof Error) {
+        // Use the error message from the action if it's user-friendly
+        if (
+          err.message.includes("Rate limit") ||
+          err.message.includes("authentication") ||
+          err.message.includes("temporarily unavailable") ||
+          err.message.includes("Network error") ||
+          err.message.includes("not configured")
+        ) {
+          errorMessage = err.message;
+        } else if (err.message.includes("No recommendations generated")) {
+          errorMessage =
+            "Unable to generate recommendations. Try logging more activities and moods first.";
+        } else {
+          // Generic error with hint
+          errorMessage = `${err.message}. If this persists, try again later.`;
+        }
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -173,6 +203,11 @@ export default function AIRecommendations() {
 
   // Error state
   if (error) {
+    // Determine if this is a rate limit or network error for specific messaging
+    const isRateLimit = error.includes("Rate limit");
+    const isNetworkError = error.includes("Network error");
+    const isConfigError = error.includes("not configured");
+
     return (
       <div className="px-5 py-8">
         <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -180,17 +215,37 @@ export default function AIRecommendations() {
             <AlertCircle size={32} className="text-[#f5c35f]" strokeWidth={2} />
           </div>
           <p className="text-[#feefd0] text-sm font-medium mb-2">
-            Unable to Generate Recommendations
+            {isRateLimit
+              ? "Too Many Requests"
+              : isNetworkError
+                ? "Connection Error"
+                : isConfigError
+                  ? "Configuration Error"
+                  : "Unable to Generate Recommendations"}
           </p>
-          <p className="text-[#f9dca0] text-xs text-center max-w-xs mb-6">
+          <p className="text-[#f9dca0] text-xs text-center max-w-xs mb-4">
             {error}
           </p>
-          <button
-            onClick={handleRefresh}
-            className="px-6 py-2 bg-[#f5c35f] text-[#121216] font-medium text-sm rounded-lg hover:bg-[#fcd587] transition-colors"
-          >
-            Try Again
-          </button>
+
+          {/* Additional help text for specific errors */}
+          {isRateLimit && (
+            <p className="text-[#f9dca0]/60 text-xs text-center max-w-xs mb-6">
+              Wait a few moments before trying again
+            </p>
+          )}
+          {isNetworkError && (
+            <p className="text-[#f9dca0]/60 text-xs text-center max-w-xs mb-6">
+              Check your connection and try again
+            </p>
+          )}
+          {!isConfigError && (
+            <button
+              onClick={handleRefresh}
+              className="px-6 py-2 bg-[#f5c35f] text-[#121216] font-medium text-sm rounded-lg hover:bg-[#fcd587] transition-colors"
+            >
+              Try Again
+            </button>
+          )}
         </div>
       </div>
     );

@@ -114,6 +114,13 @@ export const generateRecommendations = action({
         (activity: any) => activity.createdAt >= sevenDaysAgo
       );
 
+      // Check if we have enough data to generate meaningful recommendations
+      if (recentActivities.length === 0 && recentMoods.length === 0) {
+        throw new Error(
+          "Not enough data to generate recommendations. Log some activities and moods first to get personalized suggestions."
+        );
+      }
+
       // Query current stats
       const dogProfile = await ctx.runQuery(api.queries.getDogProfile, {
         dogId: args.dogId,
@@ -176,10 +183,13 @@ export const generateRecommendations = action({
         goalsSummary,
       });
 
-      // Call OpenAI Chat Completion API
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
+      // Call OpenAI Chat Completion API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      let response;
+      try {
+        response = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -194,14 +204,41 @@ export const generateRecommendations = action({
             temperature: 0.7,
             response_format: { type: "json_object" },
           }),
+          signal: controller.signal,
+        });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError instanceof Error && fetchError.name === "AbortError") {
+          throw new Error(
+            "Request timed out. The AI service is taking too long to respond. Please try again."
+          );
         }
-      );
+        throw fetchError;
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
-          `OpenAI API request failed: ${response.status} ${response.statusText} - ${errorText}`
-        );
+
+        // Handle specific error cases
+        if (response.status === 429) {
+          throw new Error(
+            "Rate limit exceeded. Please wait a moment and try again."
+          );
+        } else if (response.status === 401) {
+          throw new Error(
+            "OpenAI API authentication failed. Please check your API key configuration."
+          );
+        } else if (response.status >= 500) {
+          throw new Error(
+            "OpenAI service is temporarily unavailable. Please try again in a few moments."
+          );
+        } else {
+          throw new Error(
+            `OpenAI API request failed: ${response.status} ${response.statusText}`
+          );
+        }
       }
 
       const data = await response.json();
@@ -244,6 +281,29 @@ export const generateRecommendations = action({
       }));
     } catch (error) {
       if (error instanceof Error) {
+        // Check for network errors
+        if (
+          error.message.includes("fetch failed") ||
+          error.message.includes("network") ||
+          error.message.includes("ECONNREFUSED") ||
+          error.message.includes("ETIMEDOUT")
+        ) {
+          throw new Error(
+            "Network error. Please check your internet connection and try again."
+          );
+        }
+
+        // Re-throw with original message if it's already user-friendly
+        if (
+          error.message.includes("Rate limit") ||
+          error.message.includes("authentication") ||
+          error.message.includes("temporarily unavailable") ||
+          error.message.includes("not configured")
+        ) {
+          throw error;
+        }
+
+        // Generic error with details
         throw new Error(`Failed to generate recommendations: ${error.message}`);
       }
       throw new Error("Failed to generate recommendations: Unknown error");
