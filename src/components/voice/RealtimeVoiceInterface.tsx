@@ -130,6 +130,28 @@ export function RealtimeVoiceInterface({
     }
   }, []);
 
+  // Determine if CircularWaveform can be safely rendered
+  const canRenderWaveform = React.useMemo(() => {
+    if (!CircularWaveform || !audioTrack) {
+      return false;
+    }
+    // Check that audioTrack is in a valid state (must be "live")
+    if (audioTrack.readyState !== "live") {
+      return false;
+    }
+    // Validate that audioTrack has valid settings (CircularWaveform may access these)
+    try {
+      const settings = audioTrack.getSettings();
+      if (!settings || typeof settings !== "object") {
+        return false;
+      }
+    } catch (error) {
+      // If getSettings() fails, don't render
+      return false;
+    }
+    return true;
+  }, [CircularWaveform, audioTrack]);
+
   // Track if recording has been started to prevent double-start in strict mode
   const recordingStartedRef = useRef(false);
 
@@ -1100,7 +1122,7 @@ export function RealtimeVoiceInterface({
                   : "animate-voice-glow"
             }`}
           >
-            {CircularWaveform && audioTrack ? (
+            {canRenderWaveform && CircularWaveform ? (
               <CircularWaveform
                 size={300}
                 numBars={32}
@@ -1124,7 +1146,7 @@ export function RealtimeVoiceInterface({
                 backgroundColor="transparent"
                 sensitivity={1.5}
                 rotationEnabled={true}
-                audioTrack={audioTrack}
+                audioTrack={audioTrack!}
               />
             ) : (
               // Fallback while loading
