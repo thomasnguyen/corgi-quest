@@ -50,8 +50,34 @@ function OverviewPage() {
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
+  // Determine background based on equipped item (calculate early, before conditionals)
+  const backgroundImage =
+    equippedItem?.item?.itemType === "moon" ? "/mage_bg.webp" : "/smoke_bg.svg";
+
+  // Fallback for browsers that don't support WebP
+  const backgroundImageFallback =
+    equippedItem?.item?.itemType === "moon" ? "/mage_bg.png" : "/smoke_bg.svg";
+
+  // Preload the background image for faster rendering (must be before any conditional returns)
+  useEffect(() => {
+    if (backgroundImage) {
+      preloadImage(backgroundImage);
+      // Also preload fallback for non-WebP browsers
+      if (
+        backgroundImageFallback &&
+        backgroundImage !== backgroundImageFallback
+      ) {
+        preloadImage(backgroundImageFallback);
+      }
+    }
+  }, [backgroundImage, backgroundImageFallback]);
+
   // Loading state
-  if (firstDog === undefined || dogProfile === undefined || equippedItem === undefined) {
+  if (
+    firstDog === undefined ||
+    dogProfile === undefined ||
+    equippedItem === undefined
+  ) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
@@ -81,37 +107,16 @@ function OverviewPage() {
 
   const { dog, stats } = dogProfile;
 
-  // Determine background based on equipped item
-  const backgroundImage = equippedItem?.item?.itemType === "moon" 
-    ? "/mage_bg.webp" 
-    : "/smoke_bg.svg";
-  
-  // Fallback for browsers that don't support WebP
-  const backgroundImageFallback = equippedItem?.item?.itemType === "moon" 
-    ? "/mage_bg.png" 
-    : "/smoke_bg.svg";
-
-  // Preload the background image for faster rendering
-  useEffect(() => {
-    if (backgroundImage) {
-      preloadImage(backgroundImage);
-      // Also preload fallback for non-WebP browsers
-      if (backgroundImageFallback && backgroundImage !== backgroundImageFallback) {
-        preloadImage(backgroundImageFallback);
-      }
-    }
-  }, [backgroundImage, backgroundImageFallback]);
-
   return (
     <Layout>
-      <div 
+      <div
         className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
-        style={{ 
-          backgroundImage: `url('${backgroundImage}'), url('${backgroundImageFallback}')` 
+        style={{
+          backgroundImage: `url('${backgroundImage}'), url('${backgroundImageFallback}')`,
         }}
       >
         {/* Content */}
-        <div className="relative z-10 pb-32">
+        <div className="relative z-10 pb-32 pt-6">
           {/* Top Resource Bar */}
           <TopResourceBar />
 
@@ -147,7 +152,7 @@ function OverviewPage() {
           {/* Stats Display - Overlapping bottom of portrait */}
         </div>
 
-        <div className="fixed bottom-25 left-0 right-0  py-4 px-4">
+        <div className="fixed bottom-28 left-0 right-0 py-4 px-4">
           <StatGrid stats={stats} />
 
           <LogActivityButton />

@@ -19,7 +19,7 @@ export default function BottomNav() {
           "radial-gradient(ellipse at bottom, rgba(73,46,37,0.8) 0%, rgba(47,33,32,0.8) 25%, rgba(20,19,27,0.8) 50%, rgba(25,31,47,0.8) 100%)",
       }}
     >
-      <div className="max-w-md mx-auto flex items-stretch justify-between px-5 py-2.5">
+      <div className="max-w-md mx-auto flex items-stretch justify-between px-5 py-4 pb-6">
         {tabs.map((tab) => {
           // For root path, only match exactly
           // For other paths, match if current path starts with the tab path

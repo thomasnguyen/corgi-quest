@@ -86,8 +86,6 @@ export default function CharacterSelection() {
           </div>
         </div>
       </div>
-      {/* dark background under the content*/}
-      <div className="bg-[#121216] h-screen w-full absolute bottom-0 left-0 right-0 z-0"></div>
     </>
   );
 }
