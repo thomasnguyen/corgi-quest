@@ -16,6 +16,14 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  optimizeDeps: {
+    include: ["@pipecat-ai/client-js", "@pipecat-ai/voice-ui-kit"],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
+  },
   server: {
     headers: {
       "Cache-Control": "no-cache, no-store, must-revalidate",
