@@ -1100,7 +1100,7 @@ export function RealtimeVoiceInterface({
                   : "animate-voice-glow"
             }`}
           >
-            {CircularWaveform ? (
+            {CircularWaveform && audioTrack ? (
               <CircularWaveform
                 size={300}
                 numBars={32}

@@ -7,11 +7,10 @@ import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
 
 // Dynamically import the client-only wrapper to avoid bundling browser-only deps in server function
 // Single lazy load - the .client.tsx wrapper ensures it's never bundled in server functions
-const RealtimeVoiceInterface = lazy(
-  () =>
-    import("../components/voice/RealtimeVoiceInterface.client").then((mod) => ({
-      default: mod.RealtimeVoiceInterface,
-    }))
+const RealtimeVoiceInterface = lazy(() =>
+  import("../components/voice/RealtimeVoiceInterface.client").then((mod) => ({
+    default: mod.RealtimeVoiceInterface,
+  }))
 );
 
 // Define search params schema
@@ -39,7 +38,7 @@ function LogActivityPage() {
   const activityContext = questName || prefilledActivity;
 
   // Get selected character
-  const { selectedCharacterId, selectedUser } = useSelectedCharacter();
+  const { selectedCharacterId } = useSelectedCharacter();
 
   // Presence mutations
   const updatePresence = useMutation(api.mutations.updatePresence);
@@ -66,7 +65,13 @@ function LogActivityPage() {
 
   return (
     <Layout>
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading voice interface...</div>}>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            Loading voice interface...
+          </div>
+        }
+      >
         <RealtimeVoiceInterface
           questName={activityContext}
           userId={selectedCharacterId || undefined}
