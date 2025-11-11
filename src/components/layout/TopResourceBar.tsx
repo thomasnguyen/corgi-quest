@@ -92,13 +92,19 @@ export default function TopResourceBar() {
             <Flame size={16} strokeWidth={2} className="text-orange-500" />
             <span className="text-[#f9dca0] text-xs font-medium">0</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
-            <Dumbbell size={16} strokeWidth={2} className="text-cyan-400" />
+          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
+            <Dumbbell size={14} strokeWidth={2} className="text-cyan-400" />
             <span className="text-[#f9dca0] text-xs font-medium">0/50</span>
+            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+              STR
+            </span>
           </div>
-          <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
-            <Brain size={16} strokeWidth={2} className="text-purple-400" />
+          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
+            <Brain size={14} strokeWidth={2} className="text-purple-400" />
             <span className="text-[#f9dca0] text-xs font-medium">0/30</span>
+            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+              MEN
+            </span>
           </div>
           <button
             className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30"
@@ -135,16 +141,22 @@ export default function TopResourceBar() {
               {currentStreak}
             </span>
           </div>
-          <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
-            <Dumbbell size={16} strokeWidth={2} className="text-cyan-400" />
+          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
+            <Dumbbell size={14} strokeWidth={2} className="text-cyan-400" />
             <span className="text-[#f9dca0] text-xs font-medium">
               {physicalPoints}/{physicalGoal}
             </span>
+            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+              STR
+            </span>
           </div>
-          <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
-            <Brain size={16} strokeWidth={2} className="text-purple-400" />
+          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
+            <Brain size={14} strokeWidth={2} className="text-purple-400" />
             <span className="text-[#f9dca0] text-xs font-medium">
               {mentalPoints}/{mentalGoal}
+            </span>
+            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+              MEN
             </span>
           </div>
           <button
