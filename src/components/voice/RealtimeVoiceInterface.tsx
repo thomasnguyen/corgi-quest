@@ -1,4 +1,6 @@
-import { CircularWaveform } from "@pipecat-ai/voice-ui-kit";
+// NO TOP-LEVEL IMPORT - This prevents server bundling
+// CircularWaveform will be dynamically imported inside the component
+
 import { useOpenAIRealtime } from "../../hooks/useOpenAIRealtime";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -109,6 +111,22 @@ export function RealtimeVoiceInterface({
   );
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+
+  // Dynamically load CircularWaveform only on client side
+  const [CircularWaveform, setCircularWaveform] = useState<any>(null);
+
+  useEffect(() => {
+    // Only import on client side to prevent server bundling
+    if (typeof window !== "undefined") {
+      import("@pipecat-ai/voice-ui-kit")
+        .then((mod) => {
+          setCircularWaveform(() => mod.CircularWaveform);
+        })
+        .catch((err) => {
+          console.error("Failed to load CircularWaveform:", err);
+        });
+    }
+  }, []);
 
   // Track if recording has been started to prevent double-start in strict mode
   const recordingStartedRef = useRef(false);
@@ -1080,13 +1098,14 @@ export function RealtimeVoiceInterface({
                   : "animate-voice-glow"
             }`}
           >
-            <CircularWaveform
-              size={300}
-              numBars={32}
-              barWidth={10}
-              color1="#f5c35f"
-              color2="#f9dca0"
-              /*                   color1={
+            {CircularWaveform ? (
+              <CircularWaveform
+                size={300}
+                numBars={32}
+                barWidth={10}
+                color1="#f5c35f"
+                color2="#f9dca0"
+                /*                   color1={
                     conversationState === "speaking"
                       ? "#60a5fa"
                       : isListeningSmoothed
@@ -1100,11 +1119,19 @@ export function RealtimeVoiceInterface({
                         ? "#fcd587"
                         : "#f9dca0"
                   } */
-              backgroundColor="transparent"
-              sensitivity={1.5}
-              rotationEnabled={true}
-              audioTrack={audioTrack}
-            />
+                backgroundColor="transparent"
+                sensitivity={1.5}
+                rotationEnabled={true}
+                audioTrack={audioTrack}
+              />
+            ) : (
+              // Fallback while loading
+              <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                <div className="text-gray-400 text-sm">
+                  Loading visualizer...
+                </div>
+              </div>
+            )}
 
             {/* Conversation State - Inside the orb (centered) */}
             {isConnected && sessionConfigured && (
