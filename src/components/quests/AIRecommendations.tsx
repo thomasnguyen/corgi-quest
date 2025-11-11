@@ -76,8 +76,7 @@ export default function AIRecommendations() {
   );
   const cacheRecommendations = useMutation(api.mutations.cacheRecommendations);
 
-  // Load cached recommendations or generate new ones
-  // Cache is automatically invalidated when new activities or moods are logged
+  // Load cached recommendations (only generate if explicitly requested via refresh)
   useEffect(() => {
     if (!firstDog) return;
 
@@ -86,15 +85,8 @@ export default function AIRecommendations() {
       setRecommendations(cachedData.recommendations);
       setLastUpdated(new Date(cachedData.createdAt));
       setError(null);
-    } else if (
-      recommendations.length === 0 &&
-      !isLoading &&
-      !error &&
-      cachedData === null
-    ) {
-      // No cache exists, generate new recommendations
-      loadRecommendations();
     }
+    // Don't auto-generate if no cache exists - user must click refresh
   }, [firstDog, cachedData]);
 
   const loadRecommendations = async () => {
@@ -263,8 +255,16 @@ export default function AIRecommendations() {
             No Recommendations Yet
           </p>
           <p className="text-[#f9dca0] text-xs text-center max-w-xs mb-6">
-            Log some activities and moods to get personalized recommendations
+            Click the refresh button above to generate AI-powered activity
+            recommendations
           </p>
+          <button
+            onClick={handleRefresh}
+            className="px-6 py-2 bg-[#f5c35f] text-[#121216] font-medium text-sm rounded-lg hover:bg-[#fcd587] transition-colors flex items-center gap-2"
+          >
+            <Sparkles size={16} strokeWidth={2} />
+            Generate Recommendations
+          </button>
         </div>
       </div>
     );
@@ -297,14 +297,14 @@ export default function AIRecommendations() {
       {/* Last updated timestamp */}
       {lastUpdated && (
         <p className="text-[#f9dca0]/60 text-xs mb-4">
-          Last updated: {getRelativeTime(lastUpdated)}
+          Generated: {getRelativeTime(lastUpdated)} • Cached for today
         </p>
       )}
 
       {/* Description */}
       <p className="text-[#f9dca0] text-sm leading-relaxed mb-6">
         Personalized activity suggestions based on Bumi's mood patterns, stat
-        progress, and daily goals.
+        progress, and daily goals. Recommendations are cached daily.
       </p>
 
       {/* Recommendations list */}
