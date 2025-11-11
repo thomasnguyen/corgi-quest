@@ -21,6 +21,10 @@ const config = defineConfig({
       "@pipecat-ai/client-js",
       "@pipecat-ai/client-react",
       "@pipecat-ai/voice-ui-kit",
+      "@pipecat-ai/daily-transport",
+      "@pipecat-ai/small-webrtc-transport",
+      "@daily-co/daily-js",
+      "three",
     ],
   },
   build: {
