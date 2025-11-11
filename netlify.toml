@@ -3,7 +3,7 @@
 
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/client"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -42,17 +42,17 @@
 # Production context
 [context.production]
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/client"
 
 # Deploy preview context (for PRs)
 [context.deploy-preview]
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/client"
 
 # Branch deploy context
 [context.branch-deploy]
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/client"
 
 # Plugin configuration (optional)
 # [[plugins]]
