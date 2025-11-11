@@ -3,16 +3,12 @@
 
 [build]
   command = "npm run build"
-  publish = ".output/public"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# SPA redirect - handle client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Note: Nitro handles redirects automatically via dist/_redirects
 
 # Headers for security and performance
 [[headers]]
@@ -43,17 +39,17 @@
 # Production context
 [context.production]
   command = "npm run build"
-  publish = ".output/public"
+  publish = "dist"
 
 # Deploy preview context (for PRs)
 [context.deploy-preview]
   command = "npm run build"
-  publish = ".output/public"
+  publish = "dist"
 
 # Branch deploy context
 [context.branch-deploy]
   command = "npm run build"
-  publish = ".output/public"
+  publish = "dist"
 
 # Plugin configuration (optional)
 # [[plugins]]
