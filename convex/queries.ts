@@ -400,3 +400,40 @@ export const getTodaysMoods = query({
     };
   },
 });
+
+/**
+ * Query to get cached AI recommendations for today
+ * Returns cached recommendations if they exist for today, otherwise null
+ */
+export const getCachedRecommendations = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+    // Find today's cached recommendations
+    const cached = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (!cached) {
+      return null;
+    }
+
+    // Parse the JSON string back to array
+    try {
+      const recommendations = JSON.parse(cached.recommendations);
+      return {
+        recommendations,
+        createdAt: cached.createdAt,
+      };
+    } catch (error) {
+      console.error("Failed to parse cached recommendations:", error);
+      return null;
+    }
+  },
+});

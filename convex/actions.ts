@@ -1,6 +1,10 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import {
+  RECOMMENDATION_SYSTEM_PROMPT,
+  createRecommendationUserPrompt,
+} from "./lib/aiRecommendationPrompt";
 
 /**
  * Generate OpenAI Realtime API Session Token
@@ -163,56 +167,14 @@ export const generateRecommendations = action({
           }
         : null;
 
-      // Create system prompt
-      const systemPrompt = `You are an AI assistant for Corgi Quest, a dog training RPG. Your role is to analyze mood patterns and activity history to generate personalized activity recommendations.
-
-Context:
-- The dog has 4 stats: INT (Intelligence), PHY (Physical), IMP (Impulse Control), SOC (Social)
-- Daily goals: Physical (50 points) and Mental (30 points)
-- Activities award XP to stats and contribute to daily goals
-
-Your task:
-1. Analyze mood patterns to identify issues (e.g., frequent anxiety, reactivity)
-2. Identify which activities have been effective at improving mood
-3. Identify stat gaps (stats that are lower level or need more XP)
-4. Consider daily goal progress (which goal needs more attention)
-5. Generate 3-5 personalized activity recommendations
-
-Each recommendation should include:
-- activityName: Name of the activity (e.g., "Morning Walk", "Training Session")
-- reasoning: 1-2 sentences explaining why this activity is recommended
-- expectedMoodImpact: Brief description of how this might help with mood (e.g., "Reduces anxiety", "Increases calmness")
-- statGains: Array of {statType, xpAmount} objects
-- physicalPoints: Points toward physical goal (0-50)
-- mentalPoints: Points toward mental goal (0-30)
-- durationMinutes: Optional duration for time-based activities
-
-Activity XP Guidelines:
-- Walk: 15 XP per 10 min to PHY, 10 physical points per 10 min
-- Run: 25 XP per 10 min to PHY, 15 physical points per 10 min
-- Fetch: 20 XP per 10 min (70% PHY, 30% IMP), 12 physical + 3 mental points per 10 min
-- Training Session: 40 XP (60% IMP, 40% INT), 15 mental points
-- Puzzle Toy: 30 XP to INT, 10 mental points
-- Playdate: 35 XP (70% SOC, 30% PHY), 8 physical + 7 mental points
-- Dog Park Visit: 40 XP (50% SOC, 50% PHY), 12 physical + 8 mental points
-
-Respond ONLY with a valid JSON array of recommendations. No additional text.`;
-
-      const userPrompt = `Analyze this data and generate 3-5 personalized activity recommendations:
-
-Mood Logs (Last 7 Days):
-${JSON.stringify(moodSummary, null, 2)}
-
-Activity History (Last 7 Days):
-${JSON.stringify(activitySummary, null, 2)}
-
-Current Stats:
-${JSON.stringify(statsSummary, null, 2)}
-
-Today's Daily Goals:
-${JSON.stringify(goalsSummary, null, 2)}
-
-Generate recommendations as a JSON array.`;
+      // Create prompts using the dedicated prompt module
+      const systemPrompt = RECOMMENDATION_SYSTEM_PROMPT;
+      const userPrompt = createRecommendationUserPrompt({
+        moodSummary,
+        activitySummary,
+        statsSummary,
+        goalsSummary,
+      });
 
       // Call OpenAI Chat Completion API
       const response = await fetch(

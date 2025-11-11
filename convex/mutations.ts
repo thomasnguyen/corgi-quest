@@ -310,3 +310,46 @@ export const logMood = mutation({
     };
   },
 });
+
+/**
+ * Cache AI Recommendations Mutation
+ *
+ * Saves AI-generated recommendations to the cache for today.
+ * Replaces any existing cache for today.
+ */
+export const cacheRecommendations = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    recommendations: v.string(), // JSON stringified array
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+    const now = Date.now();
+
+    // Check if cache already exists for today
+    const existing = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", today)
+      )
+      .first();
+
+    if (existing) {
+      // Update existing cache
+      await ctx.db.patch(existing._id, {
+        recommendations: args.recommendations,
+        createdAt: now,
+      });
+      return { success: true, updated: true };
+    } else {
+      // Insert new cache
+      await ctx.db.insert("ai_recommendations", {
+        dogId: args.dogId,
+        date: today,
+        recommendations: args.recommendations,
+        createdAt: now,
+      });
+      return { success: true, updated: false };
+    }
+  },
+});

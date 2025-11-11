@@ -690,7 +690,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Handle errors gracefully
   - _Requirements: 27_
 
-- [ ] 73. Create OpenAI recommendation prompt
+- [x] 73. Create OpenAI recommendation prompt
   - Write system prompt explaining Corgi Quest context
   - Include mood pattern analysis instructions
   - Include activity effectiveness analysis
@@ -700,7 +700,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Test prompt with sample data
   - _Requirements: 27_
 
-- [ ] 74. Create QuestTabs component
+- [x] 74. Create QuestTabs component
   - Create src/components/quests/QuestTabs.tsx
   - Display two tabs: "ALL QUESTS" and "AI RECOMMENDATIONS"
   - Handle tab switching state
@@ -708,7 +708,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Show active tab indicator
   - _Requirements: 27_
 
-- [ ] 75. Create AIRecommendations component
+- [x] 75. Create AIRecommendations component
   - Create src/components/quests/AIRecommendations.tsx
   - Call generateRecommendations action on mount (if no cache)
   - Display loading state while generating
@@ -719,7 +719,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
   - Handle errors (show error message with retry)
   - _Requirements: 27_
 
-- [ ] 76. Integrate tabs into Quests screen
+- [x] 76. Integrate tabs into Quests screen
   - Update src/routes/quests.index.tsx
   - Add QuestTabs component at top
   - Conditionally render: All Quests view OR AI Recommendations view

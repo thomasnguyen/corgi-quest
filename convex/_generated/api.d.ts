@@ -10,6 +10,8 @@
 
 import type * as actions from "../actions.js";
 import type * as crons from "../crons.js";
+import type * as lib_aiRecommendationPrompt from "../lib/aiRecommendationPrompt.js";
+import type * as lib_testRecommendationPrompt from "../lib/testRecommendationPrompt.js";
 import type * as mutations from "../mutations.js";
 import type * as queries from "../queries.js";
 import type * as seed from "../seed.js";
@@ -33,6 +35,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   crons: typeof crons;
+  "lib/aiRecommendationPrompt": typeof lib_aiRecommendationPrompt;
+  "lib/testRecommendationPrompt": typeof lib_testRecommendationPrompt;
   mutations: typeof mutations;
   queries: typeof queries;
   seed: typeof seed;

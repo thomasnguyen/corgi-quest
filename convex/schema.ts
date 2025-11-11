@@ -131,4 +131,14 @@ export default defineSchema({
   })
     .index("by_dog", ["dogId"])
     .index("by_dog_and_created", ["dogId", "createdAt"]),
+
+  // AI Recommendations cache - stores daily AI-generated recommendations
+  ai_recommendations: defineTable({
+    dogId: v.id("dogs"),
+    date: v.string(), // YYYY-MM-DD format
+    recommendations: v.string(), // JSON stringified array of recommendations
+    createdAt: v.number(),
+  })
+    .index("by_dog", ["dogId"])
+    .index("by_dog_and_date", ["dogId", "date"]),
 });
