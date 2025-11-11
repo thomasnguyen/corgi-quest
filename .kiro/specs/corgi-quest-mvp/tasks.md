@@ -928,7 +928,7 @@ If the goal is to demo the hackathon MVP, **no additional work is needed** - the
 
 ### Netlify Deployment (Est. 20-30 min)
 
-- [ ] 103. Deploy to Netlify with CI/CD
+- [x] 103. Deploy to Netlify with CI/CD
   - Install netlify-cli: `npm install -g netlify-cli`
   - Create netlify.toml configuration file with build settings
   - Configure build command: `npm run build`

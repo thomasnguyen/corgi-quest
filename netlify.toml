@@ -1,0 +1,61 @@
+# Netlify Configuration for Corgi Quest
+# Documentation: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm run build"
+  publish = ".output/public"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# SPA redirect - handle client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache images
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Production context
+[context.production]
+  command = "npm run build"
+  publish = ".output/public"
+
+# Deploy preview context (for PRs)
+[context.deploy-preview]
+  command = "npm run build"
+  publish = ".output/public"
+
+# Branch deploy context
+[context.branch-deploy]
+  command = "npm run build"
+  publish = ".output/public"
+
+# Plugin configuration (optional)
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
