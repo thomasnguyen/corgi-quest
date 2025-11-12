@@ -116,7 +116,7 @@ function OverviewPage() {
         }}
       >
         {/* Content */}
-        <div className="relative z-10 pb-32 pt-6">
+        <div className="relative z-10 pb-32 pt-2">
           {/* Top Resource Bar */}
           <TopResourceBar />
 

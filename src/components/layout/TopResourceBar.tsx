@@ -87,7 +87,7 @@ export default function TopResourceBar() {
   if (firstDog === undefined) {
     return (
       <div className="relative">
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center justify-between px-5 pb-3">
           <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
             <Flame size={16} strokeWidth={2} className="text-orange-500" />
             <span className="text-[#f9dca0] text-xs font-medium">0</span>
@@ -134,7 +134,7 @@ export default function TopResourceBar() {
   return (
     <>
       <div className="relative">
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center justify-between px-5 pb-3">
           <div className="flex items-center gap-2 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
             <Flame size={16} strokeWidth={2} className="text-orange-500" />
             <span className="text-[#f9dca0] text-xs font-medium">
