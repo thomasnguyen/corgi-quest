@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
 import { useEffect } from "react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
@@ -7,6 +6,7 @@ import StatGrid from "../components/dog/StatGrid";
 import LogActivityButton from "../components/layout/LogActivityButton";
 import TopResourceBar from "../components/layout/TopResourceBar";
 import { ProgressBar } from "../components/ui/ProgressBar";
+import { useStaleQuery } from "../hooks/useStaleQuery";
 
 // Preload background images for faster loading
 function preloadImage(src: string) {
@@ -35,17 +35,17 @@ function OverviewPage() {
     }
   }, [navigate]);
 
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get the first dog (demo purposes) - use stale query to show cached data
+  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
 
-  // Get dog profile with stats
-  const dogProfile = useQuery(
+  // Get dog profile with stats - use stale query to show cached data
+  const dogProfile = useStaleQuery(
     api.queries.getDogProfile,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Get currently equipped item to check if moon item is equipped
-  const equippedItem = useQuery(
+  // Get currently equipped item to check if moon item is equipped - use stale query
+  const equippedItem = useStaleQuery(
     api.queries.getEquippedItem,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
@@ -72,7 +72,8 @@ function OverviewPage() {
     }
   }, [backgroundImage, backgroundImageFallback]);
 
-  // Loading state
+  // Loading state - only show if we've never loaded data before
+  // With useStaleQuery, we'll have stale data on subsequent visits
   if (
     firstDog === undefined ||
     dogProfile === undefined ||

@@ -1,8 +1,21 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import CharacterCard from "./CharacterCard";
 import { Id } from "../../../convex/_generated/dataModel";
+
+/**
+ * Preload images for faster rendering
+ */
+function preloadImage(src: string) {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  link.href = src;
+  link.fetchPriority = "high";
+  document.head.appendChild(link);
+}
 
 /**
  * CharacterSelection component for selecting which household member to play as
@@ -11,6 +24,14 @@ import { Id } from "../../../convex/_generated/dataModel";
  */
 export default function CharacterSelection() {
   const navigate = useNavigate();
+
+  // Preload character avatars and background as soon as component mounts
+  useEffect(() => {
+    preloadImage("/holly_avatar.svg");
+    preloadImage("/thomas_avatar.svg");
+    preloadImage("/guest_avatar.svg");
+    preloadImage("/smoke_spark_bg.svg");
+  }, []);
 
   // Get the first dog to find the household
   const firstDog = useQuery(api.queries.getFirstDog);

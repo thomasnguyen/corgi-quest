@@ -8,7 +8,10 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    // Cache routes for 5 minutes - keeps data fresh while allowing instant navigation
+    defaultPreloadStaleTime: 5 * 60 * 1000, // 5 minutes in milliseconds
+    // Keep routes in memory for 10 minutes even when inactive
+    defaultGcTime: 10 * 60 * 1000, // 10 minutes in milliseconds
   })
 
   return router

@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import { ArrowLeft, Lightbulb, Zap, Shield, Users, Mic } from "lucide-react";
 import { StatType } from "../lib/types";
 import { formatRelativeTime } from "../lib/utils";
 import { DURATION_ACTIVITIES, FIXED_ACTIVITIES } from "../lib/xpCalculations";
+import { useStaleQuery } from "../hooks/useStaleQuery";
 
 export const Route = createFileRoute("/stats/$statType")({
   component: StatDetailPage,
@@ -51,11 +51,11 @@ function StatDetailPage() {
   const { statType } = Route.useParams();
   const navigate = useNavigate();
 
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get the first dog (demo purposes) - use stale query to show cached data
+  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
 
-  // Get stat detail with recent activities
-  const statDetail = useQuery(
+  // Get stat detail with recent activities - use stale query
+  const statDetail = useStaleQuery(
     api.queries.getStatDetail,
     firstDog ? { dogId: firstDog._id, statType: statType as StatType } : "skip"
   );

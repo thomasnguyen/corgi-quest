@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import ActivityFeedItem from "../components/activity/ActivityFeedItem";
@@ -10,6 +10,7 @@ import { useToast } from "../contexts/ToastContext";
 import { useState, useMemo } from "react";
 import { useSelectedCharacter } from "../hooks/useSelectedCharacter";
 import { Smile } from "lucide-react";
+import { useStaleQuery } from "../hooks/useStaleQuery";
 
 export const Route = createFileRoute("/activity")({
   component: ActivityPage,
@@ -46,29 +47,29 @@ function ActivityPage() {
   // Get selected character
   const { selectedCharacterId } = useSelectedCharacter();
 
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get the first dog (demo purposes) - use stale query to show cached data
+  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
 
-  // Get activity feed
-  const activityFeed = useQuery(
+  // Get activity feed - use stale query to show cached data
+  const activityFeed = useStaleQuery(
     api.queries.getActivityFeed,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Get mood feed
-  const moodFeed = useQuery(
+  // Get mood feed - use stale query to show cached data
+  const moodFeed = useStaleQuery(
     api.queries.getMoodFeed,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Get today's activities for breakdown
-  const todaysActivities = useQuery(
+  // Get today's activities for breakdown - use stale query
+  const todaysActivities = useStaleQuery(
     api.queries.getTodaysActivities,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Get household users for filter
-  const householdUsers = useQuery(
+  // Get household users for filter - use stale query
+  const householdUsers = useStaleQuery(
     api.queries.getHouseholdUsers,
     firstDog ? { householdId: firstDog.householdId } : "skip"
   );

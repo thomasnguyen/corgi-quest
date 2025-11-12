@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import Layout from "../components/layout/Layout";
@@ -7,6 +6,7 @@ import QuestCard from "../components/quests/QuestCard";
 import QuestTabs from "../components/quests/QuestTabs";
 import AIRecommendations from "../components/quests/AIRecommendations";
 import { Zap, Brain } from "lucide-react";
+import { useStaleQuery } from "../hooks/useStaleQuery";
 
 export const Route = createFileRoute("/quests/")({
   component: QuestsPage,
@@ -79,7 +79,8 @@ const QUESTS: Quest[] = [
     name: "Sniff Walk",
     category: "Physical",
     points: 13,
-    description: "Take a leisurely walk focused on letting your dog explore scents",
+    description:
+      "Take a leisurely walk focused on letting your dog explore scents",
   },
   {
     id: "evening-walk",
@@ -129,7 +130,8 @@ const QUESTS: Quest[] = [
     name: "Trick Practice",
     category: "Mental",
     points: 10,
-    description: "Practice known tricks to reinforce learning and mental engagement",
+    description:
+      "Practice known tricks to reinforce learning and mental engagement",
   },
   {
     id: "grooming-session",
@@ -143,7 +145,8 @@ const QUESTS: Quest[] = [
     name: "Scent Work",
     category: "Mental",
     points: 15,
-    description: "Engage your dog's natural scenting abilities with scent games",
+    description:
+      "Engage your dog's natural scenting abilities with scent games",
   },
   {
     id: "obedience-drill",
@@ -165,7 +168,8 @@ const QUESTS: Quest[] = [
     name: "Playdate",
     category: "Physical",
     points: 15,
-    description: "Arrange a playdate with another dog for socialization and exercise",
+    description:
+      "Arrange a playdate with another dog for socialization and exercise",
   },
   {
     id: "socialization-walk",
@@ -180,11 +184,11 @@ function QuestsPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<"all" | "ai">("all");
 
-  // Get first dog
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get first dog - use stale query to show cached data
+  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
 
-  // Subscribe to activity feed for real-time quest completion detection
-  const activities = useQuery(
+  // Subscribe to activity feed for real-time quest completion detection - use stale query
+  const activities = useStaleQuery(
     api.queries.getActivityFeed,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
@@ -208,8 +212,8 @@ function QuestsPage() {
 
   // Check which quests are completed today
   const completedQuestNames = new Set<string>();
-  if (activities) {
-    activities.forEach((activity) => {
+  if (activities && Array.isArray(activities)) {
+    activities.forEach((activity: any) => {
       const activityDate = new Date(activity.createdAt)
         .toISOString()
         .split("T")[0];

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import BumiCharacterSheet from "../components/dog/BumiCharacterSheet";
+import { useStaleQuery } from "../hooks/useStaleQuery";
 
 export const Route = createFileRoute("/bumi")({
   component: BumiPage,
@@ -14,24 +14,40 @@ export const Route = createFileRoute("/bumi")({
  * Requirements: 28
  */
 function BumiPage() {
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get the first dog (demo purposes) - use stale query to show cached data
+  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
 
-  // Get dog profile with stats and mood history (optimized/cached query)
-  const dogProfile = useQuery(
+  // Get dog profile with stats and mood history (optimized/cached query) - use stale query
+  // Only query if firstDog is available (cached or loaded)
+  const dogProfile = useStaleQuery(
     api.queries.getDogProfileWithMood,
     firstDog ? { dogId: firstDog._id, days: 7 } : "skip"
   );
 
-  // Get equipped item
-  const equippedItem = useQuery(
+  // Get equipped item - use stale query
+  const equippedItem = useStaleQuery(
     api.queries.getEquippedItem,
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Loading state
+  // Loading state - only show if we've never loaded data before
+  // With useStaleQuery, we'll have stale data on subsequent visits
+  // But we need firstDog to be available before we can check dogProfile
+  if (!firstDog) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen bg-[#121216]">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f5c35f] border-t-transparent"></div>
+            <p className="mt-4 text-[#f9dca0] text-sm">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Now check if dogProfile and equippedItem are available
   if (
-    firstDog === undefined ||
     dogProfile === undefined ||
     equippedItem === undefined
   ) {

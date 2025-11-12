@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { ConvexProvider } from "convex/react";
 import * as Sentry from "@sentry/react";
+import { useEffect } from "react";
 
 import { convex } from "../lib/convex";
 import { ToastProvider } from "../contexts/ToastContext";
@@ -10,6 +11,21 @@ import "../styles.css";
 
 // Initialize Sentry as early as possible
 initSentry();
+
+// Register service worker for PWA image caching
+function registerServiceWorker() {
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    // Register immediately, don't wait for load event
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("[SW] Service Worker registered:", registration.scope);
+      })
+      .catch((error) => {
+        console.warn("[SW] Service Worker registration failed:", error);
+      });
+  }
+}
 
 export const Route = createRootRoute({
   head: () => ({
@@ -90,6 +106,31 @@ export const Route = createRootRoute({
         href: "/mage_avatar.webp",
         fetchPriority: "high",
       },
+      // Preload character avatars for character select screen
+      {
+        rel: "preload",
+        as: "image",
+        href: "/holly_avatar.svg",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/thomas_avatar.svg",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/guest_avatar.svg",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/smoke_spark_bg.svg",
+        fetchPriority: "high",
+      },
     ],
   }),
 
@@ -97,6 +138,11 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // Register service worker on mount
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
     <html lang="en">
       <head>

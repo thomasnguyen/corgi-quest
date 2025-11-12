@@ -88,7 +88,8 @@ const QUESTS: Quest[] = [
     name: "Sniff Walk",
     category: "Physical",
     points: 13,
-    description: "Take a leisurely walk focused on letting your dog explore scents",
+    description:
+      "Take a leisurely walk focused on letting your dog explore scents",
     instructions:
       "Take a 20-30 minute walk at a slower pace, allowing your dog to stop and sniff frequently. Let them lead and explore interesting scents. This provides both physical exercise and mental stimulation through scent exploration.",
   },
@@ -152,7 +153,8 @@ const QUESTS: Quest[] = [
     name: "Trick Practice",
     category: "Mental",
     points: 10,
-    description: "Practice known tricks to reinforce learning and mental engagement",
+    description:
+      "Practice known tricks to reinforce learning and mental engagement",
     instructions:
       "Practice tricks your dog already knows (sit, stay, shake, roll over, etc.) for 10-15 minutes. Use positive reinforcement and keep sessions fun. This reinforces training and provides mental stimulation through repetition and reward.",
   },
@@ -170,7 +172,8 @@ const QUESTS: Quest[] = [
     name: "Scent Work",
     category: "Mental",
     points: 15,
-    description: "Engage your dog's natural scenting abilities with scent games",
+    description:
+      "Engage your dog's natural scenting abilities with scent games",
     instructions:
       "Hide treats or a favorite toy in various locations and encourage your dog to find them using their nose. Start with easy hiding spots and gradually increase difficulty. This provides excellent mental stimulation and taps into your dog's natural abilities.",
   },
@@ -198,7 +201,8 @@ const QUESTS: Quest[] = [
     name: "Playdate",
     category: "Physical",
     points: 15,
-    description: "Arrange a playdate with another dog for socialization and exercise",
+    description:
+      "Arrange a playdate with another dog for socialization and exercise",
     instructions:
       "Arrange a playdate with a compatible dog friend. Supervise the interaction and ensure both dogs are comfortable. Let them play for 30-45 minutes. This provides physical exercise, socialization, and mental stimulation through social interaction.",
   },
@@ -293,7 +297,11 @@ function QuestDetailPage() {
                   {quest.category === "Physical" ? (
                     <Zap size={16} strokeWidth={2} className="text-[#f5c35f]" />
                   ) : (
-                    <Brain size={16} strokeWidth={2} className="text-[#f5c35f]" />
+                    <Brain
+                      size={16}
+                      strokeWidth={2}
+                      className="text-[#f5c35f]"
+                    />
                   )}
                   {quest.category.toUpperCase()}
                 </span>
