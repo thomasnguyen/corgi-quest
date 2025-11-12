@@ -146,7 +146,7 @@ export default function TopResourceBar() {
             <span className="text-[#f9dca0] text-xs font-medium">
               {physicalPoints}/{physicalGoal}
             </span>
-            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+            <span className="text-[#888] text-[9px] uppercase tracking-wide pt-1">
               STR
             </span>
           </div>
@@ -155,7 +155,7 @@ export default function TopResourceBar() {
             <span className="text-[#f9dca0] text-xs font-medium">
               {mentalPoints}/{mentalGoal}
             </span>
-            <span className="text-[#888] text-[9px] uppercase tracking-wide">
+            <span className="text-[#888] text-[9px] uppercase tracking-wide pt-1">
               MEN
             </span>
           </div>
