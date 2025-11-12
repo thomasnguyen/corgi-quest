@@ -56,6 +56,60 @@ const QUESTS: Quest[] = [
     instructions:
       "Plan a long walk of at least 60 minutes. This could be a hike, a walk through different neighborhoods, or exploring a new trail. Bring water for both you and your dog. This provides excellent physical exercise and mental stimulation.",
   },
+  {
+    id: "run-jog",
+    name: "Run/Jog",
+    category: "Physical",
+    points: 45,
+    description: "Go for a run or jog with your dog for cardiovascular fitness",
+    instructions:
+      "Take your dog for a 20-30 minute run or jog. Start with a warm-up walk, then gradually increase pace. Ensure your dog is fit enough for running and watch for signs of fatigue. This provides excellent cardiovascular exercise for both of you.",
+  },
+  {
+    id: "swimming",
+    name: "Swimming",
+    category: "Physical",
+    points: 40,
+    description: "Take your dog swimming for a full-body workout",
+    instructions:
+      "Find a safe swimming location (pool, lake, or beach) and let your dog swim for 15-20 minutes. Supervise closely and ensure your dog knows how to swim. Swimming is a low-impact, full-body exercise that's great for dogs with joint issues.",
+  },
+  {
+    id: "tug-of-war",
+    name: "Tug-of-War",
+    category: "Physical",
+    points: 15,
+    description: "Play tug-of-war to build strength and impulse control",
+    instructions:
+      "Use a sturdy rope toy and play tug-of-war for 10-15 minutes. Teach your dog to release on command ('drop it') to build impulse control. This activity builds strength and provides mental stimulation through the game rules.",
+  },
+  {
+    id: "sniff-walk",
+    name: "Sniff Walk",
+    category: "Physical",
+    points: 13,
+    description: "Take a leisurely walk focused on letting your dog explore scents",
+    instructions:
+      "Take a 20-30 minute walk at a slower pace, allowing your dog to stop and sniff frequently. Let them lead and explore interesting scents. This provides both physical exercise and mental stimulation through scent exploration.",
+  },
+  {
+    id: "evening-walk",
+    name: "Evening Walk",
+    category: "Physical",
+    points: 30,
+    description: "Take your dog for an evening walk to wind down the day",
+    instructions:
+      "Take your dog for a 20-30 minute walk in the evening. This helps them wind down after the day and provides exercise before bedtime. Walk at a comfortable pace and enjoy the quiet time together.",
+  },
+  {
+    id: "agility-practice",
+    name: "Agility Practice",
+    category: "Physical",
+    points: 30,
+    description: "Practice agility exercises to improve coordination and speed",
+    instructions:
+      "Set up simple agility obstacles (jumps, tunnels, weave poles) or use natural obstacles. Practice for 15-20 minutes, focusing on fun and positive reinforcement. This improves coordination, speed, and builds confidence.",
+  },
   // Mental Quests
   {
     id: "training-session",
@@ -92,6 +146,70 @@ const QUESTS: Quest[] = [
     description: "Play hide and seek to engage your dog's mind",
     instructions:
       "Hide treats or toys around your home or yard and encourage your dog to find them. Start easy and gradually increase difficulty. This engages their natural scenting abilities and provides mental stimulation.",
+  },
+  {
+    id: "trick-practice",
+    name: "Trick Practice",
+    category: "Mental",
+    points: 10,
+    description: "Practice known tricks to reinforce learning and mental engagement",
+    instructions:
+      "Practice tricks your dog already knows (sit, stay, shake, roll over, etc.) for 10-15 minutes. Use positive reinforcement and keep sessions fun. This reinforces training and provides mental stimulation through repetition and reward.",
+  },
+  {
+    id: "grooming-session",
+    name: "Grooming Session",
+    category: "Mental",
+    points: 8,
+    description: "Groom your dog to build trust and provide mental stimulation",
+    instructions:
+      "Spend 15-20 minutes grooming your dog - brushing, checking ears, trimming nails if needed. Make it a positive experience with treats and praise. This builds trust, provides mental stimulation through handling, and keeps your dog healthy.",
+  },
+  {
+    id: "scent-work",
+    name: "Scent Work",
+    category: "Mental",
+    points: 15,
+    description: "Engage your dog's natural scenting abilities with scent games",
+    instructions:
+      "Hide treats or a favorite toy in various locations and encourage your dog to find them using their nose. Start with easy hiding spots and gradually increase difficulty. This provides excellent mental stimulation and taps into your dog's natural abilities.",
+  },
+  {
+    id: "obedience-drill",
+    name: "Obedience Drill",
+    category: "Mental",
+    points: 12,
+    description: "Practice focused obedience commands in quick succession",
+    instructions:
+      "Practice a series of obedience commands (sit, down, stay, come) in quick succession for 10-15 minutes. Keep sessions fast-paced and reward correct responses. This improves focus, response time, and reinforces training.",
+  },
+  {
+    id: "interactive-play",
+    name: "Interactive Play",
+    category: "Mental",
+    points: 12,
+    description: "Engage in interactive games that challenge your dog's mind",
+    instructions:
+      "Play interactive games like 'find it', 'which hand', or puzzle-based games for 10-15 minutes. These games require your dog to think and problem-solve. Keep it fun and reward successful problem-solving.",
+  },
+  // Social/Mixed Quests
+  {
+    id: "playdate",
+    name: "Playdate",
+    category: "Physical",
+    points: 15,
+    description: "Arrange a playdate with another dog for socialization and exercise",
+    instructions:
+      "Arrange a playdate with a compatible dog friend. Supervise the interaction and ensure both dogs are comfortable. Let them play for 30-45 minutes. This provides physical exercise, socialization, and mental stimulation through social interaction.",
+  },
+  {
+    id: "socialization-walk",
+    name: "Socialization Walk",
+    category: "Physical",
+    points: 38,
+    description: "Take a walk in a social environment to meet people and dogs",
+    instructions:
+      "Take a 25-30 minute walk in a social environment like a busy park, downtown area, or dog-friendly neighborhood. Allow your dog to meet friendly people and dogs (with permission). This provides exercise, socialization, and builds confidence in social situations.",
   },
 ];
 
