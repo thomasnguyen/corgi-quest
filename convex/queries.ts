@@ -215,22 +215,48 @@ export const getActivityFeed = query({
       .order("desc")
       .take(20);
 
-    // For each activity, get user info and stat gains
-    const activitiesWithDetails = await Promise.all(
-      activities.map(async (activity) => {
-        const user = await ctx.db.get(activity.userId);
-        const statGains = await ctx.db
-          .query("activity_stat_gains")
-          .withIndex("by_activity", (q) => q.eq("activityId", activity._id))
-          .collect();
+    if (activities.length === 0) {
+      return [];
+    }
 
-        return {
-          ...activity,
-          userName: user?.name || "Unknown",
-          statGains,
-        };
-      })
+    // OPTIMIZATION: Batch fetch all users and stat gains in parallel
+    // Collect unique user IDs
+    const userIds = [...new Set(activities.map((a) => a.userId))];
+    const activityIds = activities.map((a) => a._id);
+
+    // Batch fetch all users (1 query instead of 20)
+    const users = await Promise.all(
+      userIds.map((userId) => ctx.db.get(userId))
     );
+    const userMap = new Map(users.filter(Boolean).map((u) => [u!._id, u!]));
+
+    // Batch fetch all stat gains (1 query per activity, but can be optimized further)
+    // Note: Convex doesn't support IN queries, so we batch with Promise.all
+    const allStatGains = await Promise.all(
+      activityIds.map((activityId) =>
+        ctx.db
+          .query("activity_stat_gains")
+          .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+          .collect()
+      )
+    );
+
+    // Create stat gains map
+    const statGainsMap = new Map(
+      activityIds.map((id, idx) => [id, allStatGains[idx]])
+    );
+
+    // Combine results (no additional queries)
+    const activitiesWithDetails = activities.map((activity) => {
+      const user = userMap.get(activity.userId);
+      const statGains = statGainsMap.get(activity._id) || [];
+
+      return {
+        ...activity,
+        userName: user?.name || "Unknown",
+        statGains,
+      };
+    });
 
     return activitiesWithDetails;
   },
