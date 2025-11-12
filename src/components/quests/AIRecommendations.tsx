@@ -354,20 +354,19 @@ export default function AIRecommendations() {
         {/* Collapsible Header */}
         <button
           onClick={() => setIsTipsExpanded(!isTipsExpanded)}
-          className="w-full flex items-center justify-between p-4 bg-[#1a1a1e]/80 border border-[#3d3d3d]/50 rounded-lg hover:border-[#f5c35f]/50 transition-all mb-3"
+          className="w-full flex items-center justify-between p-4 bg-[#1a1a1e]/80 border border-[#3d3d3d]/50 rounded-lg hover:border-[#f5c35f]/50 transition-all mb-3 gap-3"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {isTipsExpanded ? (
-              <ChevronUp size={20} className="text-[#f5c35f]" />
+              <ChevronUp size={20} className="text-[#f5c35f] shrink-0" />
             ) : (
-              <ChevronDown size={20} className="text-[#f5c35f]" />
+              <ChevronDown size={20} className="text-[#f5c35f] shrink-0" />
             )}
-            <Globe size={20} strokeWidth={2} className="text-[#f5c35f]" />
-            <div className="text-left">
-              <h2 className="text-lg font-semibold text-[#feefd0]">
+            <div className="text-left min-w-0">
+              <h2 className="text-lg font-semibold text-[#feefd0] whitespace-nowrap">
                 TRAINING TIPS
               </h2>
-              <p className="text-xs text-[#f9dca0]/60">
+              <p className="text-xs text-[#f9dca0]/60 truncate">
                 {firecrawlTips.length > 0
                   ? `${firecrawlTips.length} tip${firecrawlTips.length !== 1 ? "s" : ""} available`
                   : "Powered by Firecrawl & Cloudflare"}
@@ -380,16 +379,16 @@ export default function AIRecommendations() {
               handleFetchTips();
             }}
             disabled={isLoadingTips}
-            className="px-4 py-2 bg-[#f5c35f] text-[#121216] font-medium text-sm rounded-lg hover:bg-[#fcd587] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-3 py-1.5 bg-[#f5c35f] text-[#121216] font-medium text-xs rounded-lg hover:bg-[#fcd587] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap shrink-0"
           >
             {isLoadingTips ? (
               <>
-                <RefreshCw size={16} strokeWidth={2} className="animate-spin" />
+                <RefreshCw size={14} strokeWidth={2} className="animate-spin" />
                 <span>Fetching...</span>
               </>
             ) : (
               <>
-                <Globe size={16} strokeWidth={2} />
+                <Globe size={14} strokeWidth={2} />
                 <span>Fetch Tips</span>
               </>
             )}
