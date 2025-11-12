@@ -49,8 +49,8 @@ export default function MoodPicker({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-start justify-center z-[9999] p-4 pt-20">
-      <div className="bg-[#1a1a1e] border border-[#3d3d3d]/50 rounded-lg p-6 max-w-md w-full mt-8">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-start justify-center z-[9999] pt-20">
+      <div className="bg-[#1a1a1e] border border-[#3d3d3d]/50 rounded-lg p-6 max-w-md w-full">
         {/* Header */}
         <h2 className="text-white font-semibold text-lg mb-4">
           How is Bumi feeling?

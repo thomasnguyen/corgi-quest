@@ -111,8 +111,6 @@ Get up and running in minutes:
    npm run dev
    ```
 
-📖 See [SETUP.md](./SETUP.md) for detailed setup instructions.
-
 ---
 
 ## Credits
