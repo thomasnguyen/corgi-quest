@@ -38,7 +38,10 @@ export default function CharacterSelection() {
     preloadImage("/holly_avatar.svg");
     preloadImage("/thomas_avatar.svg");
     preloadImage("/guest_avatar.svg");
-    preloadImage("/smoke_spark_bg.svg");
+    // Preload optimized background
+    const isMobile = window.innerWidth < 768;
+    const bgSuffix = isMobile ? "_mobile" : "";
+    preloadImage(`/images/backgrounds/smoke_spark_bg_0${bgSuffix}.webp`);
   }, []);
 
   // Get all users in the household (optimized - no waterfall dependency)
@@ -84,7 +87,10 @@ export default function CharacterSelection() {
       {/* Floating explanation - desktop only */}
       <AppExplanation />
 
-      <div className="min-h-screen  bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
+      <div className="min-h-screen bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10" style={{
+        backgroundImage: `url('/images/backgrounds/smoke_spark_bg_0.webp')`,
+        backgroundSize: 'contain',
+      }}>
         <div className="max-w-md mx-auto">
           {/* Title */}
           <h1 className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent text-center mb-2">

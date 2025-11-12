@@ -88,7 +88,13 @@ function ThanksPage() {
   };
   return (
     <>
-      <div className="min-h-screen bg-[url('/smoke_spark_bg.svg')] bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
+      <div 
+        className="min-h-screen bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10"
+        style={{
+          backgroundImage: `url('/images/backgrounds/smoke_spark_bg_0.webp')`,
+          backgroundSize: 'contain',
+        }}
+      >
         <div className="max-w-md mx-auto">
           {/* Header */}
           <div className="text-center mb-8">

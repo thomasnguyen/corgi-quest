@@ -11,27 +11,60 @@
     {
       "src": "logo192.webp",
       "type": "image/webp",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.webp",
       "type": "image/webp",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#1a1a1a",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "categories": ["lifestyle", "health", "productivity"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Log Activity",
+      "short_name": "Log",
+      "description": "Quickly log a new activity",
+      "url": "/log-activity",
+      "icons": [
+        {
+          "src": "logo192.webp",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Overview",
+      "short_name": "Overview",
+      "description": "View your dog's stats",
+      "url": "/",
+      "icons": [
+        {
+          "src": "logo192.webp",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

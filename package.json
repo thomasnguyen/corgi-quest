@@ -8,7 +8,8 @@
     "serve": "vite preview",
     "test": "vitest run",
     "optimize-images": "node scripts/optimize-images.js",
-    "optimize-avatars": "node scripts/optimize-avatars.js"
+    "optimize-avatars": "node scripts/optimize-avatars.js",
+    "extract-svg-images": "node scripts/extract-svg-images.js"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.85.0",

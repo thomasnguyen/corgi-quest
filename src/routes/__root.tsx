@@ -85,13 +85,37 @@ export const Route = createRootRoute({
       {
         rel: "preload",
         as: "image",
-        href: "/smoke_bg.svg",
+        href: "/images/backgrounds/smoke_bg.webp",
         fetchPriority: "high",
       },
       {
         rel: "preload",
         as: "image",
-        href: "/mage_bg.webp",
+        href: "/images/backgrounds/smoke_bg_mobile.webp",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/images/backgrounds/smoke_bg_0.webp",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/images/backgrounds/smoke_bg_0_mobile.webp",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/images/backgrounds/mage_bg.webp",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/images/backgrounds/mage_bg_mobile.webp",
         fetchPriority: "high",
       },
       {
@@ -128,7 +152,13 @@ export const Route = createRootRoute({
       {
         rel: "preload",
         as: "image",
-        href: "/smoke_spark_bg.svg",
+        href: "/images/backgrounds/smoke_spark_bg_0.webp",
+        fetchPriority: "high",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: "/images/backgrounds/smoke_spark_bg_0_mobile.webp",
         fetchPriority: "high",
       },
     ],

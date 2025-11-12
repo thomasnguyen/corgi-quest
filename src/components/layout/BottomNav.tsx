@@ -1,14 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { OverviewIcon, QuestsIcon, ActivityIcon } from "../icons/MenuIcons";
 
 export default function BottomNav() {
   const router = useRouterState();
   const currentPath = router.location.pathname;
 
   const tabs = [
-    { name: "Overview", path: "/", image: "/overview_menu.svg" },
-    { name: "Quests", path: "/quests", image: "/quests_menu.svg" },
-    { name: "Activity", path: "/activity", image: "/activity_menu.svg" },
-    { name: "BUMI", path: "/bumi", image: "/overview_menu.svg" },
+    { name: "Overview", path: "/", Icon: OverviewIcon },
+    { name: "Quests", path: "/quests", Icon: QuestsIcon },
+    { name: "Activity", path: "/activity", Icon: ActivityIcon },
+    { name: "BUMI", path: "/bumi", Icon: OverviewIcon },
   ];
 
   return (
@@ -36,7 +37,7 @@ export default function BottomNav() {
               {/* Icon container with diamond shape */}
               <div className="relative">
                 <div>
-                  {/* Image */}
+                  {/* Inline SVG Icon - no HTTP request needed */}
                   <div 
                     className="relative z-10 transition-all duration-300"
                     style={{
@@ -45,7 +46,7 @@ export default function BottomNav() {
                         : "drop-shadow(0 0 0px rgba(245, 195, 95, 0))",
                     }}
                   >
-                    <img src={tab.image} alt={tab.name} loading="eager" fetchPriority="high" />
+                    <tab.Icon className="w-[53px] h-[53px]" />
                   </div>
                 </div>
               </div>
