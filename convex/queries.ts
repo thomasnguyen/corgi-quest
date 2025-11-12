@@ -48,6 +48,21 @@ export const getHouseholdUsers = query({
 });
 
 /**
+ * Optimized query to get all household users (demo: assumes single household)
+ * Returns all users - for demo purposes, assumes there's only one household
+ * This is the fastest possible query for character selection
+ */
+export const getAllHouseholdUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    // For demo: just get all users (assumes single household)
+    // This is immediate - no intermediate queries needed
+    const users = await ctx.db.query("users").collect();
+    return users;
+  },
+});
+
+/**
  * Query to get a user by ID
  * Returns the user with the specified ID
  */

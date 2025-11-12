@@ -8,14 +8,21 @@ import AppExplanation from "../layout/AppExplanation";
 
 /**
  * Preload images for faster rendering
+ * Uses both link preload and Image object for maximum compatibility
  */
 function preloadImage(src: string) {
+  // Method 1: Link preload (browser hint)
   const link = document.createElement("link");
   link.rel = "preload";
   link.as = "image";
   link.href = src;
   link.fetchPriority = "high";
   document.head.appendChild(link);
+
+  // Method 2: Actually fetch the image (ensures it's loaded)
+  const img = new Image();
+  img.src = src;
+  img.fetchPriority = "high";
 }
 
 /**
@@ -34,14 +41,8 @@ export default function CharacterSelection() {
     preloadImage("/smoke_spark_bg.svg");
   }, []);
 
-  // Get the first dog to find the household
-  const firstDog = useQuery(api.queries.getFirstDog);
-
-  // Get all users in the household
-  const householdUsers = useQuery(
-    api.queries.getHouseholdUsers,
-    firstDog ? { householdId: firstDog.householdId } : "skip"
-  );
+  // Get all users in the household (optimized - no waterfall dependency)
+  const householdUsers = useQuery(api.queries.getAllHouseholdUsers);
 
   // Handle character selection
   const handleSelectCharacter = (userId: Id<"users">) => {
@@ -53,7 +54,7 @@ export default function CharacterSelection() {
   };
 
   // Loading state
-  if (firstDog === undefined || householdUsers === undefined) {
+  if (householdUsers === undefined) {
     return (
       <div className="min-h-screen bg-[#121216] flex items-center justify-center px-6">
         <div className="text-center">
@@ -64,8 +65,8 @@ export default function CharacterSelection() {
     );
   }
 
-  // Error state - no dog or users found
-  if (!firstDog || !householdUsers || householdUsers.length === 0) {
+  // Error state - no users found
+  if (!householdUsers || householdUsers.length === 0) {
     return (
       <div className="min-h-screen bg-[#121216] bg-cover bg-bottom flex items-center justify-center px-6">
         <div className="text-center">
