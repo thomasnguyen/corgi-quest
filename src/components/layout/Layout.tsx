@@ -6,6 +6,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useMoodReminder } from "../../hooks/useMoodReminder";
 import MoodReminderPopup from "../mood/MoodReminderPopup";
 import { useSelectedCharacter } from "../../hooks/useSelectedCharacter";
+import AppExplanation from "./AppExplanation";
 
 interface LayoutProps {
   children: ReactNode;
@@ -190,6 +191,9 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-[#121216] flex flex-col">
+      {/* Floating explanation - desktop only */}
+      <AppExplanation />
+
       <main className="flex-1 pb-32 overflow-y-auto">
         <div className="max-w-md mx-auto">{children}</div>
       </main>

@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import CharacterCard from "./CharacterCard";
 import { Id } from "../../../convex/_generated/dataModel";
+import AppExplanation from "../layout/AppExplanation";
 
 /**
  * Preload images for faster rendering
@@ -66,7 +67,7 @@ export default function CharacterSelection() {
   // Error state - no dog or users found
   if (!firstDog || !householdUsers || householdUsers.length === 0) {
     return (
-      <div className="min-h-screen bg-[#121216] bg-[url('/smoke_spark_bg.svg')] bg-cover bg-bottom flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#121216] bg-cover bg-bottom flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-white text-lg mb-2">No characters available</p>
           <p className="text-gray-400 text-sm">
@@ -79,7 +80,10 @@ export default function CharacterSelection() {
 
   return (
     <>
-      <div className="min-h-screen bg-[url('/smoke_spark_bg.svg')] bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
+      {/* Floating explanation - desktop only */}
+      <AppExplanation />
+
+      <div className="min-h-screen  bg-no-repeat bg-bottom bg-contain py-8 px-6 absolute top-0 left-0 right-0 z-10">
         <div className="max-w-md mx-auto">
           {/* Title */}
           <h1 className="text-4xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent text-center mb-2">
