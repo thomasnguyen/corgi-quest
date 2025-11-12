@@ -53,13 +53,13 @@ Built with modern, battle-tested tools:
 
 ## 🏗️ Architecture Highlights
 
-### Real-time Sync
+### ⚡ Real-time Sync
 Convex subscriptions with `useQuery` hooks automatically sync data across devices. When one partner logs an activity, the other sees it instantly—no polling or refresh needed. 11 tables with proper indexing. Optimistic UI updates provide instant feedback. Offline mutations queue and sync when reconnected.
 
-### Voice Interface
+### 🎤 Voice Interface
 OpenAI Realtime API with function calling extracts structured data from natural conversation. Audio-to-audio responses with waveform visualization. The AI understands context, calculates XP based on activity type and duration, and calls `saveActivity` with validated parameters.
 
-### Gamification Engine
+### 🎮 Gamification Engine
 - **XP System:** 100 XP per level
 - **Smart XP Distribution:** Activities award XP to relevant stats based on type and duration
   - Duration-based activities (walks, runs) scale with time
@@ -111,7 +111,7 @@ Get up and running in minutes:
    npm run dev
    ```
 
-See [SETUP.md](./SETUP.md) for detailed setup instructions.
+📖 See [SETUP.md](./SETUP.md) for detailed setup instructions.
 
 ---
 
@@ -125,4 +125,4 @@ Built with love using [TanStack Start](https://tanstack.com/start), [Convex](htt
 
 **Thomas Nguyen**
 
-*Making dog training fun, one quest at a time.*
+*Making dog training fun, one quest at a time.* 🐾
