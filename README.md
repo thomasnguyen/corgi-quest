@@ -31,7 +31,7 @@ This app is my way of making sure we're doing everything we can to train and soc
 **🎯 Quest System**
 - Suggested activities with step-by-step instructions
 - AI-powered activity recommendations based on your dog's needs
-- Character customization with unlockable items 🎨
+- Character customization with unlockable items
 
 **😊 Wellbeing**
 - Mood tracking with notes and timestamps
@@ -53,13 +53,13 @@ Built with modern, battle-tested tools:
 
 ## 🏗️ Architecture Highlights
 
-### ⚡ Real-time Sync
+### Real-time Sync
 Convex subscriptions with `useQuery` hooks automatically sync data across devices. When one partner logs an activity, the other sees it instantly—no polling or refresh needed. 11 tables with proper indexing. Optimistic UI updates provide instant feedback. Offline mutations queue and sync when reconnected.
 
-### 🎤 Voice Interface
+### Voice Interface
 OpenAI Realtime API with function calling extracts structured data from natural conversation. Audio-to-audio responses with waveform visualization. The AI understands context, calculates XP based on activity type and duration, and calls `saveActivity` with validated parameters.
 
-### 🎮 Gamification Engine
+### Gamification Engine
 - **XP System:** 100 XP per level
 - **Smart XP Distribution:** Activities award XP to relevant stats based on type and duration
   - Duration-based activities (walks, runs) scale with time
@@ -68,19 +68,19 @@ OpenAI Realtime API with function calling extracts structured data from natural 
 - **Daily Goals:** Reset at midnight via cron jobs
 - **Streaks:** Increment when both goals are met
 
-### 🗄️ Database
+### Database
 Convex validators for type-safe operations. Auto-generated TypeScript types. Indexed foreign keys and frequently queried fields.
 
-### 🔒 Type Safety
+### Type Safety
 Full TypeScript with strict mode. Auto-generated types from schema. File-based routing with type inference.
 
-### ⚡ Performance
+### Performance
 Image preloading, optimistic updates, lazy loading, React memoization, dynamic imports for voice interface.
 
-### 📚 Training Tips
+### Training Tips
 Firecrawl fetches dog training articles from AKC.org via Cloudflare Worker. Handles JavaScript rendering and returns clean markdown parsed into structured training tips.
 
-### 🐛 Monitoring
+### Monitoring
 Sentry for error reporting and performance monitoring. Error boundaries for graceful error handling.
 
 ---
@@ -111,18 +111,18 @@ Get up and running in minutes:
    npm run dev
    ```
 
-📖 See [SETUP.md](./SETUP.md) for detailed setup instructions.
+See [SETUP.md](./SETUP.md) for detailed setup instructions.
 
 ---
 
-## 🙏 Credits
+## Credits
 
 Built with love using [TanStack Start](https://tanstack.com/start), [Convex](https://www.convex.dev), [Netlify](https://netlify.com), [Cloudflare](https://cloudflare.com), [Sentry](https://sentry.io), [Autumn](https://useautumn.com), and [Firecrawl](https://firecrawl.dev).
 
 ---
 
-## 👨‍💻 Built By
+## Built By
 
 **Thomas Nguyen**
 
-*Making dog training fun, one quest at a time.* 🐾
+*Making dog training fun, one quest at a time.*
