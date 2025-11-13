@@ -1001,3 +1001,70 @@ export const getWeeklySummary = query({
     };
   },
 });
+
+/**
+ * Query to get recent partner activities for real-time notifications
+ * Returns activities from the last 2 minutes that were logged by household partners
+ */
+export const getRecentPartnerActivities = query({
+  args: {
+    dogId: v.id("dogs"),
+    currentUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const twoMinutesAgo = Date.now() - 2 * 60 * 1000; // 2 minutes ago
+
+    // Get recent activities for this dog
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .order("desc")
+      .filter((q) =>
+        // Only activities from other users and within last 2 minutes
+        q.and(
+          q.neq(q.field("userId"), args.currentUserId),
+          q.gte(q.field("_creationTime"), twoMinutesAgo)
+        )
+      )
+      .take(5);
+
+    if (activities.length === 0) {
+      return [];
+    }
+
+    // Batch fetch user info and stat gains
+    const userIds = [...new Set(activities.map((a) => a.userId))];
+    const users = await Promise.all(
+      userIds.map((userId) => ctx.db.get(userId))
+    );
+    const userMap = new Map(users.filter(Boolean).map((u) => [u!._id, u!]));
+
+    const allStatGains = await Promise.all(
+      activities.map((activity) =>
+        ctx.db
+          .query("activity_stat_gains")
+          .withIndex("by_activity", (q) => q.eq("activityId", activity._id))
+          .collect()
+      )
+    );
+
+    // Combine results
+    const activitiesWithDetails = activities.map((activity, idx) => {
+      const user = userMap.get(activity.userId);
+      const statGains = allStatGains[idx] || [];
+      const totalXP = statGains.reduce((sum, gain) => sum + gain.xpGained, 0);
+
+      return {
+        _id: activity._id,
+        _creationTime: activity._creationTime,
+        type: activity.type,
+        duration: activity.duration,
+        userName: user?.name || "Partner",
+        totalXP,
+        statGains,
+      };
+    });
+
+    return activitiesWithDetails;
+  },
+});

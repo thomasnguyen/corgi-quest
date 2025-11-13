@@ -7,6 +7,7 @@ import LogActivityButton from "../components/layout/LogActivityButton";
 import TopResourceBar from "../components/layout/TopResourceBar";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { useStaleQuery } from "../hooks/useStaleQuery";
+import { PartnerActivityNotifier } from "../components/activity/PartnerActivityNotifier";
 
 // Preload background images for faster loading
 function preloadImage(src: string) {
@@ -37,6 +38,12 @@ function OverviewPage() {
 
   // Get the first dog (demo purposes) - use stale query to show cached data
   const firstDog = useStaleQuery(api.queries.getFirstDog, {});
+
+  // Get the first user for current user context
+  const firstUser = useStaleQuery(
+    api.queries.getFirstUser,
+    firstDog ? { householdId: firstDog.householdId } : "skip"
+  );
 
   // Get dog profile with stats - use stale query to show cached data
   const dogProfile = useStaleQuery(
@@ -114,6 +121,14 @@ function OverviewPage() {
 
   return (
     <Layout>
+      {/* Real-time partner activity notifications - showcases Convex real-time sync */}
+      {firstUser && (
+        <PartnerActivityNotifier
+          dogId={firstDog._id}
+          currentUserId={firstUser._id}
+        />
+      )}
+
       <div
         className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
         style={{
