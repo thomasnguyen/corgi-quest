@@ -5,12 +5,92 @@ import Layout from "../components/layout/Layout";
 import QuestCard from "../components/quests/QuestCard";
 import QuestTabs from "../components/quests/QuestTabs";
 import AIRecommendations from "../components/quests/AIRecommendations";
-import { Zap, Brain } from "lucide-react";
+import {
+  Zap,
+  Brain,
+  Sun,
+  Moon,
+  Activity,
+  Users,
+  Waves,
+  Target,
+  GraduationCap,
+  Puzzle,
+  Sparkles,
+  Eye,
+  Repeat,
+  Scissors,
+  Search,
+  Gamepad2,
+  Heart,
+} from "lucide-react";
 import { useStaleQuery } from "../hooks/useStaleQuery";
 
 export const Route = createFileRoute("/quests/")({
   component: QuestsPage,
 });
+
+// Icon name type
+type IconName =
+  | "Sun"
+  | "Moon"
+  | "Activity"
+  | "Users"
+  | "Waves"
+  | "Target"
+  | "GraduationCap"
+  | "Puzzle"
+  | "Sparkles"
+  | "Eye"
+  | "Repeat"
+  | "Scissors"
+  | "Search"
+  | "Gamepad2"
+  | "Heart"
+  | "Zap"
+  | "Brain";
+
+// Helper to get icon component - using function to avoid Babel scope issues
+export const getIcon = (iconName: IconName) => {
+  switch (iconName) {
+    case "Sun":
+      return Sun;
+    case "Moon":
+      return Moon;
+    case "Activity":
+      return Activity;
+    case "Users":
+      return Users;
+    case "Waves":
+      return Waves;
+    case "Target":
+      return Target;
+    case "GraduationCap":
+      return GraduationCap;
+    case "Puzzle":
+      return Puzzle;
+    case "Sparkles":
+      return Sparkles;
+    case "Eye":
+      return Eye;
+    case "Repeat":
+      return Repeat;
+    case "Scissors":
+      return Scissors;
+    case "Search":
+      return Search;
+    case "Gamepad2":
+      return Gamepad2;
+    case "Heart":
+      return Heart;
+    case "Zap":
+      return Zap;
+    case "Brain":
+      return Brain;
+    default:
+      return Zap;
+  }
+};
 
 // Quest data structure
 interface Quest {
@@ -19,6 +99,16 @@ interface Quest {
   category: "Physical" | "Mental";
   points: number;
   description: string;
+  iconName: IconName;
+  location?: string;
+  estimatedTime?: string;
+  difficulty?: "Easy" | "Medium" | "Hard" | "Epic";
+  isBoss?: boolean;
+  rewards?: {
+    xp?: number;
+    statGains?: string[];
+    unlock?: string;
+  };
 }
 
 // Static quest list from requirements
@@ -31,6 +121,9 @@ const QUESTS: Quest[] = [
     points: 30,
     description:
       "Take your dog for a morning walk to start the day with energy",
+    iconName: "Sun",
+    estimatedTime: "20-30 min",
+    difficulty: "Easy",
   },
   {
     id: "fetch-session",
@@ -38,6 +131,9 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 15,
     description: "Play fetch with your dog to build physical fitness",
+    iconName: "Activity",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   {
     id: "dog-park-visit",
@@ -45,6 +141,14 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 40,
     description: "Visit the dog park for exercise and socialization",
+    iconName: "Users",
+    location: "Dog Park",
+    estimatedTime: "30-45 min",
+    difficulty: "Medium",
+    rewards: {
+      xp: 40,
+      statGains: ["PHY +15", "SOC +10"],
+    },
   },
   {
     id: "long-walk",
@@ -52,6 +156,13 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 50,
     description: "Take an extended walk of 60 minutes or more",
+    iconName: "Activity",
+    estimatedTime: "60+ min",
+    difficulty: "Hard",
+    rewards: {
+      xp: 50,
+      statGains: ["PHY +20", "IMP +5"],
+    },
   },
   {
     id: "run-jog",
@@ -59,6 +170,13 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 45,
     description: "Go for a run or jog with your dog for cardiovascular fitness",
+    iconName: "Activity",
+    estimatedTime: "20-30 min",
+    difficulty: "Hard",
+    rewards: {
+      xp: 45,
+      statGains: ["PHY +18", "IMP +8"],
+    },
   },
   {
     id: "swimming",
@@ -66,6 +184,13 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 40,
     description: "Take your dog swimming for a full-body workout",
+    iconName: "Waves",
+    estimatedTime: "15-20 min",
+    difficulty: "Medium",
+    rewards: {
+      xp: 40,
+      statGains: ["PHY +15", "IMP +5"],
+    },
   },
   {
     id: "tug-of-war",
@@ -73,6 +198,9 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 15,
     description: "Play tug-of-war to build strength and impulse control",
+    iconName: "Activity",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   {
     id: "sniff-walk",
@@ -81,6 +209,9 @@ const QUESTS: Quest[] = [
     points: 13,
     description:
       "Take a leisurely walk focused on letting your dog explore scents",
+    iconName: "Search",
+    estimatedTime: "20-30 min",
+    difficulty: "Easy",
   },
   {
     id: "evening-walk",
@@ -88,6 +219,9 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 30,
     description: "Take your dog for an evening walk to wind down the day",
+    iconName: "Moon",
+    estimatedTime: "20-30 min",
+    difficulty: "Easy",
   },
   {
     id: "agility-practice",
@@ -95,6 +229,13 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 30,
     description: "Practice agility exercises to improve coordination and speed",
+    iconName: "Target",
+    estimatedTime: "15-20 min",
+    difficulty: "Medium",
+    rewards: {
+      xp: 30,
+      statGains: ["PHY +10", "IMP +8"],
+    },
   },
   // Mental Quests
   {
@@ -103,6 +244,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 20,
     description: "Practice obedience training and commands",
+    iconName: "GraduationCap",
+    estimatedTime: "15-20 min",
+    difficulty: "Easy",
   },
   {
     id: "puzzle-toy",
@@ -110,6 +254,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 10,
     description: "Let your dog solve a puzzle toy for mental stimulation",
+    iconName: "Puzzle",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   {
     id: "new-trick-training",
@@ -117,6 +264,13 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 25,
     description: "Teach your dog a new trick or command",
+    iconName: "Sparkles",
+    estimatedTime: "10-15 min",
+    difficulty: "Medium",
+    rewards: {
+      xp: 25,
+      statGains: ["INT +12", "IMP +5"],
+    },
   },
   {
     id: "hide-and-seek",
@@ -124,6 +278,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 15,
     description: "Play hide and seek to engage your dog's mind",
+    iconName: "Eye",
+    estimatedTime: "15-20 min",
+    difficulty: "Easy",
   },
   {
     id: "trick-practice",
@@ -132,6 +289,9 @@ const QUESTS: Quest[] = [
     points: 10,
     description:
       "Practice known tricks to reinforce learning and mental engagement",
+    iconName: "Repeat",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   {
     id: "grooming-session",
@@ -139,6 +299,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 8,
     description: "Groom your dog to build trust and provide mental stimulation",
+    iconName: "Scissors",
+    estimatedTime: "15-20 min",
+    difficulty: "Easy",
   },
   {
     id: "scent-work",
@@ -147,6 +310,9 @@ const QUESTS: Quest[] = [
     points: 15,
     description:
       "Engage your dog's natural scenting abilities with scent games",
+    iconName: "Search",
+    estimatedTime: "15-20 min",
+    difficulty: "Easy",
   },
   {
     id: "obedience-drill",
@@ -154,6 +320,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 12,
     description: "Practice focused obedience commands in quick succession",
+    iconName: "GraduationCap",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   {
     id: "interactive-play",
@@ -161,6 +330,9 @@ const QUESTS: Quest[] = [
     category: "Mental",
     points: 12,
     description: "Engage in interactive games that challenge your dog's mind",
+    iconName: "Gamepad2",
+    estimatedTime: "10-15 min",
+    difficulty: "Easy",
   },
   // Social/Mixed Quests
   {
@@ -170,6 +342,9 @@ const QUESTS: Quest[] = [
     points: 15,
     description:
       "Arrange a playdate with another dog for socialization and exercise",
+    iconName: "Heart",
+    estimatedTime: "30-45 min",
+    difficulty: "Easy",
   },
   {
     id: "socialization-walk",
@@ -177,6 +352,32 @@ const QUESTS: Quest[] = [
     category: "Physical",
     points: 38,
     description: "Take a walk in a social environment to meet people and dogs",
+    iconName: "Users",
+    estimatedTime: "25-30 min",
+    difficulty: "Medium",
+    rewards: {
+      xp: 38,
+      statGains: ["PHY +12", "SOC +15"],
+    },
+  },
+  // Boss Quest
+  {
+    id: "skate-park-adventure",
+    name: "Skate Park Adventure",
+    category: "Physical",
+    points: 75,
+    description:
+      "Conquer the skate park - the ultimate test of agility and courage",
+    iconName: "Target",
+    location: "Skate Park",
+    estimatedTime: "45-60 min",
+    difficulty: "Epic",
+    isBoss: true,
+    rewards: {
+      xp: 75,
+      statGains: ["PHY +25", "IMP +15", "SOC +10"],
+      unlock: "Skate Park Master Badge",
+    },
   },
 ];
 
@@ -282,6 +483,7 @@ function QuestsPage() {
                       points={quest.points}
                       description={quest.description}
                       isCompleted={completedQuestNames.has(quest.name)}
+                      iconName={quest.iconName}
                     />
                   ))}
                 </div>
@@ -314,6 +516,7 @@ function QuestsPage() {
                       points={quest.points}
                       description={quest.description}
                       isCompleted={completedQuestNames.has(quest.name)}
+                      iconName={quest.iconName}
                     />
                   ))}
                 </div>

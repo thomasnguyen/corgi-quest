@@ -1,5 +1,25 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Zap, Brain } from "lucide-react";
+import { getIcon } from "../../routes/quests.index";
+
+type IconName =
+  | "Sun"
+  | "Moon"
+  | "Activity"
+  | "Users"
+  | "Waves"
+  | "Target"
+  | "GraduationCap"
+  | "Puzzle"
+  | "Sparkles"
+  | "Eye"
+  | "Repeat"
+  | "Scissors"
+  | "Search"
+  | "Gamepad2"
+  | "Heart"
+  | "Zap"
+  | "Brain";
 
 interface QuestCardProps {
   id: string;
@@ -8,6 +28,7 @@ interface QuestCardProps {
   points: number;
   description: string;
   isCompleted?: boolean;
+  iconName: IconName;
 }
 
 export default function QuestCard({
@@ -17,7 +38,10 @@ export default function QuestCard({
   points,
   description,
   isCompleted = false,
+  iconName,
 }: QuestCardProps) {
+  const Icon = getIcon(iconName);
+
   return (
     <Link
       to="/quests/$questId"
@@ -35,18 +59,21 @@ export default function QuestCard({
         </div>
       )}
 
-      {/* Header with name and points */}
-      <div className="flex justify-between items-start mb-2 pr-10">
-        <div className="flex-1">
-          <h3 className="font-medium text-white text-sm mb-1">{name}</h3>
+      {/* Header with icon, name and points */}
+      <div className="flex items-start gap-3 mb-2 pr-10">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#2a2a2e]/80 border border-[#3d3d3d]/50 flex items-center justify-center">
+          <Icon size={20} strokeWidth={2} className="text-[#f5c35f]" />
         </div>
-        <span className="font-mono font-bold text-[#f5c35f] text-sm ml-4">
-          {points} pts
-        </span>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-white text-sm mb-1">{name}</h3>
+          <span className="font-mono font-bold text-[#f5c35f] text-sm">
+            {points} pts
+          </span>
+        </div>
       </div>
 
       {/* Category badge */}
-      <div className="mb-2">
+      <div className="mb-2 ml-[52px]">
         <span className="inline-flex items-center gap-1 border border-[#3d3d3d]/50 px-2 py-0.5 text-xs font-medium text-[#f9dca0] bg-[#1a1a1e]/50 rounded">
           {category === "Physical" ? (
             <Zap size={12} strokeWidth={2} className="text-[#f5c35f]" />
@@ -58,7 +85,7 @@ export default function QuestCard({
       </div>
 
       {/* Description */}
-      <p className="text-sm text-[#f9dca0]">{description}</p>
+      <p className="text-sm text-[#f9dca0] ml-[52px]">{description}</p>
     </Link>
   );
 }
