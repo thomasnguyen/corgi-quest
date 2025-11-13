@@ -85,13 +85,13 @@ export const Route = createRootRoute({
       {
         rel: "preload",
         as: "image",
-        href: "/images/backgrounds/smoke_bg.webp",
+        href: "/images/backgrounds/bumi_regular.webp",
         fetchPriority: "high",
       },
       {
         rel: "preload",
         as: "image",
-        href: "/images/backgrounds/smoke_bg_mobile.webp",
+        href: "/images/backgrounds/bumi_regular_mobile.webp",
         fetchPriority: "high",
       },
       {

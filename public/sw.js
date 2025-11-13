@@ -29,8 +29,8 @@ const CRITICAL_IMAGES = [
   "/mage_avatar.webp",
   "/mage_avatar.png",
   // Optimized background images (replaced 50MB+ SVGs with 4MB WebP)
-  "/images/backgrounds/smoke_bg.webp",
-  "/images/backgrounds/smoke_bg_mobile.webp",
+  "/images/backgrounds/bumi_regular.webp",
+  "/images/backgrounds/bumi_regular_mobile.webp",
   "/images/backgrounds/smoke_bg_0.webp",
   "/images/backgrounds/smoke_bg_0_mobile.webp",
   "/images/backgrounds/smoke_spark_bg_0.webp",
