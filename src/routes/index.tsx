@@ -72,6 +72,20 @@ function OverviewPage() {
     }
   }, [backgroundImage, backgroundImageFallback]);
 
+  // Disable vertical scrolling on this page
+  useEffect(() => {
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, []);
+
   // Loading state - only show if we've never loaded data before
   // With useStaleQuery, we'll have stale data on subsequent visits
   if (
@@ -111,7 +125,7 @@ function OverviewPage() {
   return (
     <Layout>
       <div
-        className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
+        className="relative overflow-hidden overflow-y-hidden bg-cover bg-bottom h-screen"
         style={{
           backgroundImage: `url('${backgroundImage}'), url('${backgroundImageFallback}')`,
         }}
