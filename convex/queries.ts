@@ -721,3 +721,283 @@ export const getUnlockedItems = query({
     return unlockedItems.sort((a, b) => a.unlockLevel - b.unlockLevel);
   },
 });
+
+/**
+ * Helper function to generate array of dates for the week
+ */
+function getWeekDates(startDate: string, endDate: string): string[] {
+  const dates: string[] = [];
+  const current = new Date(startDate);
+  const end = new Date(endDate);
+
+  while (current <= end) {
+    dates.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
+/**
+ * Query to get weekly summary data
+ * Returns aggregated data for the past 7 days including activities, XP, levels, goals, streaks, and tips
+ */
+export const getWeeklySummary = query({
+  args: {
+    dogId: v.id("dogs"),
+    weekStartDate: v.string(), // YYYY-MM-DD
+    weekEndDate: v.string(), // YYYY-MM-DD
+  },
+  handler: async (ctx, args) => {
+    // Convert dates to timestamps
+    const startTime = new Date(args.weekStartDate).getTime();
+    const endTime = new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of Sunday
+
+    // 1. Get all activities for the week
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("createdAt"), startTime),
+          q.lt(q.field("createdAt"), endTime)
+        )
+      )
+      .collect();
+
+    // 2. Calculate total XP gained
+    const activityIds = activities.map((a) => a._id);
+    const allStatGains = await Promise.all(
+      activityIds.map((activityId) =>
+        ctx.db
+          .query("activity_stat_gains")
+          .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+          .collect()
+      )
+    );
+
+    const totalXpGained = allStatGains
+      .flat()
+      .reduce((sum, sg) => sum + sg.xpAmount, 0);
+
+    // 3. Calculate XP gained per stat this week
+    const statXpMap = new Map<string, number>();
+    allStatGains.flat().forEach((sg) => {
+      const current = statXpMap.get(sg.statType) || 0;
+      statXpMap.set(sg.statType, current + sg.xpAmount);
+    });
+
+    // Estimate levels gained (100 XP per level)
+    const levelsGained = {
+      overall: Math.floor(totalXpGained / 100),
+      stats: {
+        INT: Math.floor((statXpMap.get("INT") || 0) / 100),
+        PHY: Math.floor((statXpMap.get("PHY") || 0) / 100),
+        IMP: Math.floor((statXpMap.get("IMP") || 0) / 100),
+        SOC: Math.floor((statXpMap.get("SOC") || 0) / 100),
+      },
+    };
+
+    // 4. Get daily goals for the week
+    const weekDates = getWeekDates(args.weekStartDate, args.weekEndDate);
+    const dailyGoals = await Promise.all(
+      weekDates.map((date) =>
+        ctx.db
+          .query("daily_goals")
+          .withIndex("by_dog_and_date", (q) =>
+            q.eq("dogId", args.dogId).eq("date", date)
+          )
+          .first()
+      )
+    );
+
+    const daysGoalsMet = dailyGoals.filter(
+      (dg) =>
+        dg &&
+        dg.physicalPoints >= dg.physicalGoal &&
+        dg.mentalPoints >= dg.mentalGoal
+    ).length;
+
+    // 5. Get streak info
+    const streak = await ctx.db
+      .query("streaks")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .first();
+
+    // 6. Calculate activity breakdown
+    const activityCounts = new Map<string, number>();
+    let totalActivityTime = 0;
+
+    activities.forEach((activity) => {
+      const count = activityCounts.get(activity.activityName) || 0;
+      activityCounts.set(activity.activityName, count + 1);
+      totalActivityTime += activity.durationMinutes || 0;
+    });
+
+    const topActivity =
+      activityCounts.size > 0
+        ? Array.from(activityCounts.entries()).sort((a, b) => b[1] - a[1])[0]
+        : null;
+
+    // 7. Calculate stat progress
+    const currentStats = await ctx.db
+      .query("dog_stats")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    const highestStat =
+      currentStats.length > 0
+        ? currentStats.reduce((max, stat) =>
+            stat.level > max.level ? stat : max
+          )
+        : null;
+
+    const mostImprovedStat =
+      statXpMap.size > 0
+        ? Array.from(statXpMap.entries()).sort((a, b) => b[1] - a[1])[0]
+        : null;
+
+    // 8. Get mood insights (if applicable)
+    const moodLogs = await ctx.db
+      .query("mood_logs")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("createdAt"), startTime),
+          q.lt(q.field("createdAt"), endTime)
+        )
+      )
+      .collect();
+
+    let moodInsights = undefined;
+    if (moodLogs.length >= 3) {
+      const moodCounts = new Map<string, number>();
+      moodLogs.forEach((ml) => {
+        const count = moodCounts.get(ml.mood) || 0;
+        moodCounts.set(ml.mood, count + 1);
+      });
+
+      const mostCommon = Array.from(moodCounts.entries()).sort(
+        (a, b) => b[1] - a[1]
+      )[0][0] as
+        | "calm"
+        | "anxious"
+        | "reactive"
+        | "playful"
+        | "tired"
+        | "neutral";
+
+      // Simple trend calculation (compare first half to second half)
+      const midpoint = Math.floor(moodLogs.length / 2);
+      const firstHalf = moodLogs.slice(0, midpoint);
+      const secondHalf = moodLogs.slice(midpoint);
+
+      const positiveMoods = ["calm", "playful"];
+      const firstHalfPositive = firstHalf.filter((ml) =>
+        positiveMoods.includes(ml.mood)
+      ).length;
+      const secondHalfPositive = secondHalf.filter((ml) =>
+        positiveMoods.includes(ml.mood)
+      ).length;
+
+      let trend: "improving" | "stable" | "needs_attention";
+      if (secondHalfPositive > firstHalfPositive) {
+        trend = "improving";
+      } else if (secondHalfPositive < firstHalfPositive) {
+        trend = "needs_attention";
+      } else {
+        trend = "stable";
+      }
+
+      moodInsights = {
+        mostCommon,
+        trend,
+        totalMoods: moodLogs.length,
+      };
+    }
+
+    // 9. Get partner contribution (if applicable)
+    const dog = await ctx.db.get(args.dogId);
+    let partnerContribution = undefined;
+
+    if (dog) {
+      const household = await ctx.db.get(dog.householdId);
+      if (household) {
+        const users = await ctx.db
+          .query("users")
+          .withIndex("by_household", (q) => q.eq("householdId", household._id))
+          .collect();
+
+        if (users.length >= 2) {
+          const userActivityCounts = new Map<string, number>();
+          activities.forEach((activity) => {
+            const count = userActivityCounts.get(activity.userId) || 0;
+            userActivityCounts.set(activity.userId, count + 1);
+          });
+
+          // Sort users by activity count to determine current user and partner
+          const userCounts = users.map((user) => ({
+            user,
+            count: userActivityCounts.get(user._id) || 0,
+          }));
+          userCounts.sort((a, b) => b.count - a.count);
+
+          const currentUser = userCounts[0].user;
+          const partner = userCounts[1].user;
+
+          partnerContribution = {
+            currentUserActivities: userCounts[0].count,
+            partnerActivities: userCounts[1].count,
+            partnerName: partner.name,
+          };
+        }
+      }
+    }
+
+    // 10. Get Firecrawl tips
+    const firecrawlCache = await ctx.db
+      .query("firecrawl_tips")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .order("desc")
+      .first();
+
+    let firecrawlTips: Array<{ title: string; description: string }> = [];
+    if (firecrawlCache) {
+      try {
+        const tips = JSON.parse(firecrawlCache.tips);
+        firecrawlTips = tips.slice(0, 2); // Take first 2 tips
+      } catch (error) {
+        console.error("Failed to parse Firecrawl tips:", error);
+      }
+    }
+
+    // Return complete summary
+    return {
+      weekStartDate: args.weekStartDate,
+      weekEndDate: args.weekEndDate,
+      totalActivities: activities.length,
+      totalXpGained,
+      levelsGained,
+      daysGoalsMet,
+      currentStreak: streak?.currentStreak || 0,
+      longestStreak: streak?.longestStreak || 0,
+      topActivity: topActivity
+        ? { name: topActivity[0], count: topActivity[1] }
+        : null,
+      activityVariety: activityCounts.size,
+      totalActivityTime,
+      highestStat: highestStat
+        ? { type: highestStat.statType, level: highestStat.level }
+        : null,
+      mostImprovedStat: mostImprovedStat
+        ? {
+            type: mostImprovedStat[0] as "INT" | "PHY" | "IMP" | "SOC",
+            xpGained: mostImprovedStat[1],
+          }
+        : null,
+      moodInsights,
+      partnerContribution,
+      firecrawlTips,
+    };
+  },
+});
