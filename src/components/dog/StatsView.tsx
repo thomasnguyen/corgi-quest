@@ -108,9 +108,7 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
           </div>
 
           {/* Dog Name and Level */}
-          <h2
-            className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent mb-2"
-          >
+          <h2 className="text-3xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent mb-2">
             {dog.name}
           </h2>
           <p className="text-[#feefd0] text-sm mb-1">

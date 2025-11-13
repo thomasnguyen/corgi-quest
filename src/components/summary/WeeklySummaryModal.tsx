@@ -103,7 +103,7 @@ export default function WeeklySummaryModal({
 
     // If we have cached recommendations, use them
     if (cachedRecommendations?.recommendations) {
-      setAiRecommendations(cachedRecommendations.recommendations.slice(0, 2));
+      setAiRecommendations(cachedRecommendations.recommendations.slice(0, 1));
       setIsLoadingRecommendations(false);
       return;
     }
@@ -122,7 +122,7 @@ export default function WeeklySummaryModal({
           weekStartDate,
           weekEndDate,
         });
-        const topRecommendations = recommendations.slice(0, 2);
+        const topRecommendations = recommendations.slice(0, 1);
         setAiRecommendations(topRecommendations);
 
         // Cache the recommendations for this week

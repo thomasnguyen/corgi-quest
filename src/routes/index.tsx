@@ -52,15 +52,11 @@ function OverviewPage() {
 
   // Determine background based on equipped item (calculate early, before conditionals)
   const backgroundImage =
-    equippedItem?.item?.itemType === "moon" 
-      ? "/images/backgrounds/mage_bg.webp" 
-      : "/images/backgrounds/bumi_regular.webp";
+    equippedItem?.item?.itemType === "moon" ? "/mage_bg.webp" : "/smoke_bg.svg";
 
   // Fallback for browsers that don't support WebP
   const backgroundImageFallback =
-    equippedItem?.item?.itemType === "moon" 
-      ? "/mage_bg.png" 
-      : "/bumi_regular.png";
+    equippedItem?.item?.itemType === "moon" ? "/mage_bg.png" : "/smoke_bg.svg";
 
   // Preload the background image for faster rendering (must be before any conditional returns)
   useEffect(() => {
