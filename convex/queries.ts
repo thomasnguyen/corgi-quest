@@ -1010,3 +1010,75 @@ export const getCachedWeeklyRecommendations = query({
     }
   },
 });
+
+/**
+ * Query to get overall stats data for graphs
+ * Returns activity counts, XP progress, and level data for visualization
+ */
+export const getOverallStatsData = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Get all activities for the last 30 days
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) => q.gte(q.field("createdAt"), thirtyDaysAgo))
+      .collect();
+
+    // Get all stat gains for these activities
+    const activityIds = activities.map((a) => a._id);
+    const allStatGains = await Promise.all(
+      activityIds.map((activityId) =>
+        ctx.db
+          .query("activity_stat_gains")
+          .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+          .collect()
+      )
+    );
+
+    // Group activities by day for daily activity count
+    const dailyActivityCountMap = new Map<string, number>();
+    activities.forEach((activity) => {
+      const date = new Date(activity.createdAt).toISOString().split("T")[0];
+      const current = dailyActivityCountMap.get(date) || 0;
+      dailyActivityCountMap.set(date, current + 1);
+    });
+
+    // Group total XP by day
+    const dailyXpMap = new Map<string, number>();
+    activities.forEach((activity, index) => {
+      const date = new Date(activity.createdAt).toISOString().split("T")[0];
+      const statGains = allStatGains[index] || [];
+      const totalXp = statGains.reduce((sum, sg) => sum + sg.xpAmount, 0);
+      const current = dailyXpMap.get(date) || 0;
+      dailyXpMap.set(date, current + totalXp);
+    });
+
+    // Get streak info
+    const streak = await ctx.db
+      .query("streaks")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .first();
+
+    // Get dog to check current level
+    const dog = await ctx.db.get(args.dogId);
+
+    return {
+      dailyActivityCount: Array.from(dailyActivityCountMap.entries())
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+      dailyXpData: Array.from(dailyXpMap.entries())
+        .map(([date, xp]) => ({ date, xp }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+      totalActivities: activities.length,
+      currentStreak: streak?.currentStreak || 0,
+      longestStreak: streak?.longestStreak || 0,
+      overallLevel: dog?.overallLevel || 0,
+    };
+  },
+});

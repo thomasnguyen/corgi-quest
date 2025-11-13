@@ -7,6 +7,9 @@ import RadarChart from "./RadarChart";
 import MoodGraph from "./MoodGraph";
 import { Lightbulb, Zap, Shield, Users } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
+import OverallXpChart from "../stats/OverallXpChart";
+import DailyActivityCountChart from "../stats/DailyActivityCountChart";
+import StreakCard from "../stats/StreakCard";
 
 interface MoodLog {
   _id: Id<"mood_logs">;
@@ -54,6 +57,11 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
 
   // Get currently equipped item to check if moon item is equipped (for demo)
   const equippedItem = useQuery(api.queries.getEquippedItem, {
+    dogId: dog._id,
+  });
+
+  // Get overall stats data for graphs
+  const overallStatsData = useQuery(api.queries.getOverallStatsData, {
     dogId: dog._id,
   });
 
@@ -182,6 +190,32 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
           </h3>
           <RadarChart stats={stats} size={220} />
         </div>
+
+        {/* Additional Stats Graphs */}
+        {overallStatsData && (
+          <div className="space-y-4">
+            <h3 className="text-white text-center text-sm font-semibold uppercase tracking-wide">
+              Performance Analytics
+            </h3>
+
+            {/* Graphs Grid */}
+            <div className="grid grid-cols-1 gap-4">
+              {/* Overall XP Progress */}
+              <OverallXpChart data={overallStatsData.dailyXpData || []} />
+
+              {/* Daily Activity Count */}
+              <DailyActivityCountChart
+                data={overallStatsData.dailyActivityCount || []}
+              />
+
+              {/* Streak Card */}
+              <StreakCard
+                currentStreak={overallStatsData.currentStreak || 0}
+                longestStreak={overallStatsData.longestStreak || 0}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
