@@ -1,0 +1,112 @@
+interface ActivityFrequencyChartProps {
+  data: Array<{ activityName: string; count: number }>;
+}
+
+export default function ActivityFrequencyChart({
+  data,
+}: ActivityFrequencyChartProps) {
+  if (data.length === 0) {
+    return (
+      <div className="bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4">
+        <h3 className="text-[#feefd0] text-sm font-semibold mb-3">
+          Top Activities
+        </h3>
+        <div className="flex items-center justify-center h-32">
+          <p className="text-white/60 text-xs">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
+  const width = 320;
+  const height = 200;
+  const padding = { top: 20, right: 20, bottom: 60, left: 20 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxCount = Math.max(...data.map((d) => d.count), 1);
+  const barWidth = chartWidth / data.length;
+  const barSpacing = 4;
+
+  return (
+    <div className="bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4">
+      <h3 className="text-[#feefd0] text-sm font-semibold mb-3">
+        Top Activities (30 Days)
+      </h3>
+      <svg width={width} height={height} className="overflow-visible">
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+          const y = padding.top + chartHeight - ratio * chartHeight;
+          const value = Math.round(ratio * maxCount);
+          return (
+            <g key={ratio}>
+              <line
+                x1={padding.left}
+                y1={y}
+                x2={padding.left + chartWidth}
+                y2={y}
+                stroke="#3d3d3d"
+                strokeWidth="1"
+                opacity={0.3}
+              />
+              <text
+                x={padding.left - 5}
+                y={y + 4}
+                textAnchor="end"
+                fill="#888"
+                fontSize="10"
+              >
+                {value}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Bars */}
+        {data.map((item, index) => {
+          const barHeight = (item.count / maxCount) * chartHeight;
+          const x = padding.left + index * barWidth + barSpacing / 2;
+          const y = padding.top + chartHeight - barHeight;
+
+          return (
+            <g key={index}>
+              <rect
+                x={x}
+                y={y}
+                width={barWidth - barSpacing}
+                height={barHeight}
+                fill="#D4AF37"
+                rx="2"
+              />
+              {/* Count label on top of bar */}
+              <text
+                x={x + (barWidth - barSpacing) / 2}
+                y={y - 5}
+                textAnchor="middle"
+                fill="#f5c35f"
+                fontSize="10"
+                fontWeight="bold"
+              >
+                {item.count}
+              </text>
+              {/* Activity name rotated */}
+              <text
+                x={x + (barWidth - barSpacing) / 2}
+                y={height - 15}
+                textAnchor="middle"
+                fill="#888"
+                fontSize="9"
+                transform={`rotate(-45 ${x + (barWidth - barSpacing) / 2} ${height - 15})`}
+              >
+                {item.activityName.length > 10
+                  ? item.activityName.substring(0, 10) + "..."
+                  : item.activityName}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+

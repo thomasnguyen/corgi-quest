@@ -6,6 +6,9 @@ import { StatType } from "../lib/types";
 import { formatRelativeTime } from "../lib/utils";
 import { DURATION_ACTIVITIES, FIXED_ACTIVITIES } from "../lib/xpCalculations";
 import { useStaleQuery } from "../hooks/useStaleQuery";
+import DailyXpChart from "../components/stats/DailyXpChart";
+import ActivityFrequencyChart from "../components/stats/ActivityFrequencyChart";
+import WeeklyXpChart from "../components/stats/WeeklyXpChart";
 
 export const Route = createFileRoute("/stats/$statType")({
   component: StatDetailPage,
@@ -116,7 +119,13 @@ function StatDetailPage() {
     );
   }
 
-  const { stat, recentActivities } = statDetail;
+  const {
+    stat,
+    recentActivities,
+    dailyXpData,
+    activityFrequencyData,
+    weeklyXpData,
+  } = statDetail;
   const statName = STAT_NAMES[stat.statType];
   const xpPercentage = (stat.xp / stat.xpToNextLevel) * 100;
 
@@ -192,6 +201,24 @@ function StatDetailPage() {
                 <span className="text-[#f9dca0] text-xs font-medium">
                   {Math.round(xpPercentage)}% Complete
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Graphs Section - Horizontally Scrollable */}
+          <div className="px-5 mt-6">
+            <h2 className="text-[#feefd0] text-lg font-semibold mb-3">
+              Analytics
+            </h2>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-5 px-5">
+              <div className="flex-shrink-0">
+                <DailyXpChart data={dailyXpData || []} />
+              </div>
+              <div className="flex-shrink-0">
+                <WeeklyXpChart data={weeklyXpData || []} />
+              </div>
+              <div className="flex-shrink-0">
+                <ActivityFrequencyChart data={activityFrequencyData || []} />
               </div>
             </div>
           </div>

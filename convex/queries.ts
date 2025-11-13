@@ -14,6 +14,31 @@ export const getFirstDog = query({
 });
 
 /**
+ * Query to get all users in the first household (for demo purposes)
+ * Returns all users in the first household found in the database
+ * This is used by the character selection screen
+ */
+export const getAllHouseholdUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get the first household
+    const household = await ctx.db.query("households").first();
+
+    if (!household) {
+      return [];
+    }
+
+    // Get all users in this household
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_household", (q) => q.eq("householdId", household._id))
+      .collect();
+
+    return users;
+  },
+});
+
+/**
  * Query to get the first user in a household (for demo purposes)
  * Returns the first user in the specified household
  */
@@ -43,21 +68,6 @@ export const getHouseholdUsers = query({
       .query("users")
       .withIndex("by_household", (q) => q.eq("householdId", args.householdId))
       .collect();
-    return users;
-  },
-});
-
-/**
- * Optimized query to get all household users (demo: assumes single household)
- * Returns all users - for demo purposes, assumes there's only one household
- * This is the fastest possible query for character selection
- */
-export const getAllHouseholdUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    // For demo: just get all users (assumes single household)
-    // This is immediate - no intermediate queries needed
-    const users = await ctx.db.query("users").collect();
     return users;
   },
 });
@@ -215,48 +225,22 @@ export const getActivityFeed = query({
       .order("desc")
       .take(20);
 
-    if (activities.length === 0) {
-      return [];
-    }
-
-    // OPTIMIZATION: Batch fetch all users and stat gains in parallel
-    // Collect unique user IDs
-    const userIds = [...new Set(activities.map((a) => a.userId))];
-    const activityIds = activities.map((a) => a._id);
-
-    // Batch fetch all users (1 query instead of 20)
-    const users = await Promise.all(
-      userIds.map((userId) => ctx.db.get(userId))
-    );
-    const userMap = new Map(users.filter(Boolean).map((u) => [u!._id, u!]));
-
-    // Batch fetch all stat gains (1 query per activity, but can be optimized further)
-    // Note: Convex doesn't support IN queries, so we batch with Promise.all
-    const allStatGains = await Promise.all(
-      activityIds.map((activityId) =>
-        ctx.db
+    // For each activity, get user info and stat gains
+    const activitiesWithDetails = await Promise.all(
+      activities.map(async (activity) => {
+        const user = await ctx.db.get(activity.userId);
+        const statGains = await ctx.db
           .query("activity_stat_gains")
-          .withIndex("by_activity", (q) => q.eq("activityId", activityId))
-          .collect()
-      )
+          .withIndex("by_activity", (q) => q.eq("activityId", activity._id))
+          .collect();
+
+        return {
+          ...activity,
+          userName: user?.name || "Unknown",
+          statGains,
+        };
+      })
     );
-
-    // Create stat gains map
-    const statGainsMap = new Map(
-      activityIds.map((id, idx) => [id, allStatGains[idx]])
-    );
-
-    // Combine results (no additional queries)
-    const activitiesWithDetails = activities.map((activity) => {
-      const user = userMap.get(activity.userId);
-      const statGains = statGainsMap.get(activity._id) || [];
-
-      return {
-        ...activity,
-        userName: user?.name || "Unknown",
-        statGains,
-      };
-    });
 
     return activitiesWithDetails;
   },
@@ -303,8 +287,8 @@ export const getTodaysActivities = query({
 });
 
 /**
- * Query to get stat detail with recent activities
- * Returns specific stat info and activities that awarded XP to it
+ * Query to get stat detail with recent activities and historical data for graphs
+ * Returns specific stat info, activities that awarded XP to it, and historical data
  */
 export const getStatDetail = query({
   args: {
@@ -335,7 +319,7 @@ export const getStatDetail = query({
       .filter((q) => q.eq(q.field("statType"), args.statType))
       .collect();
 
-    // Get activities that awarded XP to this stat (most recent 20)
+    // Get activities that awarded XP to this stat
     const activityIds = statGains.map((sg) => sg.activityId);
     const activities = await Promise.all(
       activityIds.map(async (activityId) => {
@@ -357,12 +341,60 @@ export const getStatDetail = query({
     // Filter out nulls and sort by creation date (most recent first)
     const validActivities = activities
       .filter((a) => a !== null)
-      .sort((a, b) => b!.createdAt - a!.createdAt)
-      .slice(0, 20);
+      .sort((a, b) => b!.createdAt - a!.createdAt);
+
+    // Get recent activities (last 20)
+    const recentActivities = validActivities.slice(0, 20);
+
+    // Get all activities for historical data (last 30 days)
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    const historicalActivities = validActivities.filter(
+      (a) => a!.createdAt >= thirtyDaysAgo
+    );
+
+    // Group activities by day for daily XP chart
+    const dailyXpMap = new Map<string, number>();
+    historicalActivities.forEach((activity) => {
+      if (!activity) return;
+      const date = new Date(activity.createdAt).toISOString().split("T")[0];
+      const current = dailyXpMap.get(date) || 0;
+      dailyXpMap.set(date, current + activity.xpAmount);
+    });
+
+    // Group activities by activity name for frequency chart
+    const activityFrequencyMap = new Map<string, number>();
+    historicalActivities.forEach((activity) => {
+      if (!activity) return;
+      const current = activityFrequencyMap.get(activity.activityName) || 0;
+      activityFrequencyMap.set(activity.activityName, current + 1);
+    });
+
+    // Group activities by week for weekly progress
+    const weeklyXpMap = new Map<string, number>();
+    historicalActivities.forEach((activity) => {
+      if (!activity) return;
+      const date = new Date(activity.createdAt);
+      const weekStart = new Date(date);
+      weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+      const weekKey = weekStart.toISOString().split("T")[0];
+      const current = weeklyXpMap.get(weekKey) || 0;
+      weeklyXpMap.set(weekKey, current + activity.xpAmount);
+    });
 
     return {
       stat,
-      recentActivities: validActivities,
+      recentActivities,
+      dailyXpData: Array.from(dailyXpMap.entries())
+        .map(([date, xp]) => ({ date, xp }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+      activityFrequencyData: Array.from(activityFrequencyMap.entries())
+        .map(([activityName, count]) => ({ activityName, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10), // Top 10 activities
+      weeklyXpData: Array.from(weeklyXpMap.entries())
+        .map(([week, xp]) => ({ week, xp }))
+        .sort((a, b) => a.week.localeCompare(b.week)),
     };
   },
 });
@@ -585,42 +617,6 @@ export const getCachedRecommendations = query({
 });
 
 /**
- * Query to get cached weekly AI recommendations for a specific week
- * Returns cached recommendations if they exist for the week, otherwise null
- */
-export const getCachedWeeklyRecommendations = query({
-  args: {
-    dogId: v.id("dogs"),
-    weekEndDate: v.string(), // YYYY-MM-DD format (Sunday of the week)
-  },
-  handler: async (ctx, args) => {
-    // Find cached recommendations for this week (using weekEndDate as the date key)
-    const cached = await ctx.db
-      .query("ai_recommendations")
-      .withIndex("by_dog_and_date", (q) =>
-        q.eq("dogId", args.dogId).eq("date", args.weekEndDate)
-      )
-      .first();
-
-    if (!cached) {
-      return null;
-    }
-
-    // Parse the JSON string back to array
-    try {
-      const recommendations = JSON.parse(cached.recommendations);
-      return {
-        recommendations,
-        createdAt: cached.createdAt,
-      };
-    } catch (error) {
-      console.error("Failed to parse cached weekly recommendations:", error);
-      return null;
-    }
-  },
-});
-
-/**
  * Query to get cached Firecrawl tips for today
  * Returns cached tips if they exist for today, otherwise null
  */
@@ -759,12 +755,13 @@ export const getUnlockedItems = query({
 });
 
 /**
- * Helper function to generate array of dates for the week
+ * Helper function to get week dates
  */
 function getWeekDates(startDate: string, endDate: string): string[] {
   const dates: string[] = [];
-  const current = new Date(startDate);
+  const start = new Date(startDate);
   const end = new Date(endDate);
+  const current = new Date(start);
 
   while (current <= end) {
     dates.push(current.toISOString().split("T")[0]);
@@ -905,104 +902,54 @@ export const getWeeklySummary = query({
       )
       .collect();
 
-    let moodInsights = undefined;
-    if (moodLogs.length >= 3) {
-      const moodCounts = new Map<string, number>();
-      moodLogs.forEach((ml) => {
-        const count = moodCounts.get(ml.mood) || 0;
-        moodCounts.set(ml.mood, count + 1);
-      });
+    const moodCounts = new Map<string, number>();
+    moodLogs.forEach((log) => {
+      const count = moodCounts.get(log.mood) || 0;
+      moodCounts.set(log.mood, count + 1);
+    });
 
-      const mostCommon = Array.from(moodCounts.entries()).sort(
-        (a, b) => b[1] - a[1]
-      )[0][0] as
-        | "calm"
-        | "anxious"
-        | "reactive"
-        | "playful"
-        | "tired"
-        | "neutral";
+    const mostCommonMood =
+      moodCounts.size > 0
+        ? Array.from(moodCounts.entries()).sort((a, b) => b[1] - a[1])[0][0]
+        : "neutral";
 
-      // Simple trend calculation (compare first half to second half)
-      const midpoint = Math.floor(moodLogs.length / 2);
-      const firstHalf = moodLogs.slice(0, midpoint);
-      const secondHalf = moodLogs.slice(midpoint);
+    // Simple trend calculation (compare first half vs second half of week)
+    const midPoint = startTime + (endTime - startTime) / 2;
+    const firstHalfMoods = moodLogs
+      .filter((log) => log.createdAt < midPoint)
+      .map((log) => log.mood);
+    const secondHalfMoods = moodLogs
+      .filter((log) => log.createdAt >= midPoint)
+      .map((log) => log.mood);
 
-      const positiveMoods = ["calm", "playful"];
-      const firstHalfPositive = firstHalf.filter((ml) =>
-        positiveMoods.includes(ml.mood)
-      ).length;
-      const secondHalfPositive = secondHalf.filter((ml) =>
-        positiveMoods.includes(ml.mood)
-      ).length;
+    const moodValues: Record<string, number> = {
+      reactive: 0,
+      anxious: 1,
+      tired: 2,
+      neutral: 3,
+      playful: 4,
+      calm: 5,
+    };
 
-      let trend: "improving" | "stable" | "needs_attention";
-      if (secondHalfPositive > firstHalfPositive) {
-        trend = "improving";
-      } else if (secondHalfPositive < firstHalfPositive) {
-        trend = "needs_attention";
-      } else {
-        trend = "stable";
-      }
+    const avgFirstHalf =
+      firstHalfMoods.length > 0
+        ? firstHalfMoods.reduce((sum, mood) => sum + moodValues[mood], 0) /
+          firstHalfMoods.length
+        : 3;
+    const avgSecondHalf =
+      secondHalfMoods.length > 0
+        ? secondHalfMoods.reduce((sum, mood) => sum + moodValues[mood], 0) /
+          secondHalfMoods.length
+        : 3;
 
-      moodInsights = {
-        mostCommon,
-        trend,
-        totalMoods: moodLogs.length,
-      };
+    let trend = "stable";
+    if (avgSecondHalf > avgFirstHalf + 0.5) {
+      trend = "improving";
+    } else if (avgSecondHalf < avgFirstHalf - 0.5) {
+      trend = "needs_attention";
     }
 
-    // 9. Get partner contribution (if applicable)
-    const dog = await ctx.db.get(args.dogId);
-    let partnerContribution = undefined;
-
-    if (dog) {
-      const household = await ctx.db.get(dog.householdId);
-      if (household) {
-        const users = await ctx.db
-          .query("users")
-          .withIndex("by_household", (q) => q.eq("householdId", household._id))
-          .collect();
-
-        if (users.length >= 2) {
-          const userActivityCounts = new Map<string, number>();
-          activities.forEach((activity) => {
-            const count = userActivityCounts.get(activity.userId) || 0;
-            userActivityCounts.set(activity.userId, count + 1);
-          });
-
-          // Sort users by activity count to determine current user and partner
-          const userCounts = users.map((user) => ({
-            user,
-            count: userActivityCounts.get(user._id) || 0,
-          }));
-          userCounts.sort((a, b) => b.count - a.count);
-
-          const currentUser = userCounts[0].user;
-          const partner = userCounts[1].user;
-
-          partnerContribution = {
-            currentUserActivities: userCounts[0].count,
-            partnerActivities: userCounts[1].count,
-            partnerName: partner.name,
-          };
-        }
-      }
-    }
-
-    // 10. Get AI recommendations for the week (will be generated on-demand via action)
-    // For now, return empty array - the UI will call the action to generate them
-    // This keeps the query fast and allows async generation
-    const aiRecommendations: Array<{
-      activityName: string;
-      reasoning: string;
-      expectedMoodImpact: string;
-    }> = [];
-
-    // Return complete summary
     return {
-      weekStartDate: args.weekStartDate,
-      weekEndDate: args.weekEndDate,
       totalActivities: activities.length,
       totalXpGained,
       levelsGained,
@@ -1012,20 +959,54 @@ export const getWeeklySummary = query({
       topActivity: topActivity
         ? { name: topActivity[0], count: topActivity[1] }
         : null,
-      activityVariety: activityCounts.size,
       totalActivityTime,
       highestStat: highestStat
         ? { type: highestStat.statType, level: highestStat.level }
         : null,
       mostImprovedStat: mostImprovedStat
-        ? {
-            type: mostImprovedStat[0] as "INT" | "PHY" | "IMP" | "SOC",
-            xpGained: mostImprovedStat[1],
-          }
+        ? { type: mostImprovedStat[0], xpGained: mostImprovedStat[1] }
         : null,
-      moodInsights,
-      partnerContribution,
-      aiRecommendations,
+      moodInsights:
+        moodLogs.length > 0
+          ? {
+              mostCommon: mostCommonMood,
+              trend,
+            }
+          : null,
     };
+  },
+});
+
+/**
+ * Query to get cached weekly recommendations
+ * Returns cached AI recommendations for a specific week
+ */
+export const getCachedWeeklyRecommendations = query({
+  args: {
+    dogId: v.id("dogs"),
+    weekEndDate: v.string(), // YYYY-MM-DD format (Sunday of the week)
+  },
+  handler: async (ctx, args) => {
+    const cached = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", args.weekEndDate)
+      )
+      .first();
+
+    if (!cached) {
+      return null;
+    }
+
+    try {
+      const recommendations = JSON.parse(cached.recommendations);
+      return {
+        recommendations,
+        createdAt: cached.createdAt,
+      };
+    } catch (e) {
+      // If parsing fails, return null
+      return null;
+    }
   },
 });
