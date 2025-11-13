@@ -17,6 +17,15 @@ const STATIC_ASSETS = [
   "/logo192.png",
   "/logo512.webp",
   "/logo512.png",
+  // Splash screens
+  "/splash.webp",
+  "/splash_ios_1290x2796.webp",
+  "/splash_ios_1179x2556.webp",
+  "/splash_ios_1284x2778.webp",
+  "/splash_ios_1170x2532.webp",
+  "/splash_ios_1242x2688.webp",
+  "/splash_ios_828x1792.webp",
+  "/splash_ios_750x1334.webp",
 ];
 
 // Images to cache on install (critical images)
