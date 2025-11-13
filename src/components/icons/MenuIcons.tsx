@@ -356,3 +356,4 @@ export const ActivityIcon: React.FC<IconProps> = ({
   <OverviewIcon className={className} width={width} height={height} />
 );
 
+
