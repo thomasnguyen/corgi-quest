@@ -80,9 +80,15 @@ export const generateSessionToken = action(async () => {
  * @returns {Array} Array of recommendation objects with activity details
  * @throws {Error} If OPENAI_API_KEY is not configured or API request fails
  */
-export const generateRecommendations = action({
+/**
+ * Generate AI recommendations for a specific week date range
+ * Used for weekly summary to provide personalized recommendations based on the week's data
+ */
+export const generateWeeklyRecommendations = action({
   args: {
     dogId: v.id("dogs"),
+    weekStartDate: v.string(), // YYYY-MM-DD
+    weekEndDate: v.string(), // YYYY-MM-DD
   },
   handler: async (ctx, args) => {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -94,31 +100,30 @@ export const generateRecommendations = action({
     }
 
     try {
-      // Calculate date range (last 7 days)
-      const now = Date.now();
-      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+      // Convert dates to timestamps
+      const startTime = new Date(args.weekStartDate).getTime();
+      const endTime = new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of day
 
-      // Query mood logs from last 7 days
+      // Query mood logs for the week
       const moodLogs = await ctx.runQuery(api.queries.getMoodFeed, {
         dogId: args.dogId,
       });
-      const recentMoods = moodLogs.filter(
-        (mood: any) => mood.createdAt >= sevenDaysAgo
+      const weekMoods = moodLogs.filter(
+        (mood: any) => mood.createdAt >= startTime && mood.createdAt < endTime
       );
 
-      // Query activity history from last 7 days
+      // Query activity history for the week
       const activityFeed = await ctx.runQuery(api.queries.getActivityFeed, {
         dogId: args.dogId,
       });
-      const recentActivities = activityFeed.filter(
-        (activity: any) => activity.createdAt >= sevenDaysAgo
+      const weekActivities = activityFeed.filter(
+        (activity: any) => activity.createdAt >= startTime && activity.createdAt < endTime
       );
 
       // Check if we have enough data to generate meaningful recommendations
-      if (recentActivities.length === 0 && recentMoods.length === 0) {
-        throw new Error(
-          "Not enough data to generate recommendations. Log some activities and moods first to get personalized suggestions."
-        );
+      if (weekActivities.length === 0 && weekMoods.length === 0) {
+        // Return empty array instead of throwing - weekly summary can still show other data
+        return [];
       }
 
       // Query current stats
@@ -136,13 +141,13 @@ export const generateRecommendations = action({
       });
 
       // Format data for OpenAI
-      const moodSummary = recentMoods.map((mood: any) => ({
+      const moodSummary = weekMoods.map((mood: any) => ({
         mood: mood.mood,
         note: mood.note,
         timestamp: new Date(mood.createdAt).toISOString(),
       }));
 
-      const activitySummary = recentActivities.map((activity: any) => ({
+      const activitySummary = weekActivities.map((activity: any) => ({
         name: activity.activityName,
         duration: activity.durationMinutes,
         statGains: activity.statGains,

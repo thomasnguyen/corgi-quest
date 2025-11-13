@@ -408,6 +408,49 @@ export const cacheRecommendations = mutation({
 });
 
 /**
+ * Cache Weekly AI Recommendations Mutation
+ *
+ * Saves AI-generated weekly recommendations to the cache for a specific week.
+ * Uses weekEndDate as the cache key.
+ */
+export const cacheWeeklyRecommendations = mutation({
+  args: {
+    dogId: v.id("dogs"),
+    weekEndDate: v.string(), // YYYY-MM-DD format (Sunday of the week)
+    recommendations: v.string(), // JSON stringified array
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Check if cache already exists for this week
+    const existing = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", args.weekEndDate)
+      )
+      .first();
+
+    if (existing) {
+      // Update existing cache
+      await ctx.db.patch(existing._id, {
+        recommendations: args.recommendations,
+        createdAt: now,
+      });
+      return { success: true, updated: true };
+    } else {
+      // Insert new cache (using weekEndDate as the date field)
+      await ctx.db.insert("ai_recommendations", {
+        dogId: args.dogId,
+        date: args.weekEndDate,
+        recommendations: args.recommendations,
+        createdAt: now,
+      });
+      return { success: true, updated: false };
+    }
+  },
+});
+
+/**
  * Cache Firecrawl Tips Mutation
  *
  * Saves Firecrawl-scraped training tips to the cache for today.

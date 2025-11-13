@@ -585,6 +585,42 @@ export const getCachedRecommendations = query({
 });
 
 /**
+ * Query to get cached weekly AI recommendations for a specific week
+ * Returns cached recommendations if they exist for the week, otherwise null
+ */
+export const getCachedWeeklyRecommendations = query({
+  args: {
+    dogId: v.id("dogs"),
+    weekEndDate: v.string(), // YYYY-MM-DD format (Sunday of the week)
+  },
+  handler: async (ctx, args) => {
+    // Find cached recommendations for this week (using weekEndDate as the date key)
+    const cached = await ctx.db
+      .query("ai_recommendations")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", args.weekEndDate)
+      )
+      .first();
+
+    if (!cached) {
+      return null;
+    }
+
+    // Parse the JSON string back to array
+    try {
+      const recommendations = JSON.parse(cached.recommendations);
+      return {
+        recommendations,
+        createdAt: cached.createdAt,
+      };
+    } catch (error) {
+      console.error("Failed to parse cached weekly recommendations:", error);
+      return null;
+    }
+  },
+});
+
+/**
  * Query to get cached Firecrawl tips for today
  * Returns cached tips if they exist for today, otherwise null
  */
@@ -954,22 +990,14 @@ export const getWeeklySummary = query({
       }
     }
 
-    // 10. Get Firecrawl tips
-    const firecrawlCache = await ctx.db
-      .query("firecrawl_tips")
-      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
-      .order("desc")
-      .first();
-
-    let firecrawlTips: Array<{ title: string; description: string }> = [];
-    if (firecrawlCache) {
-      try {
-        const tips = JSON.parse(firecrawlCache.tips);
-        firecrawlTips = tips.slice(0, 2); // Take first 2 tips
-      } catch (error) {
-        console.error("Failed to parse Firecrawl tips:", error);
-      }
-    }
+    // 10. Get AI recommendations for the week (will be generated on-demand via action)
+    // For now, return empty array - the UI will call the action to generate them
+    // This keeps the query fast and allows async generation
+    const aiRecommendations: Array<{
+      activityName: string;
+      reasoning: string;
+      expectedMoodImpact: string;
+    }> = [];
 
     // Return complete summary
     return {
@@ -997,7 +1025,7 @@ export const getWeeklySummary = query({
         : null,
       moodInsights,
       partnerContribution,
-      firecrawlTips,
+      aiRecommendations,
     };
   },
 });

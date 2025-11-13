@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatWeekRange } from "../../lib/dateUtils";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface WeeklySummaryModalProps {
   dogId: Id<"dogs">;
@@ -49,6 +49,29 @@ export default function WeeklySummaryModal({
     dogId,
   });
 
+  // AI Recommendations state
+  const [aiRecommendations, setAiRecommendations] = useState<
+    Array<{
+      activityName: string;
+      reasoning: string;
+      expectedMoodImpact: string;
+    }>
+  >([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false);
+  const generateWeeklyRecommendations = useAction(
+    api.actions.generateWeeklyRecommendations
+  );
+  const cacheWeeklyRecommendations = useMutation(
+    api.mutations.cacheWeeklyRecommendations
+  );
+
+  // Get cached weekly recommendations
+  const cachedRecommendations = useQuery(
+    api.queries.getCachedWeeklyRecommendations,
+    { dogId, weekEndDate }
+  );
+
   // Refs for focus trap
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -73,6 +96,61 @@ export default function WeeklySummaryModal({
       document.removeEventListener("keydown", handleEscKey);
     };
   }, [isOpen, weekEndDate, onClose]);
+
+  // Load cached recommendations first, then generate if needed
+  useEffect(() => {
+    if (!isOpen || !summaryData) return;
+
+    // If we have cached recommendations, use them
+    if (cachedRecommendations?.recommendations) {
+      setAiRecommendations(cachedRecommendations.recommendations.slice(0, 2));
+      setIsLoadingRecommendations(false);
+      return;
+    }
+
+    // If cache is still loading, wait
+    if (cachedRecommendations === undefined) {
+      return;
+    }
+
+    // No cache found, generate new recommendations
+    const loadRecommendations = async () => {
+      setIsLoadingRecommendations(true);
+      try {
+        const recommendations = await generateWeeklyRecommendations({
+          dogId,
+          weekStartDate,
+          weekEndDate,
+        });
+        const topRecommendations = recommendations.slice(0, 2);
+        setAiRecommendations(topRecommendations);
+
+        // Cache the recommendations for this week
+        await cacheWeeklyRecommendations({
+          dogId,
+          weekEndDate,
+          recommendations: JSON.stringify(recommendations),
+        });
+      } catch (error) {
+        console.error("Failed to generate AI recommendations:", error);
+        // Don't show error to user, just leave empty
+        setAiRecommendations([]);
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    };
+
+    loadRecommendations();
+  }, [
+    isOpen,
+    dogId,
+    weekStartDate,
+    weekEndDate,
+    summaryData,
+    generateWeeklyRecommendations,
+    cacheWeeklyRecommendations,
+    cachedRecommendations,
+  ]);
 
   // Focus trap implementation
   useEffect(() => {
@@ -255,29 +333,6 @@ export default function WeeklySummaryModal({
             <p className="text-gray-400 text-center mb-6">
               Start logging activities to see your weekly summary!
             </p>
-            {summaryData.firecrawlTips &&
-              summaryData.firecrawlTips.length > 0 && (
-                <div className="mb-6 w-full max-w-md">
-                  <h3 className="text-white text-lg font-semibold mb-3">
-                    Training Tips
-                  </h3>
-                  <div className="space-y-3">
-                    {summaryData.firecrawlTips.slice(0, 2).map((tip, index) => (
-                      <div
-                        key={index}
-                        className="border border-gray-700 rounded-lg p-3"
-                      >
-                        <h4 className="text-white font-medium text-sm mb-1">
-                          {tip.title}
-                        </h4>
-                        <p className="text-gray-400 text-xs">
-                          {tip.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             <button
               onClick={handleDismiss}
               className="w-full max-w-sm bg-white text-black font-bold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors"
@@ -366,7 +421,7 @@ export default function WeeklySummaryModal({
         </div>
 
         {/* Header with close button */}
-        <div className="sticky top-0 bg-black/40 backdrop-blur-sm border-gray-700/50 p-3 z-10">
+        <div className="sticky top-0  backdrop-blur-sm border-gray-700/50 p-3 z-10">
           <div className="flex items-center justify-end">
             <button
               ref={closeButtonRef}
@@ -440,6 +495,47 @@ export default function WeeklySummaryModal({
 
         {/* Content sections */}
         <div className="flex-1 p-6 space-y-4">
+          {/* AI Recommendations Section - Moved to top */}
+          <section className="bg-[#111115 rounded-lg p-4 relative overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={16} className="text-[#D4AF37]" />
+              <h3 className="text-white text-sm font-semibold uppercase tracking-wide">
+                AI Recommendations
+              </h3>
+            </div>
+            {isLoadingRecommendations ? (
+              <div className="text-center py-4">
+                <div className="inline-block w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-400 text-xs mt-2">
+                  Generating personalized recommendations...
+                </p>
+              </div>
+            ) : aiRecommendations.length > 0 ? (
+              <div className="space-y-3">
+                {aiRecommendations.map((rec, index) => (
+                  <div key={index} className=" rounded-lg p-3">
+                    <h4 className="text-white font-semibold text-sm mb-2 text-[#f5c35f]">
+                      {rec.activityName}
+                    </h4>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {rec.reasoning}
+                    </p>
+                    {rec.expectedMoodImpact && (
+                      <p className="text-gray-400 text-xs italic border-t border-white/5 pt-2 mt-2">
+                        Expected impact: {rec.expectedMoodImpact}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-xs text-center py-4">
+                No recommendations available yet. Log some activities to get
+                personalized suggestions!
+              </p>
+            )}
+          </section>
+
           {/* This Week Section */}
           <section className="bg-black/40 border border-white/10 rounded-lg p-4 relative overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
             {/* Top gradient */}
@@ -538,7 +634,7 @@ export default function WeeklySummaryModal({
           {summaryData.moodInsights && (
             <section className="bg-black/40 border border-white/10 rounded-lg p-4 relative overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
               {/* Top gradient */}
-              <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white/5 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/5 to-transparent" />
               <h3 className="text-white text-sm font-semibold mb-3 uppercase tracking-wide">
                 Mood Insights
               </h3>
@@ -566,36 +662,6 @@ export default function WeeklySummaryModal({
               </div>
             </section>
           )}
-
-          {/* AI Recommendations Section */}
-          {summaryData.firecrawlTips &&
-            summaryData.firecrawlTips.length > 0 && (
-              <section className="bg-black/40 border border-white/10 rounded-lg p-4 relative overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
-                {/* Top gradient */}
-                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white/5 to-transparent" />
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles size={16} className="text-[#D4AF37]" />
-                  <h3 className="text-white text-sm font-semibold uppercase tracking-wide">
-                    AI Recommendations
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  {summaryData.firecrawlTips.slice(0, 2).map((tip, index) => (
-                    <div
-                      key={index}
-                      className="bg-gradient-to-br from-black/60 to-black/40 border border-[#D4AF37]/30 rounded-lg p-3 hover:border-[#D4AF37]/50 transition-colors"
-                    >
-                      <h4 className="text-white font-semibold text-xs mb-2 text-[#f5c35f]">
-                        {tip.title}
-                      </h4>
-                      <p className="text-gray-300 text-xs leading-relaxed">
-                        {tip.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
         </div>
 
         {/* Footer with Got it button */}

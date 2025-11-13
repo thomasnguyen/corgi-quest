@@ -44,11 +44,28 @@ export default function Layout({ children }: LayoutProps) {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const forceShow = params.get("showWeeklySummary") === "true";
-      if (forceShow && firstDog) {
-        setIsWeeklySummaryOpen(true);
+      if (forceShow) {
+        if (firstDog === null) {
+          console.error("Cannot show weekly summary: No dog found in database");
+          return;
+        }
+        if (firstDog && weekStartDate && weekEndDate) {
+          console.log("Opening weekly summary modal via URL parameter", {
+            firstDog: firstDog._id,
+            weekStartDate,
+            weekEndDate,
+          });
+          setIsWeeklySummaryOpen(true);
+        } else {
+          console.log("Waiting for data to load...", {
+            firstDog: firstDog ? "loaded" : "loading",
+            weekStartDate,
+            weekEndDate,
+          });
+        }
       }
     }
-  }, [firstDog]);
+  }, [firstDog, weekStartDate, weekEndDate]);
 
   // Automatically show modal based on time window and dismissal state
   useEffect(() => {
@@ -239,7 +256,7 @@ export default function Layout({ children }: LayoutProps) {
       )}
 
       {/* Weekly summary modal */}
-      {isWeeklySummaryOpen && firstDog && (
+      {isWeeklySummaryOpen && firstDog && weekStartDate && weekEndDate && (
         <WeeklySummaryModal
           dogId={firstDog._id}
           isOpen={isWeeklySummaryOpen}
