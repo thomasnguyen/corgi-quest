@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import BottomNav from "./BottomNav";
@@ -7,6 +7,8 @@ import { useMoodReminder } from "../../hooks/useMoodReminder";
 import MoodReminderPopup from "../mood/MoodReminderPopup";
 import { useSelectedCharacter } from "../../hooks/useSelectedCharacter";
 import AppExplanation from "./AppExplanation";
+import { useWeeklySummary } from "../../hooks/useWeeklySummary";
+import WeeklySummaryModal from "../summary/WeeklySummaryModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,6 +19,7 @@ interface LayoutProps {
  * Detects new activities and moods, shows toast notifications
  * Also detects level-ups by watching stat changes
  * Shows daily mood reminder after 6pm if no mood logged
+ * Shows weekly summary modal on Sunday evening or Monday morning
  * Requirements: 1, 21, 22, 26
  */
 export default function Layout({ children }: LayoutProps) {
@@ -27,6 +30,32 @@ export default function Layout({ children }: LayoutProps) {
 
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
+
+  // Weekly summary modal state
+  const [isWeeklySummaryOpen, setIsWeeklySummaryOpen] = useState(false);
+
+  // Check if we should show the weekly summary modal
+  const { shouldShowModal, weekStartDate, weekEndDate } = useWeeklySummary(
+    firstDog?._id
+  );
+
+  // Check for query parameter to force show modal (for testing)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const forceShow = params.get("showWeeklySummary") === "true";
+      if (forceShow && firstDog) {
+        setIsWeeklySummaryOpen(true);
+      }
+    }
+  }, [firstDog]);
+
+  // Automatically show modal based on time window and dismissal state
+  useEffect(() => {
+    if (shouldShowModal) {
+      setIsWeeklySummaryOpen(true);
+    }
+  }, [shouldShowModal]);
 
   // Subscribe to activity feed for real-time updates
   const activityFeed = useQuery(
@@ -206,6 +235,17 @@ export default function Layout({ children }: LayoutProps) {
           dogId={firstDog._id}
           userId={selectedCharacterId}
           onDismiss={dismissReminder}
+        />
+      )}
+
+      {/* Weekly summary modal */}
+      {isWeeklySummaryOpen && firstDog && (
+        <WeeklySummaryModal
+          dogId={firstDog._id}
+          isOpen={isWeeklySummaryOpen}
+          onClose={() => setIsWeeklySummaryOpen(false)}
+          weekStartDate={weekStartDate}
+          weekEndDate={weekEndDate}
         />
       )}
     </div>
