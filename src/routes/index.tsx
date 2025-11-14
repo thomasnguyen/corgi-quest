@@ -62,22 +62,24 @@ function OverviewPage() {
   }, []);
 
   // Determine background based on equipped item (calculate early, before conditionals)
-  // Priority: 1. Generated AI image (only for non-moon items), 2. Item-specific background, 3. Default background
-  // Moon items always use mage_bg, never AI-generated images
+  // Priority: 
+  // 1. Moon items → mage_bg.webp (local, never AI-generated)
+  // 2. Non-moon equipped items → generatedImageUrl from Convex storage (AI-generated WebP)
+  // 3. Default (nothing equipped) → main_bg.webp (local)
   const bgSuffix = isMobile ? "_mobile" : "";
   const isMoonItem = equippedItem?.item?.itemType === "moon";
   const backgroundImage = isMoonItem
     ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
     : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
       ? equippedItem.generatedImageUrl
-      : `/images/backgrounds/default_bg${bgSuffix}.webp`;
+      : `/main_bg.webp`;
 
   // Fallback for browsers that don't support WebP (only for non-AI images)
   const backgroundImageFallback = isMoonItem
     ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
     : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
       ? equippedItem.generatedImageUrl
-      : `/images/backgrounds/default_bg${bgSuffix}.webp`;
+      : `/main_bg.webp`;
 
   // Preload the background image for faster rendering (must be before any conditional returns)
   useEffect(() => {

@@ -49,8 +49,8 @@ export default function MoodPicker({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1a1a1e] border border-[#3d3d3d]/50 rounded-lg p-6 max-w-md w-full">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-8 overflow-y-auto">
+      <div className="bg-[#1a1a1e] border border-[#3d3d3d]/50 rounded-lg p-6 max-w-md w-full mt-4">
         {/* Header */}
         <h2 className="text-white font-semibold text-lg mb-4">
           How is Bumi feeling?
@@ -85,18 +85,20 @@ export default function MoodPicker({
           >
             Add a note (optional)
           </label>
-          <textarea
-            id="mood-note"
-            value={note}
-            onChange={(e) => setNote(e.target.value.slice(0, 200))}
-            maxLength={200}
-            disabled={isLoading}
-            placeholder="Any details about Bumi's mood..."
-            className="w-full bg-[#121216] border border-[#3d3d3d]/50 rounded-lg p-3 text-white text-sm placeholder-[#888] focus:outline-none focus:border-[#f5c35f]/50 resize-none"
-            rows={3}
-          />
-          <div className="text-[#888] text-xs mt-1 text-right">
-            {note.length}/200
+          <div className="relative">
+            <textarea
+              id="mood-note"
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, 200))}
+              maxLength={200}
+              disabled={isLoading}
+              placeholder="Any details about Bumi's mood..."
+              className="w-full bg-[#121216] border border-[#3d3d3d]/50 rounded-lg p-3 pr-16 text-white text-sm placeholder-[#888] focus:outline-none focus:border-[#f5c35f]/50 resize-none"
+              rows={3}
+            />
+            <div className="absolute bottom-2 right-2 text-[#888] text-xs pointer-events-none">
+              {note.length}/200
+            </div>
           </div>
         </div>
 
