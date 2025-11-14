@@ -493,7 +493,53 @@ export const generateItemImage = action({
         throw new Error("Invalid response from DALL-E: missing image URL");
       }
 
-      return response.data[0].url;
+      const openaiImageUrl = response.data[0].url;
+
+      // Step 2: Download, compress, convert to WebP, and save to Convex storage
+      try {
+        // Download the image from OpenAI
+        const imageResponse = await fetch(openaiImageUrl);
+        if (!imageResponse.ok) {
+          throw new Error(
+            `Failed to download image: ${imageResponse.statusText}`
+          );
+        }
+
+        // Get image as buffer
+        const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+        // Convert to WebP and compress using sharp
+        // Import sharp dynamically to avoid bundling issues
+        const sharp = await import("sharp");
+        const webpBuffer = await sharp
+          .default(imageBuffer)
+          .webp({
+            quality: 80, // Good balance between quality and file size
+            effort: 6, // Compression effort (0-6, higher = better compression but slower)
+          })
+          .toBuffer();
+
+        // Upload to Convex storage
+        // Convert buffer to Uint8Array, then to Blob for Convex storage
+        const uint8Array = new Uint8Array(webpBuffer);
+        const blob = new Blob([uint8Array], { type: "image/webp" });
+        const storageId = await ctx.storage.store(blob);
+
+        // Get the URL for the stored file
+        const storageUrl = await ctx.storage.getUrl(storageId);
+
+        if (!storageUrl) {
+          throw new Error("Failed to get storage URL from Convex");
+        }
+
+        // Return the Convex storage URL instead of OpenAI URL
+        return storageUrl;
+      } catch (storageError) {
+        // If storage fails, log error but return OpenAI URL as fallback
+        console.error("Failed to save image to storage:", storageError);
+        // Return OpenAI URL as fallback
+        return openaiImageUrl;
+      }
     } catch (error) {
       // Throw descriptive errors on failure
       if (error instanceof Error) {

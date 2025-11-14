@@ -711,6 +711,11 @@ export const getAllCosmeticItems = query({
 /**
  * Query to get currently equipped item for a dog
  * Returns the equipped item with full item details, or null if nothing equipped
+ * 
+ * Image URL logic:
+ * - Moon items: generatedImageUrl will be empty string (use local mage_bg/mage_avatar)
+ * - Non-moon items: generatedImageUrl will be the Convex storage URL (compressed WebP)
+ * - Not equipped: returns null (use default_bg/default_avatar)
  */
 export const getEquippedItem = query({
   args: {
@@ -736,6 +741,9 @@ export const getEquippedItem = query({
     return {
       ...equippedItem,
       item,
+      // generatedImageUrl is included from equippedItem:
+      // - Empty string for moon items (use local images)
+      // - Convex storage URL for non-moon items (compressed WebP from AI generation)
     };
   },
 });

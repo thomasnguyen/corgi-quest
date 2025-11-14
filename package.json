@@ -34,6 +34,7 @@
     "openai": "^6.9.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.0.6",
     "three": "^0.181.1",
     "vite-tsconfig-paths": "^5.1.4"
@@ -48,7 +49,6 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "jsdom": "^27.0.0",
-    "sharp": "^0.34.5",
     "svgo": "^4.0.0",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
