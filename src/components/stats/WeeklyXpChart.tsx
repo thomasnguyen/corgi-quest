@@ -114,3 +114,4 @@ export default function WeeklyXpChart({ data }: WeeklyXpChartProps) {
   );
 }
 
+

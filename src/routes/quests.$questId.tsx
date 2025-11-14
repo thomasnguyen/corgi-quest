@@ -354,7 +354,8 @@ const QUEST_DETAILS: Quest[] = [
     name: "Skate Park Adventure",
     category: "Physical",
     points: 75,
-    description: "Conquer the skate park - the ultimate test of agility and courage",
+    description:
+      "Conquer the skate park - the ultimate test of agility and courage",
     instructions:
       "Visit a skate park (when safe and allowed) and let your dog explore the ramps and obstacles. This is an advanced activity that requires careful supervision and a confident, well-trained dog. Ensure the area is clear of skaters and safe for your dog to explore.",
     iconName: "Target",
@@ -426,64 +427,83 @@ function QuestDetailPage() {
         {/* Content */}
         <div className="relative z-10">
           {/* Header with Back Button */}
-          <div className="px-5 pt-5 pb-6">
+          <div className="px-5 pt-5 pb-4">
             <button
               onClick={() => navigate({ to: "/quests" })}
-              className="inline-flex items-center gap-2 text-[#f9dca0] hover:text-[#fcd587] transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-[#f9dca0] hover:text-[#fcd587] transition-colors mb-4"
             >
               <ArrowLeft size={20} strokeWidth={2} />
               <span className="text-sm font-medium">Back</span>
             </button>
 
             {/* Quest Header with Icon */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <div className={`relative ${quest.isBoss ? "animate-pulse" : ""}`}>
-                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2a2a2e] to-[#1a1a1e] border-2 ${
-                    quest.isBoss ? "border-[#f5c35f] shadow-lg shadow-[#f5c35f]/30" : "border-[#3d3d3d]/60"
-                  } flex items-center justify-center backdrop-blur-sm`}>
-                    <Icon size={40} strokeWidth={2.5} className="text-[#f5c35f]" />
+            <div className="text-center mb-6">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div
+                  className={`relative ${quest.isBoss ? "animate-pulse" : ""}`}
+                >
+                  <div
+                    className={`w-16 h-16 rounded-xl bg-[#2a2a2e]/80 border-2 ${
+                      quest.isBoss
+                        ? "border-[#f5c35f] shadow-lg shadow-[#f5c35f]/20"
+                        : "border-[#3d3d3d]/50"
+                    } flex items-center justify-center`}
+                  >
+                    <Icon
+                      size={32}
+                      strokeWidth={2}
+                      className="text-[#f5c35f]"
+                    />
                   </div>
                   {quest.isBoss && (
-                    <Crown className="absolute -top-2 -right-2 w-7 h-7 text-[#f5c35f]" fill="currentColor" />
+                    <Crown
+                      className="absolute -top-2 -right-2 w-6 h-6 text-[#f5c35f]"
+                      fill="currentColor"
+                    />
                   )}
                 </div>
-                <div className="text-left">
-                  <h1 className="text-4xl font-bold text-[#fcd587] mb-2 leading-tight">
+                <div>
+                  <h1 className="text-3xl font-bold text-[#fcd587] mb-1">
                     {quest.name}
                   </h1>
                   {quest.isBoss && (
-                    <div className="flex items-center gap-1.5 text-[#f5c35f] text-xs font-bold">
-                      <Star size={14} fill="currentColor" />
+                    <div className="flex items-center justify-center gap-1 text-[#f5c35f] text-xs font-bold">
+                      <Star size={12} fill="currentColor" />
                       <span>FINAL BOSS</span>
-                      <Star size={14} fill="currentColor" />
+                      <Star size={12} fill="currentColor" />
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Meta info badges */}
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                <span className="inline-flex items-center gap-2 border border-[#3d3d3d]/60 px-4 py-2 text-sm font-semibold text-[#f9dca0] bg-[#1a1a1e]/80 backdrop-blur-sm rounded-lg shadow-sm">
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-4">
+                <span className="inline-flex items-center gap-2 border border-[#3d3d3d]/50 px-3 py-1 text-sm font-medium text-[#f9dca0] bg-[#1a1a1e]/50 rounded">
                   {quest.category === "Physical" ? (
-                    <Zap size={18} strokeWidth={2.5} className="text-[#f5c35f]" />
+                    <Zap size={16} strokeWidth={2} className="text-[#f5c35f]" />
                   ) : (
-                    <Brain size={18} strokeWidth={2.5} className="text-[#f5c35f]" />
+                    <Brain
+                      size={16}
+                      strokeWidth={2}
+                      className="text-[#f5c35f]"
+                    />
                   )}
                   {quest.category.toUpperCase()}
                 </span>
-                <span className="font-mono font-bold text-2xl text-[#f5c35f] px-4 py-2 bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/60 rounded-lg">
+                <span className="font-mono font-bold text-xl text-[#f5c35f]">
                   {quest.points} pts
                 </span>
                 {quest.difficulty && (
-                  <span className={`inline-flex items-center gap-1.5 border-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-sm ${
-                    quest.difficulty === "Epic" 
-                      ? "border-[#f5c35f] text-[#f5c35f] bg-[#f5c35f]/15 backdrop-blur-sm"
-                      : quest.difficulty === "Hard"
-                      ? "border-[#c6a755] text-[#c6a755] bg-[#c6a755]/15 backdrop-blur-sm"
-                      : "border-[#3d3d3d]/60 text-[#f9dca0] bg-[#1a1a1e]/80 backdrop-blur-sm"
-                  }`}>
-                    <Target size={14} strokeWidth={2.5} />
+                  <span
+                    className={`inline-flex items-center gap-1 border px-3 py-1 text-xs font-medium rounded ${
+                      quest.difficulty === "Epic"
+                        ? "border-[#f5c35f] text-[#f5c35f] bg-[#f5c35f]/10"
+                        : quest.difficulty === "Hard"
+                          ? "border-[#c6a755] text-[#c6a755] bg-[#c6a755]/10"
+                          : "border-[#3d3d3d]/50 text-[#f9dca0] bg-[#1a1a1e]/50"
+                    }`}
+                  >
+                    <Target size={12} strokeWidth={2} />
                     {quest.difficulty}
                   </span>
                 )}
@@ -493,23 +513,27 @@ function QuestDetailPage() {
 
           {/* Location & Time Info */}
           {(quest.location || quest.estimatedTime) && (
-            <div className="px-5 mb-5">
-              <div className="bg-gradient-to-br from-[#1a1a1e]/90 to-[#2a2a2e]/60 backdrop-blur-sm border border-[#3d3d3d]/60 rounded-xl p-5 shadow-lg">
-                <div className="flex items-center gap-6 text-sm">
+            <div className="px-5 mb-4">
+              <div className="bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4">
+                <div className="flex items-center gap-4 text-sm">
                   {quest.location && (
-                    <div className="flex items-center gap-2.5 text-[#f9dca0]">
-                      <div className="w-8 h-8 rounded-lg bg-[#f5c35f]/10 border border-[#f5c35f]/20 flex items-center justify-center">
-                        <MapPin size={18} strokeWidth={2.5} className="text-[#f5c35f]" />
-                      </div>
-                      <span className="font-medium">{quest.location}</span>
+                    <div className="flex items-center gap-2 text-[#f9dca0]">
+                      <MapPin
+                        size={16}
+                        strokeWidth={2}
+                        className="text-[#f5c35f]"
+                      />
+                      <span>{quest.location}</span>
                     </div>
                   )}
                   {quest.estimatedTime && (
-                    <div className="flex items-center gap-2.5 text-[#f9dca0]">
-                      <div className="w-8 h-8 rounded-lg bg-[#f5c35f]/10 border border-[#f5c35f]/20 flex items-center justify-center">
-                        <Clock size={18} strokeWidth={2.5} className="text-[#f5c35f]" />
-                      </div>
-                      <span className="font-medium">{quest.estimatedTime}</span>
+                    <div className="flex items-center gap-2 text-[#f9dca0]">
+                      <Clock
+                        size={16}
+                        strokeWidth={2}
+                        className="text-[#f5c35f]"
+                      />
+                      <span>{quest.estimatedTime}</span>
                     </div>
                   )}
                 </div>
@@ -519,33 +543,40 @@ function QuestDetailPage() {
 
           {/* Rewards Section */}
           {quest.rewards && (
-            <div className="px-5 mb-5">
-              <div className="bg-gradient-to-br from-[#f5c35f]/15 via-[#c6a755]/8 to-[#f5c35f]/10 border-2 border-[#f5c35f]/30 rounded-xl p-5 shadow-lg backdrop-blur-sm">
-                <h3 className="text-[#feefd0] text-base font-bold mb-4 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#f5c35f]/20 border border-[#f5c35f]/30 flex items-center justify-center">
-                    <Trophy size={18} strokeWidth={2.5} className="text-[#f5c35f]" />
-                  </div>
+            <div className="px-5 mb-4">
+              <div className="bg-gradient-to-br from-[#f5c35f]/10 to-[#c6a755]/5 border border-[#f5c35f]/20 rounded-lg p-4">
+                <h3 className="text-[#feefd0] text-sm font-semibold mb-2 flex items-center gap-2">
+                  <Trophy
+                    size={16}
+                    strokeWidth={2}
+                    className="text-[#f5c35f]"
+                  />
                   REWARDS
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {quest.rewards.xp && (
-                    <div className="text-[#f9dca0]">
-                      <span className="font-mono font-bold text-lg text-[#f5c35f]">{quest.rewards.xp} XP</span>
+                    <div className="text-[#f9dca0] text-sm">
+                      <span className="font-mono font-bold text-[#f5c35f]">
+                        {quest.rewards.xp} XP
+                      </span>
                     </div>
                   )}
-                  {quest.rewards.statGains && quest.rewards.statGains.length > 0 && (
-                    <div className="flex flex-wrap gap-2.5">
-                      {quest.rewards.statGains.map((stat, idx) => (
-                        <span key={idx} className="text-sm px-3 py-1.5 bg-[#1a1a1e]/70 border border-[#3d3d3d]/60 rounded-lg text-[#f9dca0] font-medium shadow-sm">
-                          {stat}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {quest.rewards.statGains &&
+                    quest.rewards.statGains.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {quest.rewards.statGains.map((stat, idx) => (
+                          <span
+                            key={idx}
+                            className="text-xs px-2 py-1 bg-[#1a1a1e]/50 border border-[#3d3d3d]/50 rounded text-[#f9dca0]"
+                          >
+                            {stat}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   {quest.rewards.unlock && (
-                    <div className="mt-3 pt-3 border-t border-[#f5c35f]/20 text-sm text-[#f5c35f] font-semibold flex items-center gap-2">
-                      <Star size={16} fill="currentColor" />
-                      <span>Unlocks: {quest.rewards.unlock}</span>
+                    <div className="mt-2 text-xs text-[#f5c35f] font-medium">
+                      ✨ Unlocks: {quest.rewards.unlock}
                     </div>
                   )}
                 </div>
@@ -554,13 +585,12 @@ function QuestDetailPage() {
           )}
 
           {/* Quest Description */}
-          <div className="px-5 mb-5">
-            <div className="bg-gradient-to-br from-[#1a1a1e]/90 to-[#2a2a2e]/60 backdrop-blur-sm border border-[#3d3d3d]/60 rounded-xl p-5 shadow-lg">
-              <h2 className="text-[#feefd0] text-lg font-bold mb-4 flex items-center gap-2">
-                <div className="w-1 h-6 bg-gradient-to-b from-[#f5c35f] to-[#c6a755] rounded-full"></div>
+          <div className="px-5 mb-6">
+            <div className="bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4">
+              <h2 className="text-[#feefd0] text-lg font-semibold mb-3">
                 Description
               </h2>
-              <p className="text-[#f9dca0] text-base leading-relaxed">
+              <p className="text-[#f9dca0] text-sm leading-relaxed">
                 {quest.description}
               </p>
             </div>
@@ -568,12 +598,11 @@ function QuestDetailPage() {
 
           {/* Quest Instructions */}
           <div className="px-5 mb-8">
-            <div className="bg-gradient-to-br from-[#1a1a1e]/90 to-[#2a2a2e]/60 backdrop-blur-sm border border-[#3d3d3d]/60 rounded-xl p-5 shadow-lg">
-              <h2 className="text-[#feefd0] text-lg font-bold mb-4 flex items-center gap-2">
-                <div className="w-1 h-6 bg-gradient-to-b from-[#f5c35f] to-[#c6a755] rounded-full"></div>
+            <div className="bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4">
+              <h2 className="text-[#feefd0] text-lg font-semibold mb-3">
                 Instructions
               </h2>
-              <p className="text-[#f9dca0] text-base leading-relaxed">
+              <p className="text-[#f9dca0] text-sm leading-relaxed">
                 {quest.instructions}
               </p>
             </div>
@@ -583,14 +612,14 @@ function QuestDetailPage() {
           <div className="px-5">
             <button
               onClick={handleCompleteQuest}
-              className={`w-full font-bold py-5 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-xl ${
+              className={`w-full font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
                 quest.isBoss
-                  ? "bg-gradient-to-r from-[#f5c35f] to-[#c6a755] text-[#121216] hover:from-[#fcd587] hover:to-[#d4b565] animate-pulse hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#f5c35f]/30"
-                  : "bg-gradient-to-r from-[#c6a755] to-[#fff1ab] text-[#121216] hover:from-[#d4b565] hover:to-[#fff8c4] hover:scale-[1.02] hover:shadow-2xl"
+                  ? "bg-gradient-to-r from-[#f5c35f] to-[#c6a755] text-[#121216] hover:from-[#fcd587] hover:to-[#d4b565] animate-pulse"
+                  : "bg-gradient-to-r from-[#c6a755] to-[#fff1ab] text-[#121216] hover:from-[#d4b565] hover:to-[#fff8c4]"
               }`}
             >
-              <Mic size={22} strokeWidth={2.5} />
-              <span className="text-lg">{quest.isBoss ? "FACE THE BOSS" : "COMPLETE QUEST"}</span>
+              <Mic size={20} strokeWidth={2} />
+              {quest.isBoss ? "FACE THE BOSS" : "COMPLETE QUEST"}
             </button>
           </div>
         </div>

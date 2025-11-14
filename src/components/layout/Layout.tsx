@@ -9,6 +9,9 @@ import { useSelectedCharacter } from "../../hooks/useSelectedCharacter";
 import AppExplanation from "./AppExplanation";
 import { useWeeklySummary } from "../../hooks/useWeeklySummary";
 import WeeklySummaryModal from "../summary/WeeklySummaryModal";
+import AnimationDebugPanel from "../animations/AnimationDebugPanel";
+import { useConfetti } from "../../hooks/useConfetti";
+import { useAnimationTrigger } from "../../hooks/useAnimationTrigger";
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,7 +23,9 @@ interface LayoutProps {
  * Also detects level-ups by watching stat changes
  * Shows daily mood reminder after 6pm if no mood logged
  * Shows weekly summary modal on Sunday evening or Monday morning
- * Requirements: 1, 21, 22, 26
+ *
+ * Debug Mode: Add ?debug=true to URL to show animation testing panel
+ * Requirements: 1, 21, 22, 26, 5.1, 5.2
  */
 export default function Layout({ children }: LayoutProps) {
   const { showToast } = useToast();
@@ -31,6 +36,9 @@ export default function Layout({ children }: LayoutProps) {
   // Get the first dog (demo purposes)
   const firstDog = useQuery(api.queries.getFirstDog);
 
+  // Confetti hook for level-up animations (Subtask 7.2)
+  const { triggerOverallConfetti } = useConfetti();
+
   // Weekly summary modal state
   const [isWeeklySummaryOpen, setIsWeeklySummaryOpen] = useState(false);
 
@@ -38,6 +46,11 @@ export default function Layout({ children }: LayoutProps) {
   const { shouldShowModal, weekStartDate, weekEndDate } = useWeeklySummary(
     firstDog?._id
   );
+
+  // Animation debug state
+  const [isRealTimeAnimationsEnabled, setIsRealTimeAnimationsEnabled] =
+    useState(true);
+  const [debugMode, setDebugMode] = useState(false);
 
   // Check for query parameter to force show modal (for testing)
   useEffect(() => {
@@ -67,6 +80,42 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [firstDog, weekStartDate, weekEndDate]);
 
+  // URL parameter testing mode - parse ?testAnimation parameter
+  // Supports: floatingXP, pulse, confetti, levelUp, partnerActivity
+  // Can combine multiple with comma: ?testAnimation=floatingXP,pulse
+  // Requirements: 5.1, 5.2
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const testAnimation = params.get("testAnimation");
+      const debug = params.get("debug") === "true";
+
+      setDebugMode(debug);
+
+      if (testAnimation) {
+        // Parse comma-separated animation types
+        const animationTypes = testAnimation.split(",").map((s) => s.trim());
+
+        if (debug) {
+          console.log(
+            "[Animation Test Mode] Triggering animations:",
+            animationTypes
+          );
+        }
+
+        // Trigger each animation with a slight delay between them
+        animationTypes.forEach((type, index) => {
+          setTimeout(() => {
+            if (debug) {
+              console.log(`[Animation Test Mode] Triggering: ${type}`);
+            }
+            handleTriggerAnimation(type);
+          }, index * 500); // 500ms delay between each animation
+        });
+      }
+    }
+  }, []);
+
   // Automatically show modal based on time window and dismissal state
   useEffect(() => {
     if (shouldShowModal) {
@@ -84,6 +133,27 @@ export default function Layout({ children }: LayoutProps) {
   const dogProfile = useQuery(
     api.queries.getDogProfile,
     firstDog ? { dogId: firstDog._id } : "skip"
+  );
+
+  // Detect overall level changes and trigger confetti (Subtask 7.1)
+  // Requirements: 3.1, 5.3, 5.6
+  useAnimationTrigger(
+    dogProfile?.dog?.overallLevel,
+    (prevLevel, currentLevel) => {
+      if (
+        prevLevel !== undefined &&
+        currentLevel !== undefined &&
+        currentLevel > prevLevel
+      ) {
+        // Trigger overall confetti animation (Subtask 7.2)
+        // Requirements: 3.1, 3.3, 3.5, 3.6
+        triggerOverallConfetti();
+
+        // Show toast notification
+        showToast(`🎉 Overall leveled up to ${currentLevel}!`, "success");
+      }
+    },
+    { skipInitial: true } // Skip animation on initial mount (Requirement 5.6)
   );
 
   // Subscribe to mood feed for real-time mood updates
@@ -105,11 +175,26 @@ export default function Layout({ children }: LayoutProps) {
 
   // Track previous stat levels to detect level-ups
   const previousStatLevelsRef = useRef<Map<string, number>>(new Map());
-  const previousOverallLevelRef = useRef<number | null>(null);
 
-  // Detect new activities and show toasts
+  // Track recent level-ups to associate with partner activity toasts (Subtask 9.3)
+  // Requirements: 4.4
+  const recentLevelUpsRef = useRef<
+    Array<{ statType: string; newLevel: number; timestamp: number }>
+  >([]);
+
+  // Get current user ID to identify partner activities (Subtask 9.1)
+  // Requirements: 4.1, 4.7
+  const currentUserId = selectedCharacterId;
+
+  // Detect new activities and show enhanced toasts for partner activities
+  // Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8
   useEffect(() => {
-    if (!activityFeed || activityFeed.length === 0) {
+    if (
+      !activityFeed ||
+      activityFeed.length === 0 ||
+      !isRealTimeAnimationsEnabled ||
+      !currentUserId
+    ) {
       return;
     }
 
@@ -129,25 +214,66 @@ export default function Layout({ children }: LayoutProps) {
       (activity) => !previousActivityIdsRef.current.has(activity._id)
     );
 
-    // Show toast for each new activity
-    newActivities.forEach((activity) => {
-      // Format stat gains as "PHY +30 XP, IMP +10 XP"
+    // Filter to find partner's activities (Subtask 9.1)
+    // Requirements: 4.1, 4.7
+    const partnerActivities = newActivities.filter(
+      (activity) => activity.userId !== currentUserId
+    );
+
+    // Show enhanced toast for each new partner activity
+    partnerActivities.forEach((activity) => {
+      // Format stat gains as "PHY +30, IMP +10" (Subtask 9.2)
+      // Requirements: 4.1, 4.2, 4.3
       const statGainsText = activity.statGains
-        .map((gain) => `${gain.statType} +${gain.xpAmount} XP`)
+        .map((gain) => `${gain.statType} +${gain.xpAmount}`)
         .join(", ");
 
-      const message = `${activity.userName} logged ${activity.activityName}${statGainsText ? ` - ${statGainsText}` : ""}`;
+      // Calculate total XP (Subtask 9.2)
+      // Requirements: 4.2
+      const totalXP = activity.statGains.reduce(
+        (sum, gain) => sum + gain.xpAmount,
+        0
+      );
 
-      showToast(message, "success");
+      // Build base message with partner name, activity name, and stat breakdown
+      // Requirements: 4.1, 4.2, 4.3
+      let message = `${activity.userName} logged "${activity.activityName}" • +${totalXP} XP`;
+
+      if (statGainsText) {
+        message += ` (${statGainsText})`;
+      }
+
+      // Check for recent level-ups to include in toast (Subtask 9.3)
+      // Requirements: 4.4
+      const now = Date.now();
+      const recentLevelUps = recentLevelUpsRef.current.filter(
+        (levelUp) => now - levelUp.timestamp < 2000 // Within 2 seconds
+      );
+
+      if (recentLevelUps.length > 0) {
+        const levelUpText = recentLevelUps
+          .map((levelUp) => `${levelUp.statType} → Lv${levelUp.newLevel}`)
+          .join(", ");
+        message += ` 🎉 Level Up: ${levelUpText}`;
+      }
+
+      // Show toast with 4-second duration for partner activities (Subtask 9.4)
+      // Requirements: 4.5, 4.6, 4.8
+      showToast(message, "success", 4000);
     });
 
     // Update previous activity IDs
     previousActivityIdsRef.current = currentActivityIds;
-  }, [activityFeed, showToast]);
+  }, [activityFeed, showToast, isRealTimeAnimationsEnabled, currentUserId]);
 
   // Detect new moods and show toasts (only for partner's moods, not current user's)
   useEffect(() => {
-    if (!moodFeed || moodFeed.length === 0 || !selectedCharacterId) {
+    if (
+      !moodFeed ||
+      moodFeed.length === 0 ||
+      !selectedCharacterId ||
+      !isRealTimeAnimationsEnabled
+    ) {
       return;
     }
 
@@ -199,25 +325,17 @@ export default function Layout({ children }: LayoutProps) {
 
     // Update previous mood IDs
     previousMoodIdsRef.current = currentMoodIds;
-  }, [moodFeed, showToast, selectedCharacterId]);
+  }, [moodFeed, showToast, selectedCharacterId, isRealTimeAnimationsEnabled]);
 
-  // Detect level-ups by watching stat changes
+  // Detect stat level-ups by watching stat changes
+  // Track level-ups for potential inclusion in partner activity toasts (Subtask 9.3)
+  // Requirements: 4.4
   useEffect(() => {
-    if (!dogProfile || !dogProfile.stats || !dogProfile.dog) {
+    if (!dogProfile || !dogProfile.stats || !isRealTimeAnimationsEnabled) {
       return;
     }
 
-    // Check overall level
-    if (previousOverallLevelRef.current !== null) {
-      const currentOverallLevel = dogProfile.dog.overallLevel;
-      if (currentOverallLevel > previousOverallLevelRef.current) {
-        showToast(
-          `🎉 Overall leveled up to ${currentOverallLevel}!`,
-          "success"
-        );
-      }
-    }
-    previousOverallLevelRef.current = dogProfile.dog.overallLevel;
+    const now = Date.now();
 
     // Check each stat level
     dogProfile.stats.forEach((stat) => {
@@ -225,6 +343,18 @@ export default function Layout({ children }: LayoutProps) {
       const previousLevel = previousStatLevelsRef.current.get(key);
 
       if (previousLevel !== undefined && stat.level > previousLevel) {
+        // Track this level-up for potential association with partner activity
+        recentLevelUpsRef.current.push({
+          statType: stat.statType,
+          newLevel: stat.level,
+          timestamp: now,
+        });
+
+        // Clean up old level-ups (older than 5 seconds)
+        recentLevelUpsRef.current = recentLevelUpsRef.current.filter(
+          (levelUp) => now - levelUp.timestamp < 5000
+        );
+
         showToast(
           `🎉 ${stat.statType} leveled up to ${stat.level}!`,
           "success"
@@ -233,7 +363,94 @@ export default function Layout({ children }: LayoutProps) {
 
       previousStatLevelsRef.current.set(key, stat.level);
     });
-  }, [dogProfile, showToast]);
+  }, [dogProfile, showToast, isRealTimeAnimationsEnabled]);
+
+  // Handle animation triggers from debug panel and URL parameters
+  // Requirements: 5.1, 5.2
+  const handleTriggerAnimation = (type: string, params?: any) => {
+    if (debugMode) {
+      console.log(`[Animation Debug] Triggering animation: ${type}`, params);
+    }
+
+    switch (type) {
+      case "floatingXP":
+        // Simulate XP gain on all stats
+        // This would trigger floating XP animations on StatOrb components
+        if (debugMode) {
+          console.log(
+            `[Animation Debug] FloatingXP: +${params?.amount || 50} XP on all stats`
+          );
+        }
+        showToast(
+          `Debug: Floating XP animation triggered (+${params?.amount || 50} XP)`,
+          "info"
+        );
+        break;
+
+      case "pulse":
+        // Trigger pulse on daily goals
+        // This would trigger pulse animations on TopResourceBar
+        if (debugMode) {
+          console.log(
+            `[Animation Debug] Pulse: ${params?.intensity || "normal"} intensity`
+          );
+        }
+        showToast(
+          `Debug: Pulse animation triggered (${params?.intensity || "normal"})`,
+          "info"
+        );
+        break;
+
+      case "confetti":
+        // Trigger overall confetti
+        // This triggers the actual confetti animation from top of screen
+        if (debugMode) {
+          console.log(
+            `[Animation Debug] Confetti: ${params?.count || 50} particles`
+          );
+        }
+        triggerOverallConfetti();
+        showToast(
+          `Debug: Confetti animation triggered (${params?.count || 50} particles)`,
+          "info"
+        );
+        break;
+
+      case "levelUp":
+        // Simulate overall level-up with confetti
+        // This triggers the actual overall confetti animation
+        if (debugMode) {
+          console.log("[Animation Debug] Level Up: Overall Confetti");
+        }
+        triggerOverallConfetti();
+        showToast("🎉 Debug: Level up animation triggered!", "success");
+        break;
+
+      case "partnerActivity":
+        // Show partner activity toast
+        // This demonstrates the enhanced partner activity notification
+        if (debugMode) {
+          console.log("[Animation Debug] Partner Activity: Toast notification");
+        }
+        showToast("Holly logged Walk - PHY +30 XP, SOC +20 XP", "success");
+        break;
+
+      case "all":
+        // Trigger all animations in sequence
+        if (debugMode) {
+          console.log("[Animation Debug] Triggering all animations...");
+        }
+        showToast("Debug: Triggering all animations...", "info");
+        setTimeout(() => handleTriggerAnimation("floatingXP", params), 100);
+        setTimeout(() => handleTriggerAnimation("pulse", params), 600);
+        setTimeout(() => handleTriggerAnimation("confetti", params), 1200);
+        setTimeout(() => handleTriggerAnimation("partnerActivity"), 1800);
+        break;
+
+      default:
+        console.warn(`[Animation Debug] Unknown animation type: ${type}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#121216] flex flex-col">
@@ -265,6 +482,13 @@ export default function Layout({ children }: LayoutProps) {
           weekEndDate={weekEndDate}
         />
       )}
+
+      {/* Animation debug panel */}
+      <AnimationDebugPanel
+        onTriggerAnimation={handleTriggerAnimation}
+        isRealTimeEnabled={isRealTimeAnimationsEnabled}
+        onToggleRealTime={setIsRealTimeAnimationsEnabled}
+      />
     </div>
   );
 }

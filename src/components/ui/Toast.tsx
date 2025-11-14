@@ -62,7 +62,7 @@ export function Toast({
       case "info":
         return "border-[#d4af37]/60"; // Gold
       case "success":
-        return "border-[#d4af37]/60"; // Gold
+        return "border-green-500/60"; // Green for partner activities (Requirement 4.8)
       default:
         return "border-[#d4af37]/60"; // Gold
     }

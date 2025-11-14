@@ -4,6 +4,8 @@ import { Flame, Dumbbell, Brain, WifiOff, RefreshCw } from "lucide-react";
 import { useConvexConnection } from "../../hooks/useConvexConnection";
 import { useState } from "react";
 import MoodPicker, { type MoodType } from "../mood/MoodPicker";
+import { useAnimationTrigger } from "../../hooks/useAnimationTrigger";
+import PulseWrapper from "../animations/PulseWrapper";
 
 export default function TopResourceBar() {
   // Monitor Convex connection state
@@ -47,6 +49,9 @@ export default function TopResourceBar() {
   const [showMoodPicker, setShowMoodPicker] = useState(false);
   const logMoodMutation = useMutation(api.mutations.logMood);
   const [isLoggingMood, setIsLoggingMood] = useState(false);
+
+  // Pulse state for daily goals - Requirements: 2.1, 2.2
+  const [physicalPulse, setPhysicalPulse] = useState(false);
 
   // Mood emoji mapping
   const getMoodEmoji = (mood: string | undefined) => {
@@ -124,6 +129,14 @@ export default function TopResourceBar() {
   const mentalGoal = dailyGoals?.mentalGoal ?? 30;
   const currentStreak = streak?.currentStreak ?? 0;
 
+  // Detect physical points changes - Requirements: 2.1, 2.7, 5.5
+  useAnimationTrigger(physicalPoints, (prevPoints, currentPoints) => {
+    if (prevPoints !== undefined && currentPoints > prevPoints) {
+      setPhysicalPulse(true);
+      setTimeout(() => setPhysicalPulse(false), 1000);
+    }
+  });
+
   // Get mood emoji
   const moodEmoji = getMoodEmoji(latestMood?.mood);
 
@@ -141,16 +154,40 @@ export default function TopResourceBar() {
               {currentStreak}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
-            <Dumbbell size={14} strokeWidth={2} className="text-cyan-400" />
-            <span className="text-[#f9dca0] text-xs font-medium">
-              {physicalPoints}/{physicalGoal}
-            </span>
-            <span className="text-[#888] text-[9px] uppercase tracking-wide pt-1">
-              STR
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-[#3d3d3d]/30">
+          <PulseWrapper
+            isActive={physicalPulse}
+            color="#22d3ee"
+            intensity={
+              physicalPoints >= physicalGoal ? "celebration" : "normal"
+            }
+          >
+            <div
+              className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border transition-colors"
+              style={{
+                borderColor:
+                  physicalPoints >= physicalGoal
+                    ? "#22d3ee"
+                    : "rgba(61, 61, 61, 0.3)",
+              }}
+            >
+              <Dumbbell size={14} strokeWidth={2} className="text-cyan-400" />
+              <span className="text-[#f9dca0] text-xs font-medium">
+                {physicalPoints}/{physicalGoal}
+              </span>
+              <span className="text-[#888] text-[9px] uppercase tracking-wide pt-1">
+                STR
+              </span>
+            </div>
+          </PulseWrapper>
+          <div
+            className="flex items-center gap-1.5 bg-[#121216]/80 backdrop-blur-sm rounded-full px-3 py-1.5 border transition-colors"
+            style={{
+              borderColor:
+                mentalPoints >= mentalGoal
+                  ? "#a855f7"
+                  : "rgba(61, 61, 61, 0.3)",
+            }}
+          >
             <Brain size={14} strokeWidth={2} className="text-purple-400" />
             <span className="text-[#f9dca0] text-xs font-medium">
               {mentalPoints}/{mentalGoal}
