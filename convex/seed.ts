@@ -216,6 +216,8 @@ export const seedDemoData = mutation({
       unlockLevel: 2,
       itemType: "fire",
       icon: "🔥",
+      aiPrompt:
+        "fire warrior corgi wearing a red bandana with flames, epic fantasy art, centered composition, clean background",
       createdAt: now,
     });
 
@@ -226,6 +228,8 @@ export const seedDemoData = mutation({
       unlockLevel: 5,
       itemType: "water",
       icon: "💧",
+      aiPrompt:
+        "water mage corgi wearing a blue collar with wave patterns, flowing water magic, mystical art, centered composition, clean background",
       createdAt: now,
     });
 
@@ -236,6 +240,8 @@ export const seedDemoData = mutation({
       unlockLevel: 8,
       itemType: "grass",
       icon: "🌿",
+      aiPrompt:
+        "nature guardian corgi wearing a leafy green cape, surrounded by plants and vines, nature art, centered composition, clean background",
       createdAt: now,
     });
 
@@ -246,6 +252,8 @@ export const seedDemoData = mutation({
       unlockLevel: 11,
       itemType: "sun",
       icon: "☀️",
+      aiPrompt:
+        "solar knight corgi wearing a radiant golden crown, glowing with sunlight, divine art, centered composition, clean background",
       createdAt: now,
     });
 
@@ -256,6 +264,8 @@ export const seedDemoData = mutation({
       unlockLevel: 14,
       itemType: "moon",
       icon: "🌙",
+      aiPrompt:
+        "lunar mystic corgi wearing a silver scarf glowing with moonlight, celestial art, centered composition, clean background",
       createdAt: now,
     });
 
@@ -266,6 +276,8 @@ export const seedDemoData = mutation({
       unlockLevel: 17,
       itemType: "ground",
       icon: "🪨",
+      aiPrompt:
+        "earth guardian corgi wearing a brown stone armor vest, rocky terrain, nature art, centered composition, clean background",
       createdAt: now,
     });
 

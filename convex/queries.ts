@@ -654,6 +654,20 @@ export const getCachedFirecrawlTips = query({
 });
 
 /**
+ * Query to get a single cosmetic item by ID
+ * Returns the cosmetic item with the specified ID
+ */
+export const getCosmeticItem = query({
+  args: {
+    itemId: v.id("cosmetic_items"),
+  },
+  handler: async (ctx, args) => {
+    const item = await ctx.db.get(args.itemId);
+    return item;
+  },
+});
+
+/**
  * Query to get all cosmetic items with unlock status
  * Returns all items with a flag indicating if they're unlocked based on dog's level
  * and if they're newly unlocked (show "New!" badge)
@@ -1008,6 +1022,43 @@ export const getCachedWeeklyRecommendations = query({
       // If parsing fails, return null
       return null;
     }
+  },
+});
+
+/**
+ * Query to check if a cached AI-generated image exists for a dog + item combination
+ * Returns the cached generatedImageUrl if found, otherwise null
+ * Used to avoid regenerating images that were previously created
+ */
+export const checkCachedImage = query({
+  args: {
+    dogId: v.id("dogs"),
+    itemId: v.id("cosmetic_items"),
+  },
+  handler: async (ctx, args) => {
+    // Query equipped_items history for this dogId + itemId combination
+    // We look through all equipped_items records (not just current) to find any previous generation
+    const allEquippedItems = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    // Find if this specific item was ever equipped before
+    const cachedItem = allEquippedItems.find(
+      (item) => item.itemId === args.itemId
+    );
+
+    if (cachedItem && cachedItem.generatedImageUrl) {
+      return {
+        cached: true,
+        imageUrl: cachedItem.generatedImageUrl,
+      };
+    }
+
+    return {
+      cached: false,
+      imageUrl: null,
+    };
   },
 });
 

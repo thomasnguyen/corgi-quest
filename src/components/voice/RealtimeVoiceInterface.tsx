@@ -1134,167 +1134,169 @@ export function RealtimeVoiceInterface({
         </div>
       )}
 
-      {/* Main Interface */}
-      <>
-        {/* Back/Close Button */}
-        <div className="w-full flex justify-end mb-4">
-          <button
-            onClick={() => navigate({ to: "/" })}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-            aria-label="Close"
-          >
-            <X size={24} className="text-[#888]" strokeWidth={2} />
-          </button>
-        </div>
+      {/* Main Interface - Only show when no activity has been saved */}
+      {!savedActivity && (
+        <>
+          {/* Back/Close Button */}
+          <div className="w-full flex justify-end mb-4">
+            <button
+              onClick={() => navigate({ to: "/" })}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Close"
+            >
+              <X size={24} className="text-[#888]" strokeWidth={2} />
+            </button>
+          </div>
 
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2 text-[#f5c35f]">
-            Voice Activity Logging
-          </h2>
-          <p className="text-[#888] mb-4">
-            Speak naturally to log your dog's activities
-          </p>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2 text-[#f5c35f]">
+              Voice Activity Logging
+            </h2>
+            <p className="text-[#888] mb-4">
+              Speak naturally to log your dog's activities
+            </p>
 
-          {/* Permission Denied Message */}
-          {isPermissionDenied && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-              <p className="font-medium mb-1">Microphone Access Required</p>
-              <p>
-                Please enable microphone permissions in your browser settings to
-                use voice logging.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Voice Visualizer - RPG-style prominent visualizer */}
-        <div className="flex flex-col items-center justify-center my-8">
-          {/* Main visualizer with dynamic size */}
-          <div
-            className={`transition-all duration-500 relative ${
-              conversationState === "speaking"
-                ? "animate-voice-glow-speaking"
-                : isListeningSmoothed
-                  ? "animate-voice-glow-active"
-                  : "animate-voice-glow"
-            }`}
-          >
-            {(() => {
-              const CircularWaveform = circularWaveformRef.current;
-
-              // Final safety check - don't render if anything is missing
-              // This must be checked BEFORE any component instantiation
-              const canRender =
-                mounted &&
-                isWaveformReady &&
-                circularWaveformLoaded &&
-                CircularWaveform !== null &&
-                audioTrack !== null &&
-                audioTrack.readyState === "live" &&
-                audioTrack.id !== undefined;
-
-              if (!canRender) {
-                return (
-                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
-                    <div className="text-gray-400 text-sm">
-                      {!CircularWaveform || !circularWaveformLoaded
-                        ? "Loading visualizer..."
-                        : !audioTrack
-                          ? "Waiting for audio..."
-                          : "Initializing..."}
-                    </div>
-                  </div>
-                );
-              }
-
-              // One final check: ensure audioTrack.getSettings() returns a valid object
-              // This prevents the "Cannot destructure property 'size'" error
-              let settingsValid = false;
-              try {
-                const settings = audioTrack.getSettings();
-                settingsValid =
-                  settings !== null && typeof settings === "object";
-              } catch (error) {
-                console.error("Error checking audio track settings:", error);
-                settingsValid = false;
-              }
-
-              if (!settingsValid) {
-                return (
-                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
-                    <div className="text-gray-400 text-sm">
-                      Initializing audio...
-                    </div>
-                  </div>
-                );
-              }
-
-              // All checks passed - render the component
-              // Only render if we have a valid component reference
-              if (CircularWaveform === null) {
-                return (
-                  <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
-                    <div className="text-gray-400 text-sm">Loading...</div>
-                  </div>
-                );
-              }
-
-              return (
-                <CircularWaveform
-                  key={`waveform-${audioTrack.id}`}
-                  size={300}
-                  numBars={32}
-                  barWidth={10}
-                  color1="#f5c35f"
-                  color2="#f9dca0"
-                  backgroundColor="transparent"
-                  sensitivity={1.5}
-                  rotationEnabled={true}
-                  audioTrack={audioTrack}
-                />
-              );
-            })()}
-
-            {/* Conversation State - Inside the orb (centered) */}
-            {isConnected && sessionConfigured && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div
-                  className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
-                >
-                  {conversationState === "listening" && (
-                    <Mic size={16} strokeWidth={2} className="animate-pulse" />
-                  )}
-                  {conversationState === "speaking" && (
-                    <MicOff size={16} strokeWidth={2} />
-                  )}
-                  <span>{conversationStateInfo.text}</span>
-                </div>
+            {/* Permission Denied Message */}
+            {isPermissionDenied && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                <p className="font-medium mb-1">Microphone Access Required</p>
+                <p>
+                  Please enable microphone permissions in your browser settings to
+                  use voice logging.
+                </p>
               </div>
             )}
           </div>
 
-          {/* Ready Status - Under the orb */}
-          {/* {isConnected &&
-            sessionConfigured &&
-            !isRecording &&
-            conversationState === "idle" && (
-              <div className="mt-4 text-sm text-[#888] font-medium">
-                Ready to listen
-              </div>
-            )} */}
-        </div>
+          {/* Voice Visualizer - RPG-style prominent visualizer */}
+          <div className="flex flex-col items-center justify-center my-8">
+            {/* Main visualizer with dynamic size */}
+            <div
+              className={`transition-all duration-500 relative ${
+                conversationState === "speaking"
+                  ? "animate-voice-glow-speaking"
+                  : isListeningSmoothed
+                    ? "animate-voice-glow-active"
+                    : "animate-voice-glow"
+              }`}
+            >
+              {(() => {
+                const CircularWaveform = circularWaveformRef.current;
 
-        {/* Help Text */}
-        <div className="mt-8 text-center text-sm text-[#888] max-w-md">
-          <p>
-            Just speak naturally to describe your dog's activity. The AI will
-            automatically calculate XP rewards and save it.
-          </p>
-          <p className="mt-2 text-[#f9dca0]">
-            Example: "We went on a 20 minute walk this morning"
-          </p>
-        </div>
-      </>
+                // Final safety check - don't render if anything is missing
+                // This must be checked BEFORE any component instantiation
+                const canRender =
+                  mounted &&
+                  isWaveformReady &&
+                  circularWaveformLoaded &&
+                  CircularWaveform !== null &&
+                  audioTrack !== null &&
+                  audioTrack.readyState === "live" &&
+                  audioTrack.id !== undefined;
+
+                if (!canRender) {
+                  return (
+                    <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                      <div className="text-gray-400 text-sm">
+                        {!CircularWaveform || !circularWaveformLoaded
+                          ? "Loading visualizer..."
+                          : !audioTrack
+                            ? "Waiting for audio..."
+                            : "Initializing..."}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // One final check: ensure audioTrack.getSettings() returns a valid object
+                // This prevents the "Cannot destructure property 'size'" error
+                let settingsValid = false;
+                try {
+                  const settings = audioTrack.getSettings();
+                  settingsValid =
+                    settings !== null && typeof settings === "object";
+                } catch (error) {
+                  console.error("Error checking audio track settings:", error);
+                  settingsValid = false;
+                }
+
+                if (!settingsValid) {
+                  return (
+                    <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                      <div className="text-gray-400 text-sm">
+                        Initializing audio...
+                      </div>
+                    </div>
+                  );
+                }
+
+                // All checks passed - render the component
+                // Only render if we have a valid component reference
+                if (CircularWaveform === null) {
+                  return (
+                    <div className="w-[300px] h-[300px] rounded-full border-2 border-gray-600 flex items-center justify-center">
+                      <div className="text-gray-400 text-sm">Loading...</div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <CircularWaveform
+                    key={`waveform-${audioTrack.id}`}
+                    size={300}
+                    numBars={32}
+                    barWidth={10}
+                    color1="#f5c35f"
+                    color2="#f9dca0"
+                    backgroundColor="transparent"
+                    sensitivity={1.5}
+                    rotationEnabled={true}
+                    audioTrack={audioTrack}
+                  />
+                );
+              })()}
+
+              {/* Conversation State - Inside the orb (centered) */}
+              {isConnected && sessionConfigured && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
+                  >
+                    {conversationState === "listening" && (
+                      <Mic size={16} strokeWidth={2} className="animate-pulse" />
+                    )}
+                    {conversationState === "speaking" && (
+                      <MicOff size={16} strokeWidth={2} />
+                    )}
+                    <span>{conversationStateInfo.text}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Ready Status - Under the orb */}
+            {/* {isConnected &&
+              sessionConfigured &&
+              !isRecording &&
+              conversationState === "idle" && (
+                <div className="mt-4 text-sm text-[#888] font-medium">
+                  Ready to listen
+                </div>
+              )} */}
+          </div>
+
+          {/* Help Text */}
+          <div className="mt-8 text-center text-sm text-[#888] max-w-md">
+            <p>
+              Just speak naturally to describe your dog's activity. The AI will
+              automatically calculate XP rewards and save it.
+            </p>
+            <p className="mt-2 text-[#f9dca0]">
+              Example: "We went on a 20 minute walk this morning"
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

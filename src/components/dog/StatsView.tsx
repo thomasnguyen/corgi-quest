@@ -92,6 +92,7 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
             {/* Portrait placeholder */}
             <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
               {equippedItem?.item?.itemType === "moon" ? (
+                // Moon items always use mage_avatar
                 <picture>
                   <source srcSet="/mage_avatar.webp" type="image/webp" />
                   <img
@@ -101,7 +102,20 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
                     className="w-full h-full object-cover"
                   />
                 </picture>
+              ) : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== "" ? (
+                // AI-generated image for non-moon items
+                <img
+                  src={equippedItem.generatedImageUrl}
+                  alt={`${dog.name} wearing ${equippedItem.item.name}`}
+                  fetchPriority="high"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to default avatar if generated image fails to load
+                    e.currentTarget.src = "/default_avatar.png";
+                  }}
+                />
               ) : (
+                // Default avatar when nothing equipped
                 <picture>
                   <source srcSet="/default_avatar.webp" type="image/webp" />
                   <img

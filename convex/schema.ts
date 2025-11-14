@@ -163,6 +163,7 @@ export default defineSchema({
     unlockLevel: v.number(), // Level required to unlock (1 per level, starting at level 2)
     itemType: v.string(), // e.g., "warrior", "mage", "ranger", etc.
     icon: v.string(), // Emoji or icon identifier
+    aiPrompt: v.optional(v.string()), // DALL-E prompt for AI image generation
     createdAt: v.number(),
   }).index("by_unlock_level", ["unlockLevel"]),
 

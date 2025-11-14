@@ -553,40 +553,135 @@ export const markItemAsSeen = mutation({
 });
 
 /**
- * Equip Item Mutation
+ * Equip Item Mutation (Updated for AI Integration)
  *
- * Equips a cosmetic item to a dog.
+ * Equips a cosmetic item to a dog with AI-generated image support.
  * Only one item can be equipped at a time - equipping a new item automatically unequips the previous one.
- * For hackathon demo, images are manually created and passed as imageUrl parameter.
+ *
+ * This mutation checks for cached images before accepting a new imageUrl parameter.
+ * If a cached image exists, it uses that immediately. Otherwise, it accepts the imageUrl
+ * parameter from the frontend (which should be generated via the generateItemImage action).
  */
 export const equipItem = mutation({
   args: {
     dogId: v.id("dogs"),
     itemId: v.id("cosmetic_items"),
-    imageUrl: v.string(), // Manually created image URL
+    imageUrl: v.optional(v.string()), // Optional - only needed if no cache exists and not a moon item
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // Step 1: Delete any existing equipped_items record for this dog (only one item at a time)
-    const existingEquippedItem = await ctx.db
+    // Get item details to check if it's a moon item
+    const item = await ctx.db.get(args.itemId);
+    if (!item) {
+      throw new Error("Cosmetic item not found");
+    }
+
+    const isMoonItem = item.itemType === "moon";
+
+    // Moon items: Always use empty string (indicates mage_bg/mage_avatar), skip all other checks
+    if (isMoonItem) {
+      // Moon items don't use AI-generated images - use special marker
+      // Empty string indicates moon item (uses mage_bg/mage_avatar)
+      // DEBUG: Alert to confirm moon item is detected and skipped
+      console.log(
+        "🌙 MOON ITEM DETECTED - Skipping AI generation, using mage_bg/mage_avatar"
+      );
+
+      // Delete any existing equipped_items record for this dog (only one item at a time)
+      const currentEquippedItem = await ctx.db
+        .query("equipped_items")
+        .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+        .first();
+
+      if (currentEquippedItem) {
+        await ctx.db.delete(currentEquippedItem._id);
+      }
+
+      // Insert new equipped_items record with empty string for moon items
+      const equippedItemId = await ctx.db.insert("equipped_items", {
+        dogId: args.dogId,
+        itemId: args.itemId,
+        generatedImageUrl: "", // Empty string for moon items (uses mage_bg/mage_avatar)
+        equippedAt: now,
+      });
+
+      // Mark item as seen (remove "New!" badge)
+      const newlyUnlockedItem = await ctx.db
+        .query("newly_unlocked_items")
+        .withIndex("by_dog_and_item", (q) =>
+          q.eq("dogId", args.dogId).eq("itemId", args.itemId)
+        )
+        .first();
+
+      if (newlyUnlockedItem) {
+        await ctx.db.delete(newlyUnlockedItem._id);
+      }
+
+      // Return immediately for moon items
+      return {
+        success: true,
+        equippedItemId,
+        itemName: item?.name,
+        imageUrl: "",
+        usedCache: false,
+        isMoonItem: true,
+      };
+    }
+
+    // Non-moon items: Check for cached image from previous equips
+    const allEquippedItems = await ctx.db
+      .query("equipped_items")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    const cachedItem = allEquippedItems.find(
+      (item) => item.itemId === args.itemId
+    );
+
+    let imageUrlToUse: string;
+
+    if (
+      cachedItem &&
+      cachedItem.generatedImageUrl &&
+      cachedItem.generatedImageUrl !== ""
+    ) {
+      // Cache hit - use cached URL immediately
+      imageUrlToUse = cachedItem.generatedImageUrl;
+    } else if (args.imageUrl) {
+      // No cache - use provided imageUrl from frontend
+      imageUrlToUse = args.imageUrl;
+    } else {
+      // No cache and no imageUrl provided - return result indicating generation is needed
+      // The hook will catch this and generate the image
+      return {
+        success: false,
+        needsGeneration: true,
+        usedCache: false,
+        isMoonItem: false,
+      };
+    }
+
+    // Step 2: Delete any existing equipped_items record for this dog (only one item at a time)
+    const currentEquippedItem = await ctx.db
       .query("equipped_items")
       .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
       .first();
 
-    if (existingEquippedItem) {
-      await ctx.db.delete(existingEquippedItem._id);
+    if (currentEquippedItem) {
+      await ctx.db.delete(currentEquippedItem._id);
     }
 
-    // Step 2: Insert new equipped_items record with provided imageUrl
+    // Step 3: Insert new equipped_items record with image URL
+    // For moon items, generatedImageUrl will be empty string (we use mage_bg/mage_avatar)
     const equippedItemId = await ctx.db.insert("equipped_items", {
       dogId: args.dogId,
       itemId: args.itemId,
-      generatedImageUrl: args.imageUrl,
+      generatedImageUrl: imageUrlToUse,
       equippedAt: now,
     });
 
-    // Step 3: Mark item as seen (remove "New!" badge)
+    // Step 4: Mark item as seen (remove "New!" badge)
     const newlyUnlockedItem = await ctx.db
       .query("newly_unlocked_items")
       .withIndex("by_dog_and_item", (q) =>
@@ -598,14 +693,16 @@ export const equipItem = mutation({
       await ctx.db.delete(newlyUnlockedItem._id);
     }
 
-    // Step 4: Get the item details to return
-    const item = await ctx.db.get(args.itemId);
+    // Step 5: Get the item details to return
+    const itemDetails = await ctx.db.get(args.itemId);
 
     return {
       success: true,
       equippedItemId,
-      itemName: item?.name,
-      imageUrl: args.imageUrl,
+      itemName: itemDetails?.name,
+      imageUrl: imageUrlToUse,
+      usedCache: !!cachedItem,
+      isMoonItem: false, // Non-moon items
     };
   },
 });

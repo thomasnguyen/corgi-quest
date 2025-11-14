@@ -5,6 +5,7 @@ import {
   RECOMMENDATION_SYSTEM_PROMPT,
   createRecommendationUserPrompt,
 } from "./lib/aiRecommendationPrompt";
+import OpenAI from "openai";
 
 /**
  * Generate OpenAI Realtime API Session Token
@@ -102,7 +103,8 @@ export const generateWeeklyRecommendations = action({
     try {
       // Convert dates to timestamps
       const startTime = new Date(args.weekStartDate).getTime();
-      const endTime = new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of day
+      const endTime =
+        new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of day
 
       // Query mood logs for the week
       const moodLogs = await ctx.runQuery(api.queries.getMoodFeed, {
@@ -117,7 +119,8 @@ export const generateWeeklyRecommendations = action({
         dogId: args.dogId,
       });
       const weekActivities = activityFeed.filter(
-        (activity: any) => activity.createdAt >= startTime && activity.createdAt < endTime
+        (activity: any) =>
+          activity.createdAt >= startTime && activity.createdAt < endTime
       );
 
       // Check if we have enough data to generate meaningful recommendations
@@ -312,6 +315,235 @@ export const generateWeeklyRecommendations = action({
         throw new Error(`Failed to generate recommendations: ${error.message}`);
       }
       throw new Error("Failed to generate recommendations: Unknown error");
+    }
+  },
+});
+
+/**
+ * Generate AI Image for Cosmetic Item
+ *
+ * Creates an AI-generated image using OpenAI's DALL-E API based on the item's
+ * predefined prompt. The generated image is used as the dog's avatar and background
+ * when the item is equipped.
+ *
+ * Supports optional reference image for future image-to-image capabilities.
+ *
+ * @param {Object} args - Arguments object
+ * @param {Id<"cosmetic_items">} args.itemId - The cosmetic item's ID
+ * @param {string} args.dogName - The dog's name for personalization
+ * @param {string} args.referenceImageUrl - Optional reference image URL for modification
+ * @returns {string} Generated image URL
+ * @throws {Error} If OPENAI_API_KEY is not configured, item not found, or API request fails
+ */
+export const generateItemImage = action({
+  args: {
+    itemId: v.id("cosmetic_items"),
+    dogName: v.string(),
+    referenceImageUrl: v.optional(v.string()), // Optional reference image (deprecated - always uses mage_bg)
+  },
+  handler: async (ctx, args): Promise<string> => {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    console.log({ referenceImageUrl: args.referenceImageUrl });
+    if (!apiKey) {
+      throw new Error(
+        "OPENAI_API_KEY not configured. Please add it to your Convex environment variables."
+      );
+    }
+
+    try {
+      // Query cosmetic_items to get item details
+      const item = await ctx.runQuery(api.queries.getCosmeticItem, {
+        itemId: args.itemId,
+      });
+
+      if (!item) {
+        throw new Error("Cosmetic item not found");
+      }
+
+      // SAFEGUARD: Moon items NEVER generate AI images - they always use mage_bg/mage_avatar
+      // This should never be called for moon items, but adding as a safety check
+      if (item.itemType === "moon") {
+        // DEBUG: Alert if moon item somehow reaches generation (should never happen)
+        console.error(
+          "🚨 ERROR: Moon item tried to generate AI image! This should never happen!"
+        );
+        throw new Error(
+          "Moon items do not use AI-generated images. They always use mage_bg/mage_avatar."
+        );
+      }
+
+      // Map item types to element descriptions for prompt building
+      const elementMap: Record<
+        string,
+        { element: string; colors: string; energy: string }
+      > = {
+        fire: {
+          element: "fire",
+          colors: "red, orange, and yellow",
+          energy: "flaming",
+        },
+        water: {
+          element: "water",
+          colors: "blue, cyan, and white",
+          energy: "flowing water",
+        },
+        grass: {
+          element: "nature",
+          colors: "green, brown, and earth tones",
+          energy: "vital",
+        },
+        sun: {
+          element: "solar",
+          colors: "gold, yellow, and white",
+          energy: "radiant",
+        },
+        ground: {
+          element: "earth",
+          colors: "brown, tan, and ochre",
+          energy: "grounded",
+        },
+        moon: {
+          element: "lunar",
+          colors: "silver, blue, and white",
+          energy: "mystical",
+        },
+      };
+
+      // Get element info based on item type, with fallback
+      const elementInfo = elementMap[item.itemType] || {
+        element: item.itemType || "magical",
+        colors: "vibrant",
+        energy: "energetic",
+      };
+
+      // Build detailed prompt using the Lightning Monk template structure
+      // Always uses dark background and references mage_bg style
+      // If custom aiPrompt exists, use it; otherwise build from template
+      let fullPrompt: string;
+
+      // Reference to mage_bg style - dark mystical background with atmospheric lighting
+      const mageBgStyleReference =
+        "The art style should match the dark, atmospheric, mystical background style of a mage's realm - with deep shadows, subtle magical glows, and a sense of fantasy adventure. The background should be **dark dark dark gray** with subtle atmospheric effects.";
+
+      if (item.aiPrompt) {
+        // Use custom prompt if provided, but enhance it with the detailed structure
+        fullPrompt = `A full-body digital illustration of a Corgi dog dressed as a **${item.name}** character from a role-playing game. It should look and feel like an RPG game art. It should be super serious and cool. ${item.aiPrompt}. The Corgi is standing upright, in a highly detailed, fantasy art style. The character's outfit and accessories are glowing with **${elementInfo.energy}** energy and symbols. The colors should primarily be **${elementInfo.colors}** to represent the ${elementInfo.element} element. ${mageBgStyleReference} The Corgi's feet should be positioned very close to the bottom of the image frame.`;
+      } else {
+        // Build prompt from template
+        const characterClass =
+          item.itemType === "fire"
+            ? "Warrior"
+            : item.itemType === "water"
+              ? "Mage"
+              : item.itemType === "grass"
+                ? "Druid"
+                : item.itemType === "sun"
+                  ? "Paladin"
+                  : item.itemType === "ground"
+                    ? "Monk"
+                    : item.itemType === "moon"
+                      ? "Mystic"
+                      : "Adventurer";
+
+        fullPrompt = `A full-body digital illustration of a cute Corgi dog dressed as a **${characterClass}** character from a role-playing game. The Corgi is standing upright, in a highly detailed, fantasy art style. The character wears ${item.description.toLowerCase()}, with outfit and accessories glowing with **${elementInfo.energy}** energy and symbols. The colors should primarily be **${elementInfo.colors}** to represent the ${elementInfo.element} element. ${mageBgStyleReference} The Corgi's feet should be positioned very close to the bottom of the image frame.`;
+      }
+
+      // Always use mage_bg.webp as reference image for consistent style
+      // (Note: DALL-E 3 doesn't support image-to-image directly, but we can reference it in the prompt)
+      const referenceImageUrl =
+        "https://corgiquest.netlify.app/images/backgrounds/mage_bg.webp";
+      fullPrompt = `${fullPrompt} The image should be inspired by and similar in style to the reference image at ${referenceImageUrl}, matching the dark, atmospheric, mystical background style with deep shadows, subtle magical glows, and a sense of fantasy adventure.`;
+
+      // Initialize OpenAI client
+      const openai = new OpenAI({
+        apiKey,
+      });
+
+      // Call OpenAI DALL-E API with 30-second timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      let response;
+      try {
+        response = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: fullPrompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        });
+      } catch (generateError) {
+        clearTimeout(timeoutId);
+        if (
+          generateError instanceof Error &&
+          generateError.name === "AbortError"
+        ) {
+          throw new Error(
+            "Image generation timed out after 30 seconds. Please try again."
+          );
+        }
+        throw generateError;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      // Return generated image URL on success
+      if (!response.data?.[0]?.url) {
+        throw new Error("Invalid response from DALL-E: missing image URL");
+      }
+
+      return response.data[0].url;
+    } catch (error) {
+      // Throw descriptive errors on failure
+      if (error instanceof Error) {
+        // Check for network errors
+        if (
+          error.message.includes("fetch failed") ||
+          error.message.includes("network") ||
+          error.message.includes("ECONNREFUSED") ||
+          error.message.includes("ETIMEDOUT")
+        ) {
+          throw new Error(
+            "Network error. Please check your internet connection and try again."
+          );
+        }
+
+        // Handle OpenAI-specific errors
+        if (error.message.includes("rate limit")) {
+          throw new Error(
+            "Rate limit exceeded. Please wait a moment and try again."
+          );
+        }
+
+        if (
+          error.message.includes("authentication") ||
+          error.message.includes("401")
+        ) {
+          throw new Error(
+            "OpenAI API authentication failed. Please check your API key configuration."
+          );
+        }
+
+        if (error.message.includes("content_policy_violation")) {
+          throw new Error(
+            "Image generation failed due to content policy. Please try a different item."
+          );
+        }
+
+        // Re-throw with original message if it's already user-friendly
+        if (
+          error.message.includes("not configured") ||
+          error.message.includes("not found") ||
+          error.message.includes("timed out")
+        ) {
+          throw error;
+        }
+
+        // Generic error with details
+        throw new Error(`Failed to generate image: ${error.message}`);
+      }
+      throw new Error("Failed to generate image: Unknown error");
     }
   },
 });

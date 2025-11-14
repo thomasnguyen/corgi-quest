@@ -123,57 +123,69 @@ export default function StatOrb({
         aria-label={`View ${STAT_NAMES[statType]} details`}
       >
         {/* Circular Progress Ring */}
-        <div className="relative" style={{ width: size, height: size }}>
-          {/* Background circle */}
-          <svg width={size} height={size} className="transform -rotate-90">
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke="#2a2a2a"
-              strokeWidth={strokeWidth}
-              fill="#1a1a1a"
-              opacity={0.6}
-            />
-            {/* Progress circle - brighter and glowing */}
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke="#F5C35F"
-              strokeWidth={strokeWidth}
-              fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              className={`transition-all duration-300 ${
-                isLevelingUp ? "animate-pulse-ring" : ""
-              }`}
-              style={{
-                filter:
-                  "drop-shadow(0 0 4px rgba(245, 195, 95, 0.9)) drop-shadow(0 0 8px rgba(245, 195, 95, 0.6)) drop-shadow(0 0 12px rgba(245, 195, 95, 0.3))",
-              }}
-            />
-          </svg>
+        <div
+          className="relative overflow-visible flex items-center justify-center"
+          style={{ width: size + 16, height: size + 16 }}
+        >
+          <div className="relative" style={{ width: size, height: size }}>
+            {/* Background circle */}
+            <svg
+              width={size}
+              height={size}
+              className="transform -rotate-90"
+              style={{ overflow: "visible" }}
+            >
+              <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke="#2a2a2a"
+                strokeWidth={strokeWidth}
+                fill="#1a1a1a"
+                opacity={0.6}
+              />
+              {/* Progress circle - brighter and glowing */}
+              <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke="#F5C35F"
+                strokeWidth={strokeWidth}
+                fill="none"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                className={`transition-all duration-300 ${
+                  isLevelingUp ? "animate-pulse-ring" : ""
+                }`}
+                style={{
+                  filter:
+                    "drop-shadow(0 0 4px rgba(245, 195, 95, 0.9)) drop-shadow(0 0 8px rgba(245, 195, 95, 0.6)) drop-shadow(0 0 12px rgba(245, 195, 95, 0.3))",
+                }}
+              />
+            </svg>
 
-          {/* Center content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            {(() => {
-              const Icon = STAT_ICONS[statType];
-              return (
-                <Icon
-                  size={20}
-                  strokeWidth={2.5}
-                  fill="none"
-                  className="mb-1"
-                  style={{
-                    color: "#F5C35F",
-                    filter: "drop-shadow(0 0 2px rgba(245, 195, 95, 0.6))",
-                  }}
-                />
-              );
-            })()}
-            <span className="text-[8px] font-bold text-white">LVL {level}</span>
+            {/* Center content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {(() => {
+                const Icon = STAT_ICONS[statType];
+                return (
+                  <Icon
+                    size={20}
+                    strokeWidth={2.5}
+                    fill="none"
+                    className="mb-1"
+                    style={{
+                      color: "#F5C35F",
+                      filter: "drop-shadow(0 0 2px rgba(245, 195, 95, 0.6))",
+                    }}
+                  />
+                );
+              })()}
+              <span className="text-[8px] font-bold text-white">
+                LVL {level}
+              </span>
+            </div>
           </div>
         </div>
       </button>

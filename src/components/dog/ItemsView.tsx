@@ -4,6 +4,8 @@ import { Dog } from "../../lib/types";
 import { Id } from "convex/_generated/dataModel";
 import ItemCard from "./ItemCard";
 import { useState } from "react";
+import { useEquipItem } from "../../hooks/useEquipItem";
+import GeneratingScreen from "../ui/GeneratingScreen";
 
 interface ItemsViewProps {
   dog: Dog;
@@ -12,11 +14,9 @@ interface ItemsViewProps {
 /**
  * ItemsView component for the ITEMS sub-tab in BUMI screen
  * Displays dog portrait with current outfit, unlocked items, and locked items
- * Requirements: 28
+ * Requirements: 28, 1.1, 1.2, 1.3, 5.1, 5.2, 5.3, 5.4
  */
 export default function ItemsView({ dog }: ItemsViewProps) {
-  const [loadingItemId, setLoadingItemId] =
-    useState<Id<"cosmetic_items"> | null>(null);
   const [isUnequipping, setIsUnequipping] = useState(false);
 
   // Get all cosmetic items with unlock status
@@ -33,23 +33,36 @@ export default function ItemsView({ dog }: ItemsViewProps) {
   const unequipItemMutation = useMutation(api.mutations.unequipItem);
   const equipItemMutation = useMutation(api.mutations.equipItem);
 
+  // Use the AI-powered equip hook (only for non-moon items)
+  const { equipItem, isLoading, error, loadingItemId } = useEquipItem(
+    dog._id,
+    dog.name
+  );
+
   const handleEquip = async (itemId: Id<"cosmetic_items">) => {
     try {
-      setLoadingItemId(itemId);
-
-      // For hackathon demo: use placeholder image URL
-      // In production, this would call an AI image generation service
-      const placeholderImageUrl = `https://placehold.co/400x400/1a1a1a/f5c35f?text=${encodeURIComponent("🐕")}`;
-
-      await equipItemMutation({
-        dogId: dog._id,
-        itemId,
-        imageUrl: placeholderImageUrl,
-      });
+      // Check if this is a moon item BEFORE calling equipItem
+      // Moon items should NEVER show loading/generating screen - equip instantly!
+      const item = allItems?.find((item) => item._id === itemId);
+      const isMoonItem = item?.itemType === "moon";
+      
+      if (isMoonItem) {
+        // Moon items: Call mutation directly, NO loading state, instant equip!
+        // Call mutation directly - no loading state, instant equip
+        await equipItemMutation({
+          dogId: dog._id,
+          itemId,
+        });
+        
+        // Done! No loading screen, no generation, instant equip
+        return;
+      }
+      
+      // Non-moon items: Use the hook which handles AI generation
+      await equipItem(itemId);
     } catch (error) {
+      // Error is already handled by useEquipItem hook
       console.error("Failed to equip item:", error);
-    } finally {
-      setLoadingItemId(null);
     }
   };
 
@@ -83,9 +96,59 @@ export default function ItemsView({ dog }: ItemsViewProps) {
   // Get equipped item ID for comparison
   const equippedItemId = equippedItem?.itemId;
 
+  // Check if the currently loading item is a moon item (don't show generating screen for moon items)
+  const loadingItem = allItems?.find((item) => item._id === loadingItemId);
+  const isLoadingMoonItem = loadingItem?.itemType === "moon";
+  
+  // DEBUG: Log to console to verify moon item detection
+  if (isLoading && loadingItemId) {
+    console.log("🔍 Loading item check:", {
+      itemId: loadingItemId,
+      itemName: loadingItem?.name,
+      itemType: loadingItem?.itemType,
+      isMoonItem: isLoadingMoonItem,
+      allItemsLength: allItems?.length,
+      foundItem: !!loadingItem,
+    });
+    
+    if (isLoadingMoonItem) {
+      console.log("✅ MOON ITEM DETECTED - Generating screen will NOT show");
+    } else {
+      console.log("❌ NOT a moon item - Generating screen WILL show");
+    }
+  }
+
   return (
     <div className="min-h-screen pb-32 pt-4 px-4">
+      {/* Show generating screen when AI is generating (but NOT for moon items) */}
+      {isLoading && loadingItemId && !isLoadingMoonItem && (
+        <GeneratingScreen />
+      )}
+      
       <div className="max-w-md mx-auto space-y-4">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-3 mb-4">
+            <div className="flex items-start gap-2">
+              <span className="text-red-500 text-lg">⚠️</span>
+              <div className="flex-1">
+                <p className="text-red-400 text-sm font-semibold mb-1">
+                  Generation Failed
+                </p>
+                <p className="text-red-300 text-xs mb-2">{error}</p>
+                {loadingItemId && (
+                  <button
+                    onClick={() => handleEquip(loadingItemId)}
+                    className="text-xs bg-red-500/20 hover:bg-red-500/30 text-red-300 px-3 py-1 rounded transition-colors"
+                  >
+                    Retry
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Dog Portrait Section */}
         <div className="text-center">
           {/* Portrait with Border - shows equipped item or base portrait */}
@@ -99,7 +162,15 @@ export default function ItemsView({ dog }: ItemsViewProps) {
             />
             {/* Portrait - shows equipped item or base portrait */}
             <div className="relative w-28 h-28 mx-auto mt-2 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
-              {equippedItem?.item?.itemType === "moon" ? (
+              {isLoading && loadingItemId ? (
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#f5c35f] border-t-transparent"></div>
+                  <p className="text-[#f5c35f] text-[10px] font-semibold">
+                    Generating...
+                  </p>
+                </div>
+              ) : equippedItem?.item?.itemType === "moon" ? (
+                // Moon items always use mage_avatar
                 <picture>
                   <source srcSet="/mage_avatar.webp" type="image/webp" />
                   <img
@@ -109,14 +180,20 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                     className="w-full h-full object-cover"
                   />
                 </picture>
-              ) : equippedItem?.generatedImageUrl ? (
+              ) : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== "" ? (
+                // AI-generated image for non-moon items
                 <img
                   src={equippedItem.generatedImageUrl}
                   alt={`${dog.name} wearing ${equippedItem.item.name}`}
                   fetchPriority="high"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to default avatar if generated image fails to load
+                    e.currentTarget.src = "/default_avatar.png";
+                  }}
                 />
               ) : (
+                // Default avatar when nothing equipped
                 <picture>
                   <source srcSet="/default_avatar.webp" type="image/webp" />
                   <img
@@ -182,7 +259,9 @@ export default function ItemsView({ dog }: ItemsViewProps) {
                       className="w-4 h-4"
                     />
                   ) : (
-                    <span className="text-[#f5c35f]">{equippedItem.item.icon}</span>
+                    <span className="text-[#f5c35f]">
+                      {equippedItem.item.icon}
+                    </span>
                   )}
                   <p className="text-[#f5c35f] text-xs">
                     {equippedItem.item.description}

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import StatGrid from "../components/dog/StatGrid";
@@ -50,13 +50,34 @@ function OverviewPage() {
     firstDog ? { dogId: firstDog._id } : "skip"
   );
 
-  // Determine background based on equipped item (calculate early, before conditionals)
-  const backgroundImage =
-    equippedItem?.item?.itemType === "moon" ? "/mage_bg.webp" : "/smoke_bg.svg";
+  // Detect mobile for responsive backgrounds
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
-  // Fallback for browsers that don't support WebP
-  const backgroundImageFallback =
-    equippedItem?.item?.itemType === "moon" ? "/mage_bg.png" : "/smoke_bg.svg";
+  // Determine background based on equipped item (calculate early, before conditionals)
+  // Priority: 1. Generated AI image (only for non-moon items), 2. Item-specific background, 3. Default background
+  // Moon items always use mage_bg, never AI-generated images
+  const bgSuffix = isMobile ? "_mobile" : "";
+  const isMoonItem = equippedItem?.item?.itemType === "moon";
+  const backgroundImage = isMoonItem
+    ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
+    : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
+      ? equippedItem.generatedImageUrl
+      : `/images/backgrounds/default_bg${bgSuffix}.webp`;
+
+  // Fallback for browsers that don't support WebP (only for non-AI images)
+  const backgroundImageFallback = isMoonItem
+    ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
+    : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
+      ? equippedItem.generatedImageUrl
+      : `/images/backgrounds/default_bg${bgSuffix}.webp`;
 
   // Preload the background image for faster rendering (must be before any conditional returns)
   useEffect(() => {
