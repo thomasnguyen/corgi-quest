@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import Layout from "../components/layout/Layout";
 import StatGrid from "../components/dog/StatGrid";
-import LogActivityButton from "../components/layout/LogActivityButton";
+import ActivityButtons from "../components/layout/ActivityButtons";
 import TopResourceBar from "../components/layout/TopResourceBar";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { useStaleQuery } from "../hooks/useStaleQuery";
@@ -62,7 +62,7 @@ function OverviewPage() {
   }, []);
 
   // Determine background based on equipped item (calculate early, before conditionals)
-  // Priority: 
+  // Priority:
   // 1. Moon items → mage_bg.webp (local, never AI-generated)
   // 2. Non-moon equipped items → generatedImageUrl from Convex storage (AI-generated WebP)
   // 3. Default (nothing equipped) → main_bg.webp (local)
@@ -179,9 +179,9 @@ function OverviewPage() {
         <div className="fixed bottom-28 left-0 right-0 py-4 px-4">
           <StatGrid stats={stats} />
 
-          <LogActivityButton />
+          <ActivityButtons />
         </div>
-        {/* Log Activity Button - positioned above bottom nav */}
+        {/* Activity Buttons - positioned above bottom nav */}
       </div>
     </Layout>
   );

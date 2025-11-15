@@ -109,6 +109,9 @@ export function useOpenAIRealtime(
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isManualDisconnectRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
 
   // Convex action for generating session token
   const generateToken = useAction(api.actions.generateSessionToken);
@@ -263,22 +266,27 @@ export function useOpenAIRealtime(
    * Connect to OpenAI Realtime API
    */
   const connect = useCallback(async () => {
+    console.log("[OpenAI Realtime] connect() called");
+
     // Check if already connected or connecting
     if (
       wsRef.current?.readyState === WebSocket.OPEN ||
       connectionState === "connecting"
     ) {
-      console.log("Already connected or connecting");
+      console.log("[OpenAI Realtime] Already connected or connecting");
       return;
     }
 
     // Check microphone permission first
     if (hasPermission === null) {
+      console.log("[OpenAI Realtime] Requesting microphone permission...");
       const granted = await requestPermission();
       if (!granted) {
+        console.log("[OpenAI Realtime] Microphone permission denied");
         return;
       }
     } else if (hasPermission === false) {
+      console.log("[OpenAI Realtime] Microphone permission already denied");
       const error = new Error("Microphone permission required");
       onError?.(error);
       return;
@@ -289,15 +297,19 @@ export function useOpenAIRealtime(
       isManualDisconnectRef.current = false;
 
       // Generate session token from Convex
-      console.log("Generating OpenAI session token...");
+      console.log("[OpenAI Realtime] Generating OpenAI session token...");
       const sessionToken = await generateToken();
+      console.log(
+        "[OpenAI Realtime] ✅ Session token generated:",
+        sessionToken?.substring(0, 20) + "..."
+      );
 
       if (!sessionToken) {
         throw new Error("Failed to generate session token");
       }
 
       console.log(
-        "Session token generated, establishing WebSocket connection..."
+        "[OpenAI Realtime] Session token generated, establishing WebSocket connection..."
       );
 
       // Create WebSocket connection
@@ -312,7 +324,9 @@ export function useOpenAIRealtime(
 
       // Set up event listeners
       ws.onopen = () => {
-        console.log("WebSocket connection opened");
+        console.log("[OpenAI Realtime] 🔌 WebSocket connection opened!");
+        // Start audio capture when connection opens
+        startAudioCapture();
         // Connection state will be updated to "connected" when we receive session.created
       };
 
@@ -322,7 +336,7 @@ export function useOpenAIRealtime(
 
       wsRef.current = ws;
     } catch (error) {
-      console.error("Failed to connect to OpenAI Realtime API:", error);
+      console.error("[OpenAI Realtime] ❌ Failed to connect:", error);
       updateConnectionState("error");
       onError?.(error as Error);
     }
@@ -342,9 +356,12 @@ export function useOpenAIRealtime(
    * Disconnect from OpenAI Realtime API
    */
   const disconnect = useCallback(() => {
-    console.log("Manually disconnecting from OpenAI Realtime API");
+    console.log("[OpenAI Realtime] Manually disconnecting");
 
     isManualDisconnectRef.current = true;
+
+    // Stop audio capture first
+    stopAudioCapture();
 
     // Clear any pending reconnection attempts
     if (reconnectTimeoutRef.current) {
@@ -361,6 +378,90 @@ export function useOpenAIRealtime(
     updateConnectionState("disconnected");
     reconnectAttemptsRef.current = 0;
   }, [updateConnectionState]);
+
+  /**
+   * Start capturing microphone audio and sending to OpenAI
+   */
+  const startAudioCapture = useCallback(async () => {
+    try {
+      console.log("[OpenAI Realtime] Starting audio capture...");
+
+      // Get microphone stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+
+      // Create audio context
+      const audioContext = new AudioContext({ sampleRate: 24000 });
+      audioContextRef.current = audioContext;
+
+      // Create source from microphone
+      const source = audioContext.createMediaStreamSource(stream);
+
+      // Create script processor for audio processing
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      processorRef.current = processor;
+
+      // Handle audio data
+      processor.onaudioprocess = (event) => {
+        const inputData = event.inputBuffer.getChannelData(0);
+
+        // Convert float32 to int16
+        const int16Data = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          int16Data[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+        }
+
+        // Convert to base64
+        const base64Audio = btoa(
+          String.fromCharCode.apply(null, Array.from(int16Data))
+        );
+
+        // Send to OpenAI
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(
+            JSON.stringify({
+              type: "input_audio_buffer.append",
+              audio: base64Audio,
+            })
+          );
+        }
+      };
+
+      // Connect nodes
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
+      console.log("[OpenAI Realtime] ✅ Audio capture started");
+    } catch (error) {
+      console.error("[OpenAI Realtime] Failed to start audio capture:", error);
+      onError?.(error as Error);
+    }
+  }, [onError]);
+
+  /**
+   * Stop audio capture
+   */
+  const stopAudioCapture = useCallback(() => {
+    console.log("[OpenAI Realtime] Stopping audio capture...");
+
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current = null;
+    }
+
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    console.log("[OpenAI Realtime] Audio capture stopped");
+  }, []);
 
   /**
    * Send a message through the WebSocket connection
@@ -398,6 +499,9 @@ export function useOpenAIRealtime(
    */
   useEffect(() => {
     return () => {
+      // Stop audio capture
+      stopAudioCapture();
+
       // Clear reconnection timeout
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -409,7 +513,7 @@ export function useOpenAIRealtime(
         wsRef.current.close(1000, "Component unmounted");
       }
     };
-  }, []);
+  }, [stopAudioCapture]);
 
   return {
     connectionState,

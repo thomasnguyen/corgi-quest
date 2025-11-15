@@ -24,8 +24,6 @@
 ## Component Patterns
 - Functional components only with TypeScript
 - Use proper TypeScript types for all props
-- Follow black/white minimalist wireframe design
-- No gradients, no colors except black/white/gray
 
 ## Real-Time Requirements (MOST IMPORTANT)
 - All data must update in real-time using Convex subscriptions

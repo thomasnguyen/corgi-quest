@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrainingModeRouteImport } from './routes/training-mode'
 import { Route as ThanksRouteImport } from './routes/thanks'
 import { Route as SelectCharacterRouteImport } from './routes/select-character'
 import { Route as QuestsRouteImport } from './routes/quests'
@@ -27,6 +28,11 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const TrainingModeRoute = TrainingModeRouteImport.update({
+  id: '/training-mode',
+  path: '/training-mode',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ThanksRoute = ThanksRouteImport.update({
   id: '/thanks',
   path: '/thanks',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/quests': typeof QuestsRouteWithChildren
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
+  '/training-mode': typeof TrainingModeRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/log-activity': typeof LogActivityRoute
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
+  '/training-mode': typeof TrainingModeRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests': typeof QuestsIndexRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/quests': typeof QuestsRouteWithChildren
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
+  '/training-mode': typeof TrainingModeRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/quests'
     | '/select-character'
     | '/thanks'
+    | '/training-mode'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/log-activity'
     | '/select-character'
     | '/thanks'
+    | '/training-mode'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/quests'
     | '/select-character'
     | '/thanks'
+    | '/training-mode'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   QuestsRoute: typeof QuestsRouteWithChildren
   SelectCharacterRoute: typeof SelectCharacterRoute
   ThanksRoute: typeof ThanksRoute
+  TrainingModeRoute: typeof TrainingModeRoute
   StatsStatTypeRoute: typeof StatsStatTypeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -249,6 +262,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/training-mode': {
+      id: '/training-mode'
+      path: '/training-mode'
+      fullPath: '/training-mode'
+      preLoaderRoute: typeof TrainingModeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/thanks': {
       id: '/thanks'
       path: '/thanks'
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestsRoute: QuestsRouteWithChildren,
   SelectCharacterRoute: SelectCharacterRoute,
   ThanksRoute: ThanksRoute,
+  TrainingModeRoute: TrainingModeRoute,
   StatsStatTypeRoute: StatsStatTypeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,

@@ -1,3 +1,5 @@
+"use node";
+
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
@@ -590,6 +592,116 @@ export const generateItemImage = action({
         throw new Error(`Failed to generate image: ${error.message}`);
       }
       throw new Error("Failed to generate image: Unknown error");
+    }
+  },
+});
+
+/**
+ * Process Training Mode Activity with AI
+ *
+ * Takes a natural language activity description and uses OpenAI to:
+ * 1. Parse the activity details (name, duration, etc.)
+ * 2. Determine appropriate stat gains
+ * 3. Calculate physical/mental points
+ *
+ * @param {Object} args - Arguments object
+ * @param {string} args.activityDescription - Natural language description (e.g., "walked for 10 minutes")
+ * @returns {Object} Parsed activity with stat gains
+ * @throws {Error} If OPENAI_API_KEY is not configured or parsing fails
+ */
+export const processTrainingActivity = action({
+  args: {
+    activityDescription: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error(
+        "OPENAI_API_KEY not configured. Please add it to your Convex environment variables."
+      );
+    }
+
+    try {
+      const systemPrompt = `You are an AI assistant that parses dog training activities and assigns appropriate stat gains.
+
+Given a natural language description of an activity, you must:
+1. Extract the activity name and duration (if mentioned)
+2. Assign stat gains based on the activity type:
+   - INT (Intelligence): Training, learning tricks, puzzle toys
+   - PHY (Physical): Walking, running, playing fetch, swimming
+   - IMP (Impulse Control): Staying calm, ignoring distractions, waiting
+   - SOC (Social): Meeting other dogs, greeting people politely
+
+3. Calculate points:
+   - Physical points: For physical activities (walking, running, playing)
+   - Mental points: For mental activities (training, puzzles, calm behavior)
+
+Return a JSON object with this structure:
+{
+  "activityName": "Brief activity name (e.g., 'Morning Walk')",
+  "durationMinutes": number or null,
+  "statGains": [
+    { "statType": "PHY", "xpAmount": 50 },
+    { "statType": "INT", "xpAmount": 20 }
+  ],
+  "physicalPoints": number (0-100),
+  "mentalPoints": number (0-100)
+}
+
+Guidelines:
+- Stat XP: 10-100 per stat (higher for longer/more intense activities)
+- Physical points: 10-100 for physical activities, 0 otherwise
+- Mental points: 10-100 for mental activities, 0 otherwise
+- Most activities should give 1-2 stats, not all 4`;
+
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: args.activityDescription },
+            ],
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `OpenAI API request failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error("Invalid response from OpenAI: missing content");
+      }
+
+      const parsed = JSON.parse(data.choices[0].message.content);
+
+      return {
+        activityName: parsed.activityName || "Activity",
+        durationMinutes: parsed.durationMinutes || undefined,
+        statGains: parsed.statGains || [],
+        physicalPoints: parsed.physicalPoints || 0,
+        mentalPoints: parsed.mentalPoints || 0,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to process activity: ${error.message}`);
+      }
+      throw new Error("Failed to process activity: Unknown error");
     }
   },
 });

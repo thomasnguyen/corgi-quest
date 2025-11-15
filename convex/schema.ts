@@ -183,4 +183,25 @@ export default defineSchema({
   })
     .index("by_dog", ["dogId"])
     .index("by_dog_and_item", ["dogId", "itemId"]),
+
+  // Quests table - suggested daily activities
+  quests: defineTable({
+    name: v.string(),
+    description: v.string(),
+    durationMinutes: v.number(),
+    statGains: v.array(
+      v.object({
+        statType: v.union(
+          v.literal("INT"),
+          v.literal("PHY"),
+          v.literal("IMP"),
+          v.literal("SOC")
+        ),
+        xpAmount: v.number(),
+      })
+    ),
+    physicalPoints: v.number(),
+    mentalPoints: v.number(),
+    createdAt: v.number(),
+  }),
 });

@@ -290,6 +290,77 @@ export const seedDemoData = mutation({
       equippedAt: now,
     });
 
+    // Step 11: Create 5 default quests
+    // Quest 1: Walk Around the Block
+    await ctx.db.insert("quests", {
+      name: "Walk Around the Block",
+      description: "15-20 min casual walk around the neighborhood",
+      durationMinutes: 18,
+      statGains: [
+        { statType: "PHY", xpAmount: 35 },
+        { statType: "SOC", xpAmount: 15 },
+      ],
+      physicalPoints: 25,
+      mentalPoints: 5,
+      createdAt: now,
+    });
+
+    // Quest 2: Practice Loose Leash
+    await ctx.db.insert("quests", {
+      name: "Practice Loose Leash",
+      description: "10-15 min focused walk without pulling",
+      durationMinutes: 12,
+      statGains: [
+        { statType: "INT", xpAmount: 20 },
+        { statType: "IMP", xpAmount: 30 },
+      ],
+      physicalPoints: 10,
+      mentalPoints: 15,
+      createdAt: now,
+    });
+
+    // Quest 3: Visit the Park
+    await ctx.db.insert("quests", {
+      name: "Visit the Park",
+      description: "20-30 min at a dog park or open space",
+      durationMinutes: 25,
+      statGains: [
+        { statType: "PHY", xpAmount: 50 },
+        { statType: "SOC", xpAmount: 40 },
+      ],
+      physicalPoints: 40,
+      mentalPoints: 15,
+      createdAt: now,
+    });
+
+    // Quest 4: Sniff Walk
+    await ctx.db.insert("quests", {
+      name: "Sniff Walk",
+      description: "15-20 min slow exploratory walk",
+      durationMinutes: 18,
+      statGains: [
+        { statType: "INT", xpAmount: 35 },
+        { statType: "IMP", xpAmount: 20 },
+      ],
+      physicalPoints: 10,
+      mentalPoints: 25,
+      createdAt: now,
+    });
+
+    // Quest 5: Run to the Store
+    await ctx.db.insert("quests", {
+      name: "Run to the Store",
+      description: "10-15 min quick errand walk",
+      durationMinutes: 12,
+      statGains: [
+        { statType: "PHY", xpAmount: 25 },
+        { statType: "SOC", xpAmount: 15 },
+      ],
+      physicalPoints: 20,
+      mentalPoints: 5,
+      createdAt: now,
+    });
+
     return {
       success: true,
       message: "Demo data seeded successfully",
@@ -300,6 +371,7 @@ export const seedDemoData = mutation({
         activityCount: 4,
         cosmeticItemsCount: 6,
         equippedItemId: forestCapeId,
+        questsCount: 5,
       },
     };
   },
