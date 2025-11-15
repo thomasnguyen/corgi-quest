@@ -26,7 +26,7 @@ export default function CharacterCard({
 
   // display holly with holly_avatar.svg
   if (name === "Holly") {
-    avatarUrl = "/character2.webp";
+    avatarUrl = "/character2.png";
   } else if (name === "Thomas") {
     avatarUrl = "/character1.webp";
   } else if (name === "Guest") {

@@ -290,7 +290,48 @@ export const seedDemoData = mutation({
       equippedAt: now,
     });
 
-    // Step 11: Create 5 default quests
+    // Step 11: Create mood logs throughout the day
+    // Morning: playful after walk
+    await ctx.db.insert("mood_logs", {
+      dogId,
+      userId: thomasId,
+      mood: "playful",
+      note: "Very energetic after morning walk!",
+      activityId: activity1Id,
+      createdAt: now - 3 * 60 * 60 * 1000,
+    });
+
+    // Mid-morning: calm after training
+    await ctx.db.insert("mood_logs", {
+      dogId,
+      userId: hollyId,
+      mood: "calm",
+      note: "Settled down nicely after training session",
+      activityId: activity2Id,
+      createdAt: now - 2 * 60 * 60 * 1000,
+    });
+
+    // Afternoon: playful during fetch
+    await ctx.db.insert("mood_logs", {
+      dogId,
+      userId: thomasId,
+      mood: "playful",
+      note: "Loving the fetch game!",
+      activityId: activity3Id,
+      createdAt: now - 1 * 60 * 60 * 1000,
+    });
+
+    // Late afternoon: focused on puzzle
+    await ctx.db.insert("mood_logs", {
+      dogId,
+      userId: hollyId,
+      mood: "neutral",
+      note: "Concentrating hard on the puzzle toy",
+      activityId: activity4Id,
+      createdAt: now - 30 * 60 * 1000,
+    });
+
+    // Step 12: Create 5 default quests
     // Quest 1: Walk Around the Block
     await ctx.db.insert("quests", {
       name: "Walk Around the Block",
@@ -361,6 +402,48 @@ export const seedDemoData = mutation({
       createdAt: now,
     });
 
+    // Quest 6: Agility Training
+    await ctx.db.insert("quests", {
+      name: "Agility Training",
+      description: "10-15 min practicing jumps and weaves",
+      durationMinutes: 12,
+      statGains: [
+        { statType: "PHY", xpAmount: 40 },
+        { statType: "INT", xpAmount: 25 },
+      ],
+      physicalPoints: 30,
+      mentalPoints: 20,
+      createdAt: now,
+    });
+
+    // Quest 7: Socialization Time
+    await ctx.db.insert("quests", {
+      name: "Socialization Time",
+      description: "15-20 min meeting other dogs or people",
+      durationMinutes: 18,
+      statGains: [
+        { statType: "SOC", xpAmount: 45 },
+        { statType: "IMP", xpAmount: 15 },
+      ],
+      physicalPoints: 15,
+      mentalPoints: 10,
+      createdAt: now,
+    });
+
+    // Quest 8: Enrichment Activity
+    await ctx.db.insert("quests", {
+      name: "Enrichment Activity",
+      description: "10-15 min with puzzle toys or sniff games",
+      durationMinutes: 12,
+      statGains: [
+        { statType: "INT", xpAmount: 40 },
+        { statType: "IMP", xpAmount: 20 },
+      ],
+      physicalPoints: 5,
+      mentalPoints: 30,
+      createdAt: now,
+    });
+
     return {
       success: true,
       message: "Demo data seeded successfully",
@@ -369,9 +452,12 @@ export const seedDemoData = mutation({
         dogId,
         userIds: { thomasId, hollyId, guestId },
         activityCount: 4,
+        moodLogsCount: 4,
         cosmeticItemsCount: 6,
         equippedItemId: forestCapeId,
-        questsCount: 5,
+        questsCount: 8,
+        streakDays: 15,
+        dogLevel: 8,
       },
     };
   },
