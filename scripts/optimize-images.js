@@ -25,6 +25,9 @@ const PNG_FILES = [
   "logo192.png",
   "logo512.png",
   "favicon.png",
+  "character1.png",
+  "character2.png",
+  "character3.png",
 ];
 
 const SVG_FILES_TO_OPTIMIZE = ["Border.svg"];
@@ -41,6 +44,9 @@ const QUALITY_SETTINGS = {
   "logo192.png": 90,
   "logo512.png": 90,
   "favicon.png": 90,
+  "character1.png": 90,
+  "character2.png": 90,
+  "character3.png": 90,
 };
 
 async function checkDependencies() {

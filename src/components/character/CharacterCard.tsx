@@ -26,20 +26,20 @@ export default function CharacterCard({
 
   // display holly with holly_avatar.svg
   if (name === "Holly") {
-    avatarUrl = "/holly_avatar.svg";
+    avatarUrl = "/character2.webp";
   } else if (name === "Thomas") {
-    avatarUrl = "/thomas_avatar.svg";
+    avatarUrl = "/character1.webp";
   } else if (name === "Guest") {
-    avatarUrl = "/guest_avatar.svg";
+    avatarUrl = "/character3.webp";
   }
 
   return (
     <div
-      className="relative bg-[#121216] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 active:scale-100"
+      className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 active:scale-100"
       onClick={handleSelect}
     >
       {/* Dark background under the image */}
-      <div className="absolute inset-0 bg-[#121216] z-0"></div>
+      <div className="absolute inset-0 z-0"></div>
 
       {/* add blur effect to the background */}
       <div className="absolute top-8 right-5 text-right px-2 z-10">

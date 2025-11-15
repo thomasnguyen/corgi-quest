@@ -14,6 +14,7 @@ import type * as lib_aiRecommendationPrompt from "../lib/aiRecommendationPrompt.
 import type * as mutations from "../mutations.js";
 import type * as queries from "../queries.js";
 import type * as seed from "../seed.js";
+import type * as updates from "../updates.js";
 import type * as waitlist from "../waitlist.js";
 
 import type {
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   mutations: typeof mutations;
   queries: typeof queries;
   seed: typeof seed;
+  updates: typeof updates;
   waitlist: typeof waitlist;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
