@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TrainingModeRouteImport } from './routes/training-mode'
 import { Route as ThanksRouteImport } from './routes/thanks'
 import { Route as SelectCharacterRouteImport } from './routes/select-character'
@@ -28,6 +29,11 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrainingModeRoute = TrainingModeRouteImport.update({
   id: '/training-mode',
   path: '/training-mode',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
   '/training-mode': typeof TrainingModeRoute
+  '/waitlist': typeof WaitlistRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
   '/training-mode': typeof TrainingModeRoute
+  '/waitlist': typeof WaitlistRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests': typeof QuestsIndexRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
   '/training-mode': typeof TrainingModeRoute
+  '/waitlist': typeof WaitlistRoute
   '/quests/$questId': typeof QuestsQuestIdRoute
   '/stats/$statType': typeof StatsStatTypeRoute
   '/quests/': typeof QuestsIndexRoute
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/select-character'
     | '/thanks'
     | '/training-mode'
+    | '/waitlist'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/select-character'
     | '/thanks'
     | '/training-mode'
+    | '/waitlist'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/select-character'
     | '/thanks'
     | '/training-mode'
+    | '/waitlist'
     | '/quests/$questId'
     | '/stats/$statType'
     | '/quests/'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   SelectCharacterRoute: typeof SelectCharacterRoute
   ThanksRoute: typeof ThanksRoute
   TrainingModeRoute: typeof TrainingModeRoute
+  WaitlistRoute: typeof WaitlistRoute
   StatsStatTypeRoute: typeof StatsStatTypeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -262,6 +275,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/training-mode': {
       id: '/training-mode'
       path: '/training-mode'
@@ -413,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   SelectCharacterRoute: SelectCharacterRoute,
   ThanksRoute: ThanksRoute,
   TrainingModeRoute: TrainingModeRoute,
+  WaitlistRoute: WaitlistRoute,
   StatsStatTypeRoute: StatsStatTypeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,

@@ -4,7 +4,7 @@ import { v } from "convex/values";
 /**
  * Corgi Quest Database Schema
  *
- * This schema defines 11 tables for the dog training RPG:
+ * This schema defines 12 tables for the dog training RPG:
  * - users: Partners in a household
  * - households: Shared account containing users and a dog
  * - dogs: The pet character being trained
@@ -16,6 +16,7 @@ import { v } from "convex/values";
  * - mood_logs: Dog mood tracking throughout the day
  * - cosmetic_items: Unlockable cosmetic items for dog customization
  * - equipped_items: Currently equipped cosmetic items per dog
+ * - waitlist_users: Waitlist signups with referral tracking
  */
 
 export default defineSchema({
@@ -204,4 +205,16 @@ export default defineSchema({
     mentalPoints: v.number(),
     createdAt: v.number(),
   }),
+
+  // Waitlist users table - waitlist signups with referral tracking
+  waitlist_users: defineTable({
+    email: v.string(),
+    referralCode: v.string(),
+    referredBy: v.optional(v.id("waitlist_users")),
+    referralCount: v.number(),
+    earlyAccess: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_referralCode", ["referralCode"]),
 });
