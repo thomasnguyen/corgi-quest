@@ -1,79 +1,140 @@
-# Corgi Quest
+# **Corgi Quest**
 
-**Level up your dog, level up your relationship.**  
-Corgi Quest is a real‑time multiplayer training game that turns everyday dog training into a shared adventure for couples. You and your partner log activities, complete quests and watch your pup grow stronger—together.
+**A real-time dog training RPG for couples.**
+Train your dog together, stay consistent, and watch your pup level up as you complete activities, quests, and daily goals — all synced instantly across both of your devices.
 
-## Why Corgi Quest?
+---
 
-We built this because training our own corgi, Bumi, felt impossible when life got busy. Instead of skipping sessions, we needed a way to keep each other engaged and accountable. Making training feel like a game gave us a reason to show up, and tracking progress on both phones kept us on the same page:contentReference[oaicite:0]{index=0}.
+## **Why We Built This**
 
-## Key Features
+Training our corgi, Bumi, got tough the moment life got busy. We kept slipping, routines faded, and we always felt like the other person had it handled. Turning training into a shared game fixed that. Seeing progress update in real time on both our phones made it fun again — and kept us accountable.
 
-- **Real‑Time Multiplayer:** When one of you logs a walk or training session, your partner sees the XP and progress instantly—no refreshing or waiting:contentReference[oaicite:1]{index=1}.
-- **Voice Logging:** Speak naturally to record activities. Tell the app what you did and it updates stats automatically, so you don’t have to type:contentReference[oaicite:2]{index=2}.
-- **Four Core Stats:** Intelligence, Physical, Impulse Control and Socialization—each with its own XP bar and level system:contentReference[oaicite:3]{index=3}.
-- **Daily Goals and Streaks:** Hit your daily XP targets for physical and mental activities and build streaks that unlock cosmetic items:contentReference[oaicite:4]{index=4}.
-- **Quests and Recommendations:** Choose from dozens of guided quests with clear instructions, or let the AI suggest activities tailored to your dog’s needs:contentReference[oaicite:5]{index=5}.
-- **Mood Tracking:** Quick mood logs help you see patterns and adjust training accordingly:contentReference[oaicite:6]{index=6}.
+Corgi Quest exists to help couples stay consistent, stay connected, and build a happier dog together.
 
-## Tech Stack
+---
 
-Corgi Quest is built with modern tools to make development and deployment seamless:
+## **What It Does**
 
-- **Frontend:** TanStack Start for file‑based routing:contentReference[oaicite:7]{index=7}.
-- **Backend:** Convex provides a real‑time database and subscriptions:contentReference[oaicite:8]{index=8}.
-- **Hosting:** Netlify and Cloudflare Workers serve the app globally:contentReference[oaicite:9]{index=9}.
-- **Monitoring:** Sentry catches errors before they cause trouble:contentReference[oaicite:10]{index=10}.
-- **AI & Training Tips:** Autumn and Firecrawl power voice commands and dog‑training advice:contentReference[oaicite:11]{index=11}.
+### **• Real-Time Multiplayer**
 
-## Architecture Highlights
+Log a walk or training session and your partner sees XP, stats, and daily goals update instantly — no refresh needed.
 
-- **Real‑Time Data:** Convex subscriptions ensure both partners see updates instantly, with optimistic UI and offline support:contentReference[oaicite:12]{index=12}.
-- **Voice Interface:** OpenAI’s Realtime API parses natural commands and computes XP based on activity type and duration:contentReference[oaicite:13]{index=13}.
-- **Gamification Engine:** XP distribution scales with duration and activity type, daily goals reset at midnight, and streaks reward consistency:contentReference[oaicite:14]{index=14}.
-- **Type Safety & Performance:** Fully typed TypeScript, indexed queries, image preloading and lazy loading keep the app fast:contentReference[oaicite:15]{index=15}.
-- **Training Tips:** Firecrawl fetches and parses expert articles into actionable guidance:contentReference[oaicite:16]{index=16}.
-- **Monitoring:** Sentry reports errors and performance insights:contentReference[oaicite:17]{index=17}.
+### **• Voice Logging**
 
-## Getting Started
+Talk naturally: “30-minute walk, passed two dogs, stayed calm.”
+The app parses it and assigns XP to the right stats.
 
-Want to run Corgi Quest locally? Follow these steps:
+### **• Four Core Dog Stats**
 
-1. **Clone the repo and install dependencies**:
-   ```bash
-   git clone https://github.com/thomasnguyen/corgi-quest.git
-   cd corgi-quest
-   npm install
-````
+* **Intelligence**
+* **Physical**
+* **Impulse Control**
+* **Socialization**
 
-2. **Start Convex locally**:
+Each has its own level, XP curve, and activity history.
 
-   ```bash
-   npx convex dev
-   ```
+### **• Daily Goals + Shared Streaks**
 
-   This initializes your project and generates types.
+Hit physical and mental stimulation targets each day. Stay consistent together to build streaks.
 
-3. **Create a `.env.local` file** with your keys:
+### **• Quests + Recommendations**
 
-   ```env
-   VITE_CONVEX_URL=your-convex-url
-   VITE_OPENAI_API_KEY=your-openai-key
-   ```
+Guided activities to keep training fresh, plus AI-suggested tasks tailored to your dog.
 
-4. **Run the development server**:
+### **• Mood Tracking**
 
-   ```bash
-   npm run dev
-   ```
+Quick mood check-ins help you spot patterns over time.
 
-   The app will be available at `http://localhost:5173`.
+---
 
-## Credits
+## **Tech Stack**
 
-Corgi Quest was designed and built by **Thomas Nguyen** for the TanStack Start Hackathon. Built in just nine days with love and a lot of corgi cuddles. Special thanks to the creators of TanStack Start, Convex, Netlify, Cloudflare, Sentry, Autumn and Firecrawl for the amazing tools.
+### **Frontend**
 
+* **TanStack Start** — full-stack routing, server functions, streaming, and SSR.
+
+### **Backend**
+
+* **Convex** — real-time sync for XP, stats, daily goals, streaks, and the shared activity feed.
+
+### **AI**
+
+* **OpenAI Realtime API** — parses voice logs into structured XP events.
+* **Firecrawl** — fetches and distills dog-training guidance for quest suggestions.
+
+### **Dev + Cloud**
+
+* **Netlify** — deployment of the full app.
+* **Cloudflare** — global performance and edge caching.
+* **Sentry** — error tracking and performance monitoring.
+* **CodeRabbit** — automated PR reviews during development.
+* **Autumn** — integrated as the basis for future monetization flows.
+
+---
+
+## **Architecture Overview**
+
+### **• Real-Time Sync**
+
+Convex subscriptions keep both partners’ screens in perfect sync:
+
+* XP and stat updates
+* Daily goals
+* Activity feed
+* Streaks
+
+Everything updates live, even across two devices side by side.
+
+### **• Voice → XP Pipeline**
+
+1. User speaks.
+2. Audio sent to TanStack server function.
+3. OpenAI Realtime API extracts activity type, duration, and context.
+4. Convex awards XP across multiple stats and updates daily goals instantly.
+
+### **• Gamification Engine**
+
+* XP scales with duration and difficulty.
+* Daily goals reset at midnight.
+* Streaks reward consistency.
+* All progress persists in real time across the household.
+
+---
+
+## **Getting Started**
+
+Clone the repo:
+
+```bash
+git clone https://github.com/thomasnguyen/corgi-quest.git
+cd corgi-quest
+npm install
 ```
 
-This is the full Markdown content of the updated README, complete with headings, features and setup instructions.
+Start Convex:
+
+```bash
+npx convex dev
 ```
+
+Add `.env.local`:
+
+```env
+VITE_CONVEX_URL=your-convex-url
+VITE_OPENAI_API_KEY=your-openai-key
+```
+
+Run the dev server:
+
+```bash
+npm run dev
+```
+
+Visit: `http://localhost:5173`
+
+---
+
+## **About**
+
+Corgi Quest was designed and built by **Thomas Nguyen** for the TanStack Start Hackathon — a nine-day sprint powered by early mornings, late nights, and one very stubborn corgi.
+Huge thanks to the creators of TanStack Start, Convex, Netlify, Cloudflare, Sentry, Autumn, Firecrawl, and CodeRabbit for the incredible tools.
