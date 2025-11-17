@@ -9,7 +9,6 @@ import { useSelectedCharacter } from "../../hooks/useSelectedCharacter";
 import AppExplanation from "./AppExplanation";
 import { useWeeklySummary } from "../../hooks/useWeeklySummary";
 import WeeklySummaryModal from "../summary/WeeklySummaryModal";
-import AnimationDebugPanel from "../animations/AnimationDebugPanel";
 import { useConfetti } from "../../hooks/useConfetti";
 import { useAnimationTrigger } from "../../hooks/useAnimationTrigger";
 
@@ -48,8 +47,7 @@ export default function Layout({ children }: LayoutProps) {
   );
 
   // Animation debug state
-  const [isRealTimeAnimationsEnabled, setIsRealTimeAnimationsEnabled] =
-    useState(true);
+  const [isRealTimeAnimationsEnabled] = useState(true);
   const [debugMode, setDebugMode] = useState(false);
 
   // Check for query parameter to force show modal (for testing)
@@ -482,13 +480,6 @@ export default function Layout({ children }: LayoutProps) {
           weekEndDate={weekEndDate}
         />
       )}
-
-      {/* Animation debug panel */}
-      <AnimationDebugPanel
-        onTriggerAnimation={handleTriggerAnimation}
-        isRealTimeEnabled={isRealTimeAnimationsEnabled}
-        onToggleRealTime={setIsRealTimeAnimationsEnabled}
-      />
     </div>
   );
 }
