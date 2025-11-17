@@ -1,5 +1,8 @@
 # **Corgi Quest**
 
+<img width="1856" height="1004" alt="Screenshot 2025-11-16 at 11 08 26 PM" src="https://github.com/user-attachments/assets/5c601e7b-19e9-4e22-bc23-37b1e976a82c" />
+
+
 **A real-time dog training RPG for couples.**
 Train your dog together, stay consistent, and watch your pup level up as you complete activities, quests, and daily goals — all synced instantly across both of your devices.
 
