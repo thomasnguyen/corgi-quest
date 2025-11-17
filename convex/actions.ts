@@ -87,11 +87,11 @@ export const generateSessionToken = action(async () => {
  * Generate AI recommendations for a specific week date range
  * Used for weekly summary to provide personalized recommendations based on the week's data
  */
-export const generateWeeklyRecommendations = action({
+export const generateRecommendations = action({
   args: {
     dogId: v.id("dogs"),
-    weekStartDate: v.string(), // YYYY-MM-DD
-    weekEndDate: v.string(), // YYYY-MM-DD
+    weekStartDate: v.optional(v.string()), // YYYY-MM-DD
+    weekEndDate: v.optional(v.string()), // YYYY-MM-DD
   },
   handler: async (ctx, args) => {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -103,10 +103,19 @@ export const generateWeeklyRecommendations = action({
     }
 
     try {
-      // Convert dates to timestamps
-      const startTime = new Date(args.weekStartDate).getTime();
-      const endTime =
-        new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of day
+      // Convert dates to timestamps (default to last 7 days if not provided)
+      let startTime: number;
+      let endTime: number;
+
+      if (args.weekStartDate && args.weekEndDate) {
+        startTime = new Date(args.weekStartDate).getTime();
+        endTime = new Date(args.weekEndDate).getTime() + 24 * 60 * 60 * 1000; // End of day
+      } else {
+        // Default to last 7 days
+        const now = new Date();
+        endTime = now.getTime() + 24 * 60 * 60 * 1000; // End of today
+        startTime = now.getTime() - 7 * 24 * 60 * 60 * 1000; // 7 days ago
+      }
 
       // Query mood logs for the week
       const moodLogs = await ctx.runQuery(api.queries.getMoodFeed, {
