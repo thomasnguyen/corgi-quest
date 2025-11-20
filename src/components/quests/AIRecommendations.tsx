@@ -16,6 +16,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { fetchTrainingTips } from "@/routes/api/fetch-tips";
+import { useActiveDog } from "../../hooks/useActiveDog";
 
 interface Recommendation {
   activityName: string;
@@ -76,8 +77,8 @@ export default function AIRecommendations() {
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] =
     useState(true);
 
-  // Get first dog
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
 
   // Update relative time every minute
   useEffect(() => {
@@ -91,13 +92,13 @@ export default function AIRecommendations() {
   // Get cached recommendations for today
   const cachedData = useQuery(
     api.queries.getCachedRecommendations,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get cached Firecrawl tips for today
   const cachedTipsData = useQuery(
     api.queries.getCachedFirecrawlTips,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get the action and mutation
@@ -109,7 +110,7 @@ export default function AIRecommendations() {
 
   // Load cached recommendations (only generate if explicitly requested via refresh)
   useEffect(() => {
-    if (!firstDog) return;
+    if (!activeDogId) return;
 
     // If we have cached data, use it
     if (cachedData) {
@@ -118,11 +119,11 @@ export default function AIRecommendations() {
       setError(null);
     }
     // Don't auto-generate if no cache exists - user must click refresh
-  }, [firstDog, cachedData]);
+  }, [activeDogId, cachedData]);
 
   // Load cached Firecrawl tips (only fetch if explicitly requested via button)
   useEffect(() => {
-    if (!firstDog) return;
+    if (!activeDogId) return;
 
     // If we have cached tips, use them
     if (cachedTipsData) {
@@ -131,16 +132,16 @@ export default function AIRecommendations() {
       setTipsError(null);
     }
     // Don't auto-fetch if no cache exists - user must click button
-  }, [firstDog, cachedTipsData]);
+  }, [activeDogId, cachedTipsData]);
 
   const loadRecommendations = async () => {
-    if (!firstDog) return;
+    if (!activeDogId) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await generateRecommendations({ dogId: firstDog._id });
+      const result = await generateRecommendations({ dogId: activeDogId });
 
       // Handle empty results
       if (!result || result.length === 0) {
@@ -157,7 +158,7 @@ export default function AIRecommendations() {
 
       // Cache the recommendations
       await cacheRecommendations({
-        dogId: firstDog._id,
+        dogId: activeDogId,
         recommendations: JSON.stringify(result),
       });
     } catch (err) {
@@ -205,7 +206,7 @@ export default function AIRecommendations() {
   };
 
   const handleFetchTips = async () => {
-    if (!firstDog) return;
+    if (!activeDogId) return;
 
     setIsLoadingTips(true);
     setTipsError(null);
@@ -222,7 +223,7 @@ export default function AIRecommendations() {
 
       // Cache the tips
       await cacheFirecrawlTips({
-        dogId: firstDog._id,
+        dogId: activeDogId,
         tips: JSON.stringify(tips),
       });
     } catch (err) {

@@ -6,6 +6,7 @@ import MoodFeedItem from "../components/mood/MoodFeedItem";
 import TodaysBreakdown from "../components/activity/TodaysBreakdown";
 import { useMemo } from "react";
 import { useStaleQuery } from "../hooks/useStaleQuery";
+import { useActiveDog } from "../hooks/useActiveDog";
 
 export const Route = createFileRoute("/activity")({
   component: ActivityPage,
@@ -35,31 +36,37 @@ type FeedItem =
     };
 
 function ActivityPage() {
-  // Get the first dog (demo purposes) - use stale query to show cached data
-  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
+
+  // Get dog to access householdId
+  const dogProfile = useStaleQuery(
+    api.queries.getDogProfile,
+    activeDogId ? { dogId: activeDogId } : "skip"
+  );
 
   // Get activity feed - use stale query to show cached data
   const activityFeed = useStaleQuery(
     api.queries.getActivityFeed,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get mood feed - use stale query to show cached data
   const moodFeed = useStaleQuery(
     api.queries.getMoodFeed,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get today's activities for breakdown - use stale query
   const todaysActivities = useStaleQuery(
     api.queries.getTodaysActivities,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get household users for filter - use stale query
   const householdUsers = useStaleQuery(
     api.queries.getHouseholdUsers,
-    firstDog ? { householdId: firstDog.householdId } : "skip"
+    dogProfile?.dog ? { householdId: dogProfile.dog.householdId } : "skip"
   );
 
   // Merge and sort activities and mood logs by timestamp
@@ -93,7 +100,8 @@ function ActivityPage() {
 
   // Loading state
   if (
-    firstDog === undefined ||
+    !activeDogId ||
+    dogProfile === undefined ||
     activityFeed === undefined ||
     moodFeed === undefined ||
     todaysActivities === undefined ||

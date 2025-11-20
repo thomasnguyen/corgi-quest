@@ -14,6 +14,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { useToast } from "../../contexts/ToastContext";
 import { useNavigate } from "@tanstack/react-router";
 import { Mic, MicOff, Eye, X } from "lucide-react";
+import { useActiveDog } from "../../hooks/useActiveDog";
 
 /**
  * Get timestamp for logging
@@ -231,9 +232,9 @@ export function RealtimeVoiceInterface({
   // Track when listening started to enforce minimum duration
   const listeningStartTimeRef = useRef<number | null>(null);
 
-  // Get dog ID for activity logging
-  const firstDog = useQuery(api.queries.getFirstDog);
-  const dogId = firstDog?._id;
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
+  const dogId = activeDogId;
 
   // Use selected user ID from props
   const userId = selectedUserId;
@@ -1161,8 +1162,8 @@ export function RealtimeVoiceInterface({
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
                 <p className="font-medium mb-1">Microphone Access Required</p>
                 <p>
-                  Please enable microphone permissions in your browser settings to
-                  use voice logging.
+                  Please enable microphone permissions in your browser settings
+                  to use voice logging.
                 </p>
               </div>
             )}
@@ -1263,7 +1264,11 @@ export function RealtimeVoiceInterface({
                     className={`text-sm font-medium flex items-center gap-2 ${conversationStateInfo.color}`}
                   >
                     {conversationState === "listening" && (
-                      <Mic size={16} strokeWidth={2} className="animate-pulse" />
+                      <Mic
+                        size={16}
+                        strokeWidth={2}
+                        className="animate-pulse"
+                      />
                     )}
                     {conversationState === "speaking" && (
                       <MicOff size={16} strokeWidth={2} />

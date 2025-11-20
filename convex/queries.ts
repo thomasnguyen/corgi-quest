@@ -711,7 +711,7 @@ export const getAllCosmeticItems = query({
 /**
  * Query to get currently equipped item for a dog
  * Returns the equipped item with full item details, or null if nothing equipped
- * 
+ *
  * Image URL logic:
  * - Moon items: generatedImageUrl will be empty string (use local mage_bg/mage_avatar)
  * - Non-moon items: generatedImageUrl will be the Convex storage URL (compressed WebP)
@@ -1067,6 +1067,45 @@ export const checkCachedImage = query({
       cached: false,
       imageUrl: null,
     };
+  },
+});
+
+/**
+ * Query to get all dogs in a household
+ * Returns dogs ordered by creation date (newest first)
+ * Used for multi-dog management and dog selection menu
+ */
+export const getHouseholdDogs = query({
+  args: {
+    householdId: v.id("households"),
+  },
+  handler: async (ctx, args) => {
+    const dogs = await ctx.db
+      .query("dogs")
+      .withIndex("by_household", (q) => q.eq("householdId", args.householdId))
+      .order("desc")
+      .collect();
+
+    return dogs;
+  },
+});
+
+/**
+ * Query to get all quests for a specific dog
+ * Returns quests linked to the dog ID
+ * Used for dog-specific quest lists in multi-dog households
+ */
+export const getDogQuests = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    const quests = await ctx.db
+      .query("quests")
+      .withIndex("by_dog", (q) => q.eq("dogId", args.dogId))
+      .collect();
+
+    return quests;
   },
 });
 

@@ -19,6 +19,7 @@ import { useOpenAIRealtime } from "@/hooks/useOpenAIRealtime";
 import { RealtimeMessage } from "@/hooks/useOpenAIRealtime";
 import { TRAINING_MODE_FUNCTION_DEFINITION } from "@/lib/trainingModeInstructions";
 import { TRAINING_MODE_SYSTEM_INSTRUCTIONS } from "@/lib/trainingModeInstructions";
+import { useActiveDog } from "../../hooks/useActiveDog";
 
 interface SaveActivityParams {
   activityName: string;
@@ -44,8 +45,9 @@ export function TrainingModeInterface() {
   const [displayTranscript, setDisplayTranscript] = useState("");
   const [isProcessingWithOpenAI, setIsProcessingWithOpenAI] = useState(false);
 
-  const firstDog = useQuery(api.queries.getFirstDog);
-  const dogId = firstDog?._id;
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
+  const dogId = activeDogId;
 
   const logActivityMutation = useMutation(api.mutations.logActivity);
 

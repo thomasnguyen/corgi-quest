@@ -783,3 +783,111 @@ export const addGuestUser = mutation({
     };
   },
 });
+
+/**
+ * Create Dog with Stats Mutation
+ *
+ * Creates a complete dog profile with:
+ * - Dog record with breed and traits
+ * - Four stat records (PHY, INT, IMP, SOC) with initial emphasis
+ * - Personalized starter quest linked to the dog
+ *
+ * Used during AI-powered onboarding flow
+ */
+export const createDogWithStats = mutation({
+  args: {
+    householdId: v.id("households"),
+    name: v.string(),
+    breed: v.string(),
+    traits: v.array(v.string()),
+    initialStatEmphasis: v.object({
+      PHY: v.number(),
+      INT: v.number(),
+      IMP: v.number(),
+      SOC: v.number(),
+    }),
+    starterQuest: v.object({
+      name: v.string(),
+      description: v.string(),
+      targetStat: v.union(
+        v.literal("PHY"),
+        v.literal("INT"),
+        v.literal("IMP"),
+        v.literal("SOC")
+      ),
+      reps: v.number(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Step 1: Create dog record
+    const dogId = await ctx.db.insert("dogs", {
+      name: args.name,
+      householdId: args.householdId,
+      breed: args.breed,
+      traits: args.traits,
+      overallLevel: 1,
+      overallXp: 0,
+      xpToNextLevel: 100,
+      createdAt: now,
+    });
+
+    // Step 2: Create four stat records with initial emphasis
+    const statTypes = ["PHY", "INT", "IMP", "SOC"] as const;
+    for (const statType of statTypes) {
+      await ctx.db.insert("dog_stats", {
+        dogId,
+        statType,
+        level: 1,
+        xp: args.initialStatEmphasis[statType], // Slight head start based on traits
+        xpToNextLevel: 100,
+      });
+    }
+
+    // Step 3: Create starter quest linked to dog
+    const statGains = [
+      {
+        statType: args.starterQuest.targetStat,
+        xpAmount: 50,
+      },
+    ];
+
+    const questId = await ctx.db.insert("quests", {
+      dogId,
+      name: args.starterQuest.name,
+      description: args.starterQuest.description,
+      durationMinutes: 10,
+      statGains,
+      physicalPoints: args.starterQuest.targetStat === "PHY" ? 20 : 10,
+      mentalPoints: args.starterQuest.targetStat === "INT" ? 20 : 10,
+      targetReps: args.starterQuest.reps,
+      createdAt: now,
+    });
+
+    // Step 4: Create initial daily goal for today
+    const today = new Date().toISOString().split("T")[0];
+    await ctx.db.insert("daily_goals", {
+      dogId,
+      date: today,
+      physicalPoints: 0,
+      physicalGoal: 50,
+      mentalPoints: 0,
+      mentalGoal: 30,
+    });
+
+    // Step 5: Create initial streak record
+    await ctx.db.insert("streaks", {
+      dogId,
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActivityDate: today,
+    });
+
+    return {
+      success: true,
+      dogId,
+      questId,
+    };
+  },
+});

@@ -9,6 +9,7 @@ import { useStaleQuery } from "../hooks/useStaleQuery";
 import DailyXpChart from "../components/stats/DailyXpChart";
 import ActivityFrequencyChart from "../components/stats/ActivityFrequencyChart";
 import WeeklyXpChart from "../components/stats/WeeklyXpChart";
+import { useActiveDog } from "../hooks/useActiveDog";
 
 export const Route = createFileRoute("/stats/$statType")({
   component: StatDetailPage,
@@ -54,13 +55,15 @@ function StatDetailPage() {
   const { statType } = Route.useParams();
   const navigate = useNavigate();
 
-  // Get the first dog (demo purposes) - use stale query to show cached data
-  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
 
   // Get stat detail with recent activities - use stale query
   const statDetail = useStaleQuery(
     api.queries.getStatDetail,
-    firstDog ? { dogId: firstDog._id, statType: statType as StatType } : "skip"
+    activeDogId
+      ? { dogId: activeDogId, statType: statType as StatType }
+      : "skip"
   );
 
   // Get potential XP for an activity

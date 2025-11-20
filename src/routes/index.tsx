@@ -7,6 +7,7 @@ import ActivityButtons from "../components/layout/ActivityButtons";
 import TopResourceBar from "../components/layout/TopResourceBar";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { useStaleQuery } from "../hooks/useStaleQuery";
+import { useActiveDog } from "../hooks/useActiveDog";
 
 // Preload background images for faster loading
 function preloadImage(src: string) {
@@ -35,19 +36,19 @@ function OverviewPage() {
     }
   }, [navigate]);
 
-  // Get the first dog (demo purposes) - use stale query to show cached data
-  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
 
   // Get dog profile with stats - use stale query to show cached data
   const dogProfile = useStaleQuery(
     api.queries.getDogProfile,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Get currently equipped item to check if moon item is equipped - use stale query
   const equippedItem = useStaleQuery(
     api.queries.getEquippedItem,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Detect mobile for responsive backgrounds
@@ -97,11 +98,7 @@ function OverviewPage() {
 
   // Loading state - only show if we've never loaded data before
   // With useStaleQuery, we'll have stale data on subsequent visits
-  if (
-    firstDog === undefined ||
-    dogProfile === undefined ||
-    equippedItem === undefined
-  ) {
+  if (dogProfile === undefined || equippedItem === undefined) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
@@ -114,14 +111,14 @@ function OverviewPage() {
     );
   }
 
-  // No dog found
-  if (!firstDog || !dogProfile) {
+  // No dog found or no active dog selected
+  if (!activeDogId || !dogProfile) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
           <div className="text-center px-6">
             <p className="text-[#f9dca0] text-sm">
-              No dog found. Run the seed mutation to create demo data.
+              No active dog selected. Please select a dog from the menu.
             </p>
           </div>
         </div>

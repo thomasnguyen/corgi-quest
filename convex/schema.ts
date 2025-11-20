@@ -47,6 +47,8 @@ export default defineSchema({
     overallXp: v.number(),
     xpToNextLevel: v.number(),
     photoUrl: v.optional(v.string()),
+    breed: v.optional(v.string()), // Dog breed (e.g., "Golden Retriever", "Corgi")
+    traits: v.optional(v.array(v.string())), // Personality traits (e.g., ["friendly", "reactive", "distractible"])
     createdAt: v.number(),
   }).index("by_household", ["householdId"]),
 
@@ -188,6 +190,7 @@ export default defineSchema({
 
   // Quests table - suggested daily activities
   quests: defineTable({
+    dogId: v.optional(v.id("dogs")), // Link quest to specific dog (optional for backward compatibility)
     name: v.string(),
     description: v.string(),
     durationMinutes: v.number(),
@@ -204,8 +207,9 @@ export default defineSchema({
     ),
     physicalPoints: v.number(),
     mentalPoints: v.number(),
+    targetReps: v.optional(v.number()), // Target number of repetitions for rep-based quests
     createdAt: v.number(),
-  }),
+  }).index("by_dog", ["dogId"]),
 
   // Waitlist users table - waitlist signups with referral tracking
   waitlist_users: defineTable({

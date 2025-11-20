@@ -11,6 +11,7 @@ import { useWeeklySummary } from "../../hooks/useWeeklySummary";
 import WeeklySummaryModal from "../summary/WeeklySummaryModal";
 import { useConfetti } from "../../hooks/useConfetti";
 import { useAnimationTrigger } from "../../hooks/useAnimationTrigger";
+import { useActiveDog } from "../../hooks/useActiveDog";
 
 interface LayoutProps {
   children: ReactNode;
@@ -32,8 +33,8 @@ export default function Layout({ children }: LayoutProps) {
   // Get selected character
   const { selectedCharacterId } = useSelectedCharacter();
 
-  // Get the first dog (demo purposes)
-  const firstDog = useQuery(api.queries.getFirstDog);
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
 
   // Confetti hook for level-up animations (Subtask 7.2)
   const { triggerOverallConfetti } = useConfetti();
@@ -43,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
 
   // Check if we should show the weekly summary modal
   const { shouldShowModal, weekStartDate, weekEndDate } = useWeeklySummary(
-    firstDog?._id
+    activeDogId || undefined
   );
 
   // Animation debug state
@@ -56,27 +57,27 @@ export default function Layout({ children }: LayoutProps) {
       const params = new URLSearchParams(window.location.search);
       const forceShow = params.get("showWeeklySummary") === "true";
       if (forceShow) {
-        if (firstDog === null) {
-          console.error("Cannot show weekly summary: No dog found in database");
+        if (!activeDogId) {
+          console.error("Cannot show weekly summary: No active dog selected");
           return;
         }
-        if (firstDog && weekStartDate && weekEndDate) {
+        if (activeDogId && weekStartDate && weekEndDate) {
           console.log("Opening weekly summary modal via URL parameter", {
-            firstDog: firstDog._id,
+            activeDogId,
             weekStartDate,
             weekEndDate,
           });
           setIsWeeklySummaryOpen(true);
         } else {
           console.log("Waiting for data to load...", {
-            firstDog: firstDog ? "loaded" : "loading",
+            activeDogId: activeDogId ? "loaded" : "loading",
             weekStartDate,
             weekEndDate,
           });
         }
       }
     }
-  }, [firstDog, weekStartDate, weekEndDate]);
+  }, [activeDogId, weekStartDate, weekEndDate]);
 
   // URL parameter testing mode - parse ?testAnimation parameter
   // Supports: floatingXP, pulse, confetti, levelUp, partnerActivity
@@ -124,13 +125,13 @@ export default function Layout({ children }: LayoutProps) {
   // Subscribe to activity feed for real-time updates
   const activityFeed = useQuery(
     api.queries.getActivityFeed,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Subscribe to dog profile to detect level-ups
   const dogProfile = useQuery(
     api.queries.getDogProfile,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Detect overall level changes and trigger confetti (Subtask 7.1)
@@ -157,12 +158,12 @@ export default function Layout({ children }: LayoutProps) {
   // Subscribe to mood feed for real-time mood updates
   const moodFeed = useQuery(
     api.queries.getMoodFeed,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Mood reminder hook
   const { shouldShowReminder, dismissReminder } = useMoodReminder(
-    firstDog?._id
+    activeDogId || undefined
   );
 
   // Track previous activity IDs to detect new activities
@@ -462,18 +463,18 @@ export default function Layout({ children }: LayoutProps) {
       <BottomNav />
 
       {/* Mood reminder popup */}
-      {shouldShowReminder && firstDog && selectedCharacterId && (
+      {shouldShowReminder && activeDogId && selectedCharacterId && (
         <MoodReminderPopup
-          dogId={firstDog._id}
+          dogId={activeDogId}
           userId={selectedCharacterId}
           onDismiss={dismissReminder}
         />
       )}
 
       {/* Weekly summary modal */}
-      {isWeeklySummaryOpen && firstDog && weekStartDate && weekEndDate && (
+      {isWeeklySummaryOpen && activeDogId && weekStartDate && weekEndDate && (
         <WeeklySummaryModal
-          dogId={firstDog._id}
+          dogId={activeDogId}
           isOpen={isWeeklySummaryOpen}
           onClose={() => setIsWeeklySummaryOpen(false)}
           weekStartDate={weekStartDate}

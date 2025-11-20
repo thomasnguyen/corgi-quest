@@ -25,6 +25,7 @@ import {
   Heart,
 } from "lucide-react";
 import { useStaleQuery } from "../hooks/useStaleQuery";
+import { useActiveDog } from "../hooks/useActiveDog";
 
 export const Route = createFileRoute("/quests/")({
   component: QuestsPage,
@@ -385,17 +386,17 @@ function QuestsPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<"all" | "ai">("all");
 
-  // Get first dog - use stale query to show cached data
-  const firstDog = useStaleQuery(api.queries.getFirstDog, {});
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
 
   // Subscribe to activity feed for real-time quest completion detection - use stale query
   const activities = useStaleQuery(
     api.queries.getActivityFeed,
-    firstDog ? { dogId: firstDog._id } : "skip"
+    activeDogId ? { dogId: activeDogId } : "skip"
   );
 
   // Loading state
-  if (firstDog === undefined || activities === undefined) {
+  if (!activeDogId || activities === undefined) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">

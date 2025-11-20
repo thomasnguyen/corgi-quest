@@ -15,6 +15,7 @@ import { ListeningIndicator } from "./ListeningIndicator";
 import { LastLoggedActivity } from "./LastLoggedActivity";
 import { TodaysSummary } from "./TodaysSummary";
 import { StopButton } from "./StopButton";
+import { useActiveDog } from "../../hooks/useActiveDog";
 
 export function TrainingModeSimple() {
   const navigate = useNavigate();
@@ -29,8 +30,9 @@ export function TrainingModeSimple() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const firstDog = useQuery(api.queries.getFirstDog);
-  const dogId = firstDog?._id;
+  // Get active dog ID from useActiveDog hook
+  const { activeDogId } = useActiveDog();
+  const dogId = activeDogId;
 
   // Get all household users to find a valid one
   const householdUsers = useQuery(api.queries.getAllHouseholdUsers);
