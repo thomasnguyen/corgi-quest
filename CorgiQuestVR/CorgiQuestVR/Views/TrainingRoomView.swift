@@ -24,9 +24,22 @@ struct TrainingRoomView: View {
     private let repMarkDebounceInterval: TimeInterval = 0.5
     
     var body: some View {
-        RealityView { content in
-            setupEnvironment(content: content)
-            setupPedestal(content: content, dogName: viewModel.dogName)
+        ZStack {
+            // 3D Environment with debug objects
+            RealityView { content in
+                setupEnvironment(content: content)
+                setupPedestal(content: content, dogName: viewModel.dogName)
+            }
+
+            // Floating UI Panels overlay
+            FloatingPanelsView(
+                dogName: viewModel.dogName,
+                stats: viewModel.stats,
+                goals: viewModel.goals,
+                activities: viewModel.activities,
+                weeklyXP: viewModel.weeklyXP,
+                sessionState: $sessionState
+            )
         }
         .onAppear {
             // Fetch initial data and start polling
