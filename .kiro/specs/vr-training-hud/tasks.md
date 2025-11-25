@@ -25,8 +25,8 @@
   - **Property 5: Voice log round trip**
   - **Validates: Requirements 6.1, 9.2**
 
-- [ ] 2. Create visionOS app project structure
-- [ ] 2.1 Initialize visionOS app in Xcode (separate directory)
+- [-] 2. Create visionOS app project structure
+- [x] 2.1 Initialize visionOS app in Xcode (separate directory)
   - Create `visionos-app/` directory in mono-repo root
   - Create new visionOS app project in Xcode within that directory
   - Set minimum deployment target to visionOS 1.0
@@ -35,7 +35,7 @@
   - Add README.md explaining how to open and run the visionOS app
   - _Requirements: 1.1_
 
-- [ ] 2.2 Define Swift data models
+- [x] 2.2 Define Swift data models
   - Create StatData struct with Identifiable
   - Create GoalData struct
   - Create ActivityData struct
@@ -43,22 +43,22 @@
   - Create SessionState enum and SessionData struct
   - _Requirements: 2.2, 2.3, 2.4, 4.2_
 
-- [ ] 2.3 Create NetworkService for API calls
+- [x] 2.3 Create NetworkService for API calls
   - Implement fetchVRStatus() using URLSession
   - Implement submitVoiceLog() using URLSession
   - Add error handling and retry logic
   - Configure request timeouts (5 seconds)
   - _Requirements: 7.1, 6.1_
 
-- [ ] 3. Build immersive VR training room environment
-- [ ] 3.1 Create TrainingRoomView with RealityView
+- [x] 3. Build immersive VR training room environment
+- [x] 3.1 Create TrainingRoomView with RealityView
   - Set up RealityView container
   - Implement setupEnvironment() for room and lighting
   - Implement setupPedestal() for central platform
   - Add dog name floating text above pedestal
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 3.2 Implement FloatingPanelsView layout
+- [x] 3.2 Implement FloatingPanelsView layout
   - Create ZStack with positioned panels
   - Position StatOrbsPanel at left (-400, 0, -600)
   - Position GoalsPanel at top (0, 300, -600)
