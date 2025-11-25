@@ -47,6 +47,13 @@ struct ContentView: View {
             .buttonStyle(.plain)
         }
         .padding()
+        .task {
+            // Auto-launch immersive space on startup
+            if !isImmersiveSpaceShown {
+                await openImmersiveSpace(id: "TrainingRoom")
+                isImmersiveSpaceShown = true
+            }
+        }
     }
 }
 
