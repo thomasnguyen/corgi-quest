@@ -165,14 +165,32 @@ struct GoalsPanel: View {
                 .frame(height: 8)
             }
             
-            // Streak
-            HStack {
+            // Streak - PROMINENT DISPLAY (Skyrim-style)
+            HStack(spacing: 12) {
                 Text("🔥")
-                    .font(.title3)
-                Text("\(goals.streak) day streak")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 40))
+                    .shadow(color: .orange, radius: 10)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(goals.streak) Day Streak!")
+                        .font(.system(size: 20, weight: .bold, design: .serif))
+                        .foregroundColor(.orange)
+                    Text("Keep Training!")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.yellow)
+                }
+                Text("🔥")
+                    .font(.system(size: 40))
+                    .shadow(color: .orange, radius: 10)
             }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.orange.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.orange, lineWidth: 2)
+                    )
+            )
         }
         .padding(30)
         .frame(width: 300)
@@ -298,6 +316,52 @@ struct WeeklyChartPanel: View {
         .frame(width: 400)
         .background(.ultraThinMaterial)
         .cornerRadius(20)
+    }
+}
+
+/// Displays dog name and level - Skyrim-style compass bar
+struct DogInfoPanel: View {
+    let dogName: String
+    let level: Int
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Dog name in large fantasy-style font
+            Text(dogName)
+                .font(.system(size: 32, weight: .bold, design: .serif))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+
+            // Level display with ornate styling
+            HStack(spacing: 8) {
+                Image(systemName: "shield.fill")
+                    .foregroundColor(.yellow)
+                Text("Level \(level)")
+                    .font(.system(size: 24, weight: .semibold, design: .serif))
+                    .foregroundColor(.yellow)
+                Image(systemName: "shield.fill")
+                    .foregroundColor(.yellow)
+            }
+            .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+        }
+        .padding(.vertical, 20)
+        .padding(.horizontal, 40)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.9),
+                    Color(red: 0.3, green: 0.25, blue: 0.2).opacity(0.9)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.yellow.opacity(0.6), lineWidth: 2)
+        )
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
     }
 }
 

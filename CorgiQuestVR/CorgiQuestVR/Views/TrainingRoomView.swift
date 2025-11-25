@@ -62,6 +62,13 @@ struct TrainingRoomView: View {
                 chartAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
                 headAnchor.addChild(chartAttachment)
             }
+
+            // Dog Name/Level panel - top center (like Skyrim compass bar)
+            if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
+                dogInfoAttachment.position = [0, 0.5, -1.2] // Top center
+                dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
+                headAnchor.addChild(dogInfoAttachment)
+            }
         } attachments: {
             // Define attachments for each panel
             if let goals = viewModel.goals {
@@ -84,6 +91,11 @@ struct TrainingRoomView: View {
             Attachment(id: "chart") {
                 WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
                     .frame(width: 500)
+            }
+
+            Attachment(id: "dogInfo") {
+                DogInfoPanel(dogName: viewModel.dogName, level: viewModel.dogLevel)
+                    .frame(width: 450)
             }
         }
         .onAppear {
@@ -199,55 +211,58 @@ struct TrainingRoomView: View {
     
     // MARK: - Environment Setup
     
-    /// Creates the stylized room with soft neutral lighting
+    /// Creates a Skyrim-inspired training hall with warm torchlight
     private func setupEnvironment(content: RealityViewContent) {
-        // DEBUG: Add HUGE bright spheres to test visibility
-        // Red sphere right in front
-        let redSphere = ModelEntity(
-            mesh: .generateSphere(radius: 0.5),
-            materials: [SimpleMaterial(color: .red, isMetallic: false)]
-        )
-        redSphere.position = [0, 1.5, -1.5] // Eye level, 1.5m in front
-        content.add(redSphere)
-
-        // Blue sphere to the left
-        let blueSphere = ModelEntity(
-            mesh: .generateSphere(radius: 0.4),
-            materials: [SimpleMaterial(color: .blue, isMetallic: false)]
-        )
-        blueSphere.position = [-1, 1.5, -2] // Left side
-        content.add(blueSphere)
-
-        // Green sphere to the right
-        let greenSphere = ModelEntity(
-            mesh: .generateSphere(radius: 0.4),
-            materials: [SimpleMaterial(color: .green, isMetallic: false)]
-        )
-        greenSphere.position = [1, 1.5, -2] // Right side
-        content.add(greenSphere)
-
-        // Yellow cube above
-        let yellowCube = ModelEntity(
-            mesh: .generateBox(size: 0.4),
-            materials: [SimpleMaterial(color: .yellow, isMetallic: false)]
-        )
-        yellowCube.position = [0, 2.2, -2] // Above
-        content.add(yellowCube)
-
-        // Very bright lighting
-        let ambientLight = PointLight()
-        ambientLight.light.intensity = 10000
-        ambientLight.light.color = .white
-        ambientLight.position = [0, 2, 0]
-        content.add(ambientLight)
-
-        // Create bright white floor plane
+        // Stone floor (like Skyrim dungeons/halls)
         let floorMesh = MeshResource.generatePlane(width: 20, depth: 20)
         var floorMaterial = SimpleMaterial()
-        floorMaterial.color = .init(tint: .white.withAlphaComponent(0.5))
+        floorMaterial.color = .init(tint: UIColor(red: 0.4, green: 0.35, blue: 0.3, alpha: 1.0)) // Stone color
+        floorMaterial.roughness = 0.8 // Rough stone texture
         let floor = ModelEntity(mesh: floorMesh, materials: [floorMaterial])
         floor.position = [0, 0, 0]
         content.add(floor)
+
+        // Warm ambient lighting (like torchlight)
+        let ambientLight = PointLight()
+        ambientLight.light.intensity = 800
+        ambientLight.light.color = .init(red: 1.0, green: 0.8, blue: 0.6, alpha: 1.0) // Warm orange glow
+        ambientLight.position = [0, 2.5, 0]
+        content.add(ambientLight)
+
+        // Torch-like point lights around the room
+        let torchPositions: [SIMD3<Float>] = [
+            [-3, 2, -3], // Front left
+            [3, 2, -3],  // Front right
+            [-3, 2, 3],  // Back left
+            [3, 2, 3]    // Back right
+        ]
+
+        for position in torchPositions {
+            let torch = PointLight()
+            torch.light.intensity = 600
+            torch.light.color = .init(red: 1.0, green: 0.7, blue: 0.4, alpha: 1.0) // Flickering torch color
+            torch.light.attenuationRadius = 5.0
+            torch.position = position
+            content.add(torch)
+        }
+
+        // Stone pillars (medieval hall aesthetic)
+        let pillarPositions: [SIMD3<Float>] = [
+            [-2.5, 0, -2],
+            [2.5, 0, -2],
+            [-2.5, 0, 2],
+            [2.5, 0, 2]
+        ]
+
+        for position in pillarPositions {
+            let pillarMesh = MeshResource.generateCylinder(height: 3.0, radius: 0.2)
+            var pillarMaterial = SimpleMaterial()
+            pillarMaterial.color = .init(tint: UIColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 1.0))
+            pillarMaterial.roughness = 0.9
+            let pillar = ModelEntity(mesh: pillarMesh, materials: [pillarMaterial])
+            pillar.position = position
+            content.add(pillar)
+        }
     }
     
     /// Creates the central circular platform with dog name floating above
