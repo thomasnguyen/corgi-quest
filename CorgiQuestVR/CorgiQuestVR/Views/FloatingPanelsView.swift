@@ -17,7 +17,9 @@ struct FloatingPanelsView: View {
     let activities: [ActivityData]
     let weeklyXP: [DayXP]
     @Binding var sessionState: SessionState
-    
+    let onMarkRep: () -> Void
+    let onEndSession: () -> Void
+
     var body: some View {
         ZStack {
             // Left Panel: Stat Orbs
@@ -40,8 +42,12 @@ struct FloatingPanelsView: View {
 
             // Center Panel: Session (conditional)
             if case .active(let sessionData) = sessionState {
-                SessionPanel(sessionData: sessionData)
-                    .offset(x: 0, y: 0)
+                SessionPanel(
+                    sessionData: sessionData,
+                    onMarkRep: onMarkRep,
+                    onEndSession: onEndSession
+                )
+                .offset(x: 0, y: 0)
             }
         }
     }
@@ -708,6 +714,8 @@ struct SessionPanel: View {
             DayXP(day: "Sat", total: 90, date: Date().addingTimeInterval(-1 * 86400)),
             DayXP(day: "Sun", total: 40, date: Date())
         ],
-        sessionState: .constant(.idle)
+        sessionState: .constant(.idle),
+        onMarkRep: { print("Mark rep pressed") },
+        onEndSession: { print("End session pressed") }
     )
 }
