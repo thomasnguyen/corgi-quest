@@ -67,8 +67,8 @@
   - Add conditional SessionPanel at center
   - _Requirements: 2.1_
 
-- [ ] 4. Build floating UI panels
-- [ ] 4.1 Create StatOrbsPanel and StatOrbView
+- [x] 4. Build floating UI panels
+- [x] 4.1 Create StatOrbsPanel and StatOrbView
   - Implement VStack with four stat orbs
   - Add circular progress ring with trim animation
   - Display stat type, name, and level
@@ -80,21 +80,21 @@
   - **Property 1: Stat orb completeness**
   - **Validates: Requirements 2.2**
 
-- [ ] 4.3 Create GoalsPanel
+- [x] 4.3 Create GoalsPanel
   - Display physical goal progress bar
   - Display mental goal progress bar
   - Display streak with fire emoji
   - Add smooth animation on goal updates
   - _Requirements: 2.3_
 
-- [ ] 4.4 Create ActivitiesPanel
+- [x] 4.4 Create ActivitiesPanel
   - Display last 5 activities in vertical list
   - Show activity name, XP breakdown, timestamp
   - Show who logged the activity
   - Add fade-in animation for new activities
   - _Requirements: 2.4_
 
-- [ ] 4.5 Create WeeklyChartPanel using Swift Charts
+- [x] 4.5 Create WeeklyChartPanel using Swift Charts
   - Implement horizontal bar chart
   - One bar per day showing total XP
   - Minimal axes with day labels
