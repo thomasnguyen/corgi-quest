@@ -11,54 +11,11 @@ import Charts
 /// Arranges floating UI panels around the central pedestal in 3D space
 struct FloatingPanelsView: View {
     let dogName: String
+    let stats: [StatData]
+    let goals: GoalData?
+    let activities: [ActivityData]
+    let weeklyXP: [DayXP]
     @Binding var sessionState: SessionState
-    
-    // Sample data for preview - will be replaced with ViewModel data
-    @State private var stats: [StatData] = [
-        StatData(type: "PHY", name: "Physical", level: 5, xp: 120, xpToNextLevel: 200, xpProgress: 0.6),
-        StatData(type: "INT", name: "Intelligence", level: 4, xp: 80, xpToNextLevel: 150, xpProgress: 0.53),
-        StatData(type: "IMP", name: "Impulse Control", level: 3, xp: 50, xpToNextLevel: 100, xpProgress: 0.5),
-        StatData(type: "SOC", name: "Socialization", level: 6, xp: 180, xpToNextLevel: 250, xpProgress: 0.72)
-    ]
-    
-    @State private var goals: GoalData = GoalData(
-        physical: GoalData.GoalProgress(current: 2, target: 3),
-        mental: GoalData.GoalProgress(current: 1, target: 2),
-        streak: 5
-    )
-    
-    @State private var activities: [ActivityData] = [
-        ActivityData(
-            id: "1",
-            name: "Calm Walk",
-            xpBreakdown: [
-                ActivityData.XPGain(stat: "PHY", amount: 15),
-                ActivityData.XPGain(stat: "IMP", amount: 10)
-            ],
-            timestamp: Date().addingTimeInterval(-300),
-            loggedBy: "Thomas"
-        ),
-        ActivityData(
-            id: "2",
-            name: "Sit Practice",
-            xpBreakdown: [
-                ActivityData.XPGain(stat: "INT", amount: 20),
-                ActivityData.XPGain(stat: "IMP", amount: 5)
-            ],
-            timestamp: Date().addingTimeInterval(-1800),
-            loggedBy: "Holly"
-        )
-    ]
-    
-    @State private var weeklyXP: [DayXP] = [
-        DayXP(day: "Mon", total: 45, date: Date().addingTimeInterval(-6 * 86400)),
-        DayXP(day: "Tue", total: 60, date: Date().addingTimeInterval(-5 * 86400)),
-        DayXP(day: "Wed", total: 30, date: Date().addingTimeInterval(-4 * 86400)),
-        DayXP(day: "Thu", total: 75, date: Date().addingTimeInterval(-3 * 86400)),
-        DayXP(day: "Fri", total: 50, date: Date().addingTimeInterval(-2 * 86400)),
-        DayXP(day: "Sat", total: 90, date: Date().addingTimeInterval(-1 * 86400)),
-        DayXP(day: "Sun", total: 40, date: Date())
-    ]
     
     var body: some View {
         ZStack {
@@ -67,8 +24,10 @@ struct FloatingPanelsView: View {
                 .position3D(x: -400, y: 0, z: -600)
             
             // Top Panel: Today's Goals
-            GoalsPanel(goals: goals)
-                .position3D(x: 0, y: 300, z: -600)
+            if let goals = goals {
+                GoalsPanel(goals: goals)
+                    .position3D(x: 0, y: 300, z: -600)
+            }
             
             // Right Panel: Recent Activities
             ActivitiesPanel(activities: activities)
@@ -389,6 +348,48 @@ struct SessionPanel: View {
 #Preview {
     FloatingPanelsView(
         dogName: "Bumi",
+        stats: [
+            StatData(type: "PHY", name: "Physical", level: 5, xp: 120, xpToNextLevel: 200, xpProgress: 0.6),
+            StatData(type: "INT", name: "Intelligence", level: 4, xp: 80, xpToNextLevel: 150, xpProgress: 0.53),
+            StatData(type: "IMP", name: "Impulse Control", level: 3, xp: 50, xpToNextLevel: 100, xpProgress: 0.5),
+            StatData(type: "SOC", name: "Socialization", level: 6, xp: 180, xpToNextLevel: 250, xpProgress: 0.72)
+        ],
+        goals: GoalData(
+            physical: GoalData.GoalProgress(current: 2, target: 3),
+            mental: GoalData.GoalProgress(current: 1, target: 2),
+            streak: 5
+        ),
+        activities: [
+            ActivityData(
+                id: "1",
+                name: "Calm Walk",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "PHY", amount: 15),
+                    ActivityData.XPGain(stat: "IMP", amount: 10)
+                ],
+                timestamp: Date().addingTimeInterval(-300),
+                loggedBy: "Thomas"
+            ),
+            ActivityData(
+                id: "2",
+                name: "Sit Practice",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "INT", amount: 20),
+                    ActivityData.XPGain(stat: "IMP", amount: 5)
+                ],
+                timestamp: Date().addingTimeInterval(-1800),
+                loggedBy: "Holly"
+            )
+        ],
+        weeklyXP: [
+            DayXP(day: "Mon", total: 45, date: Date().addingTimeInterval(-6 * 86400)),
+            DayXP(day: "Tue", total: 60, date: Date().addingTimeInterval(-5 * 86400)),
+            DayXP(day: "Wed", total: 30, date: Date().addingTimeInterval(-4 * 86400)),
+            DayXP(day: "Thu", total: 75, date: Date().addingTimeInterval(-3 * 86400)),
+            DayXP(day: "Fri", total: 50, date: Date().addingTimeInterval(-2 * 86400)),
+            DayXP(day: "Sat", total: 90, date: Date().addingTimeInterval(-1 * 86400)),
+            DayXP(day: "Sun", total: 40, date: Date())
+        ],
         sessionState: .constant(.idle)
     )
 }

@@ -10,8 +10,10 @@ import RealityKit
 
 /// Main immersive training room view with 3D environment and floating UI panels
 struct TrainingRoomView: View {
-    // Sample data for preview - will be replaced with ViewModel
-    @State private var dogName: String = "Bumi"
+    // ViewModel for state management and data fetching
+    @StateObject private var viewModel = TrainingRoomViewModel()
+    
+    // Session state for Coach Mode
     @State private var sessionState: SessionState = .idle
     
     // Voice command handler
@@ -26,12 +28,16 @@ struct TrainingRoomView: View {
             // 3D Environment
             RealityView { content in
                 setupEnvironment(content: content)
-                setupPedestal(content: content, dogName: dogName)
+                setupPedestal(content: content, dogName: viewModel.dogName)
             }
             
             // Floating UI Panels overlay
             FloatingPanelsView(
-                dogName: dogName,
+                dogName: viewModel.dogName,
+                stats: viewModel.stats,
+                goals: viewModel.goals,
+                activities: viewModel.activities,
+                weeklyXP: viewModel.weeklyXP,
                 sessionState: $sessionState
             )
             
@@ -72,10 +78,19 @@ struct TrainingRoomView: View {
             
             // Start listening for voice commands
             voiceCommandHandler.startListening()
+            
+            // Fetch initial data and start polling
+            Task {
+                await viewModel.fetchInitialData()
+                viewModel.startPolling()
+            }
         }
         .onDisappear {
             // Stop listening when view disappears
             voiceCommandHandler.stopListening()
+            
+            // Stop polling when view disappears
+            viewModel.stopPolling()
         }
         .onChange(of: voiceCommandHandler.lastCommand) { oldValue, newValue in
             handleVoiceCommand(newValue)

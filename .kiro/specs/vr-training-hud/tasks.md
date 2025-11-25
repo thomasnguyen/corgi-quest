@@ -147,22 +147,22 @@
   - **Property 4: Rep counter increment**
   - **Validates: Requirements 5.1**
 
-- [ ] 7. Implement TrainingRoomViewModel for state management
-- [ ] 7.1 Create TrainingRoomViewModel class
+- [x] 7. Implement TrainingRoomViewModel for state management
+- [x] 7.1 Create TrainingRoomViewModel class
   - Add @Published properties for stats, goals, activities, weeklyXP
   - Add @Published properties for dogName and dogLevel
   - Implement fetchInitialData() async method
   - Implement updateUI() to transform API response
   - _Requirements: 7.1, 7.2_
 
-- [ ] 7.2 Add polling mechanism for real-time updates
+- [x] 7.2 Add polling mechanism for real-time updates
   - Implement startPolling() with Timer (3 second interval)
   - Call fetchInitialData() on each poll
   - Add stopPolling() for cleanup
   - Use weak self in timer closure
   - _Requirements: 7.2, 7.3_
 
-- [ ] 7.3 Add logVoiceActivity method
+- [x] 7.3 Add logVoiceActivity method
   - Implement async method to call NetworkService
   - Refresh data after successful log
   - Handle errors gracefully
@@ -172,28 +172,28 @@
   - **Property 6: Real-time sync latency**
   - **Validates: Requirements 6.5, 7.2**
 
-- [ ] 8. Wire up data flow and animations
-- [ ] 8.1 Connect TrainingRoomViewModel to TrainingRoomView
+- [x] 8. Wire up data flow and animations
+- [x] 8.1 Connect TrainingRoomViewModel to TrainingRoomView
   - Add @StateObject for viewModel
   - Pass data to FloatingPanelsView
   - Call fetchInitialData() and startPolling() on appear
   - Stop polling on disappear
   - _Requirements: 7.1, 7.2_
 
-- [ ] 8.2 Implement XP pulse animation in StatOrbView
+- [x] 8.2 Implement XP pulse animation in StatOrbView
   - Add @State for pulseScale
   - Use onChange(of: stat.xp) to trigger animation
   - Apply spring animation with 0.3s response
   - Scale to 1.2 then back to 1.0
   - _Requirements: 3.1_
 
-- [ ] 8.3 Implement goal progress bar animations
+- [x] 8.3 Implement goal progress bar animations
   - Add smooth animation to progress bar width changes
   - Use .animation(.easeInOut) modifier
   - Ensure bars fill smoothly on data update
   - _Requirements: 3.2_
 
-- [ ] 8.4 Implement activity feed fade-in animation
+- [x] 8.4 Implement activity feed fade-in animation
   - Add transition(.opacity) to new activities
   - Animate when activities array changes
   - _Requirements: 3.3_
