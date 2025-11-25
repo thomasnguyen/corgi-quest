@@ -24,66 +24,62 @@ struct TrainingRoomView: View {
     private let repMarkDebounceInterval: TimeInterval = 0.5
     
     var body: some View {
-        ZStack {
-            // 3D Environment (background)
-            RealityView { content in
-                setupEnvironment(content: content)
-                setupPedestal(content: content, dogName: viewModel.dogName)
+        RealityView { content, attachments in
+            setupEnvironment(content: content)
+            setupPedestal(content: content, dogName: viewModel.dogName)
+
+            // Create a head anchor - this will follow the user's head
+            let headAnchor = AnchorEntity(.head)
+            content.add(headAnchor)
+
+            // Position HUD panels relative to head (in head-local space)
+            // These will follow as the user looks around
+
+            // Goals panel - top center, 1.5m forward
+            if let goalsAttachment = attachments.entity(for: "goals") {
+                goalsAttachment.position = [0, 0.35, -1.5] // Slightly above center
+                headAnchor.addChild(goalsAttachment)
             }
 
-            // HUD Overlay - follows your view like a video game HUD
-            // Make panels MUCH larger and more visible
-            VStack(spacing: 0) {
-                // Top HUD area - Goals
-                HStack {
-                    Spacer()
-                    if let goals = viewModel.goals {
-                        GoalsPanel(goals: goals)
-                            .frame(width: 500)
-                            .scaleEffect(1.5) // Make 50% larger
-                    }
-                    Spacer()
-                }
-                .padding(.top, 80)
-
-                Spacer()
-
-                // Bottom HUD area - Weekly Chart
-                HStack {
-                    Spacer()
-                    WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
-                        .frame(width: 600)
-                        .scaleEffect(1.5) // Make 50% larger
-                    Spacer()
-                }
-                .padding(.bottom, 80)
+            // Stats panel - left side
+            if let statsAttachment = attachments.entity(for: "stats") {
+                statsAttachment.position = [-0.9, -0.1, -1.5] // Left side, slightly down
+                headAnchor.addChild(statsAttachment)
             }
 
-            // Left HUD area - Stats
-            HStack {
+            // Activities panel - right side
+            if let activitiesAttachment = attachments.entity(for: "activities") {
+                activitiesAttachment.position = [0.9, -0.1, -1.5] // Right side, slightly down
+                headAnchor.addChild(activitiesAttachment)
+            }
+
+            // Weekly chart - bottom center
+            if let chartAttachment = attachments.entity(for: "chart") {
+                chartAttachment.position = [0, -0.4, -1.5] // Below center
+                headAnchor.addChild(chartAttachment)
+            }
+        } attachments: {
+            // Define attachments for each panel
+            if let goals = viewModel.goals {
+                Attachment(id: "goals") {
+                    GoalsPanel(goals: goals)
+                        .frame(width: 400)
+                }
+            }
+
+            Attachment(id: "stats") {
                 StatOrbsPanel(stats: viewModel.stats)
-                    .scaleEffect(1.5) // Make 50% larger
-                    .padding(.leading, 60)
-                Spacer()
+                    .frame(width: 250)
             }
 
-            // Right HUD area - Activities
-            HStack {
-                Spacer()
+            Attachment(id: "activities") {
                 ActivitiesPanel(activities: viewModel.activities)
-                    .frame(width: 450)
-                    .scaleEffect(1.5) // Make 50% larger
-                    .padding(.trailing, 60)
+                    .frame(width: 350)
             }
 
-            // DEBUG: Add a centered red test box to verify HUD is rendering
-            VStack {
-                Text("HUD TEST - Can you see this?")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(30)
-                    .background(Color.red)
-                    .cornerRadius(20)
+            Attachment(id: "chart") {
+                WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
+                    .frame(width: 500)
             }
         }
         .onAppear {
