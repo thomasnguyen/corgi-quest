@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import Combine
 
 /// Arranges floating UI panels around the central pedestal in 3D space
 struct FloatingPanelsView: View {
@@ -356,13 +357,6 @@ struct XPNotificationsView: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: notifications)
     }
-}
-
-struct XPNotification: Identifiable, Equatable {
-    let id: UUID
-    let statType: String
-    let amount: Int
-    let color: Color
 }
 
 /// Quick action buttons - Skyrim-style action bar
