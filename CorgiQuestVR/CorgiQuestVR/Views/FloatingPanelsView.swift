@@ -319,6 +319,52 @@ struct WeeklyChartPanel: View {
     }
 }
 
+/// XP Notifications - floating pop-ups
+struct XPNotificationsView: View {
+    let notifications: [XPNotification]
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 12) {
+            ForEach(notifications) { notification in
+                HStack(spacing: 10) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(notification.color)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("+\(notification.amount) \(notification.statType) XP")
+                            .font(.system(size: 18, weight: .bold, design: .serif))
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(notification.color.opacity(0.25))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(notification.color, lineWidth: 2)
+                        )
+                        .shadow(color: notification.color.opacity(0.6), radius: 10)
+                )
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .opacity.combined(with: .scale(scale: 0.8))
+                ))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: notifications)
+    }
+}
+
+struct XPNotification: Identifiable, Equatable {
+    let id: UUID
+    let statType: String
+    let amount: Int
+    let color: Color
+}
+
 /// Quick action buttons - Skyrim-style action bar
 struct QuickActionsPanel: View {
     let sessionState: SessionState

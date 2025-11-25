@@ -22,7 +22,11 @@ struct TrainingRoomView: View {
     // Debounce timer for rep marking
     @State private var lastRepMarkTime: Date = .distantPast
     private let repMarkDebounceInterval: TimeInterval = 0.5
-    
+
+    // XP notifications for pop-ups
+    @State private var xpNotifications: [XPNotification] = []
+    @State private var previousStatXP: [String: Int] = [:] // Track previous XP values
+
     var body: some View {
         RealityView { content, attachments in
             setupEnvironment(content: content)
@@ -83,6 +87,13 @@ struct TrainingRoomView: View {
                 sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
                 headAnchor.addChild(sessionAttachment)
             }
+
+            // XP Notifications - float up on right side
+            if let xpNotifAttachment = attachments.entity(for: "xpNotifications") {
+                xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
+                xpNotifAttachment.scale = [1.4, 1.4, 1.4]
+                headAnchor.addChild(xpNotifAttachment)
+            }
         } attachments: {
             // Define attachments for each panel
             if let goals = viewModel.goals {
@@ -128,6 +139,12 @@ struct TrainingRoomView: View {
                         .frame(width: 450)
                 }
             }
+
+            // XP Notifications
+            Attachment(id: "xpNotifications") {
+                XPNotificationsView(notifications: xpNotifications)
+                    .frame(width: 250)
+            }
         }
         .onAppear {
             // Fetch initial data and start polling
@@ -140,8 +157,41 @@ struct TrainingRoomView: View {
             // Stop polling when view disappears
             viewModel.stopPolling()
         }
+        .onChange(of: viewModel.stats) { oldStats, newStats in
+            detectXPChanges(old: oldStats, new: newStats)
+        }
     }
-    
+
+    // MARK: - XP Detection
+
+    /// Detect XP changes and create notifications
+    private func detectXPChanges(old: [StatData], new: [StatData]) {
+        for newStat in new {
+            let oldXP = previousStatXP[newStat.type] ?? newStat.xp
+            let xpGained = newStat.xp - oldXP
+
+            if xpGained > 0 {
+                // Create notification
+                let notification = XPNotification(
+                    id: UUID(),
+                    statType: newStat.type,
+                    amount: xpGained,
+                    color: newStat.color
+                )
+                xpNotifications.append(notification)
+
+                // Remove after 3 seconds
+                Task {
+                    try? await Task.sleep(nanoseconds: 3_000_000_000)
+                    xpNotifications.removeAll { $0.id == notification.id }
+                }
+            }
+
+            // Update previous XP
+            previousStatXP[newStat.type] = newStat.xp
+        }
+    }
+
     // MARK: - Quick Actions
 
     /// Start a training session
@@ -342,6 +392,15 @@ struct TrainingRoomView: View {
         // TODO: Replace with actual TextEntity when implementing text rendering
         // Example: let textEntity = TextEntity(text: dogName, font: .systemFont(ofSize: 0.1))
     }
+}
+
+// MARK: - XP Notification Model
+
+struct XPNotification: Identifiable, Equatable {
+    let id: UUID
+    let statType: String
+    let amount: Int
+    let color: Color
 }
 
 // MARK: - Preview
