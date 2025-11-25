@@ -15,10 +15,10 @@ struct TrainingRoomView: View {
     
     // Session state for Coach Mode
     @State private var sessionState: SessionState = .idle
-    
-    // Voice command handler
-    @StateObject private var voiceCommandHandler = VoiceCommandHandler()
-    
+
+    // Voice command handler - DISABLED for simulator (microphone permissions hang)
+    // @StateObject private var voiceCommandHandler = VoiceCommandHandler()
+
     // Debounce timer for rep marking
     @State private var lastRepMarkTime: Date = .distantPast
     private let repMarkDebounceInterval: TimeInterval = 0.5
@@ -40,45 +40,43 @@ struct TrainingRoomView: View {
                 weeklyXP: viewModel.weeklyXP,
                 sessionState: $sessionState
             )
-            
-            // Voice recognition indicator
-            if voiceCommandHandler.isListening {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.red)
-                        Text("Listening...")
-                            .font(.caption)
-                    }
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(8)
-                    .padding(.bottom, 50)
-                }
-            }
-            
-            // Error message display
-            if let errorMessage = voiceCommandHandler.errorMessage {
-                VStack {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(8)
-                    Spacer()
-                }
-                .padding(.top, 50)
-            }
+
+            // Voice recognition indicator - DISABLED
+            // if voiceCommandHandler.isListening {
+            //     VStack {
+            //         Spacer()
+            //         HStack {
+            //             Image(systemName: "mic.fill")
+            //                 .foregroundColor(.red)
+            //             Text("Listening...")
+            //                 .font(.caption)
+            //         }
+            //         .padding()
+            //         .background(.ultraThinMaterial)
+            //         .cornerRadius(8)
+            //         .padding(.bottom, 50)
+            //     }
+            // }
+            //
+            // // Error message display
+            // if let errorMessage = voiceCommandHandler.errorMessage {
+            //     VStack {
+            //         Text(errorMessage)
+            //             .font(.caption)
+            //             .foregroundColor(.red)
+            //             .padding()
+            //             .background(.ultraThinMaterial)
+            //             .cornerRadius(8)
+            //         Spacer()
+            //     }
+            //     .padding(.top, 50)
+            // }
         }
         .onAppear {
-            // Request microphone permissions
-            voiceCommandHandler.requestAuthorization()
-            
-            // Start listening for voice commands
-            voiceCommandHandler.startListening()
-            
+            // Voice commands DISABLED for simulator
+            // voiceCommandHandler.requestAuthorization()
+            // voiceCommandHandler.startListening()
+
             // Fetch initial data and start polling
             Task {
                 await viewModel.fetchInitialData()
@@ -86,15 +84,16 @@ struct TrainingRoomView: View {
             }
         }
         .onDisappear {
-            // Stop listening when view disappears
-            voiceCommandHandler.stopListening()
-            
+            // Voice commands DISABLED
+            // voiceCommandHandler.stopListening()
+
             // Stop polling when view disappears
             viewModel.stopPolling()
         }
-        .onChange(of: voiceCommandHandler.lastCommand) { oldValue, newValue in
-            handleVoiceCommand(newValue)
-        }
+        // Voice commands DISABLED
+        // .onChange(of: voiceCommandHandler.lastCommand) { oldValue, newValue in
+        //     handleVoiceCommand(newValue)
+        // }
     }
     
     // MARK: - Voice Command Handling
