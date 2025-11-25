@@ -87,6 +87,24 @@ export const getUserById = query({
 });
 
 /**
+ * Query to get a user by email
+ * Returns the user with the specified email address
+ * Used for demo auto-login flow
+ */
+export const getUserByEmail = query({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+    return user;
+  },
+});
+
+/**
  * Query to get dog profile with all stats
  * Returns dog info and all 4 stat records
  */

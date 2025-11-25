@@ -3,6 +3,23 @@ import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 /**
+ * Convert Uint8Array to base64 string safely
+ * Uses chunking to avoid call stack issues and ensures proper Latin1 encoding
+ */
+function arrayBufferToBase64(bytes: Uint8Array): string {
+  const CHUNK_SIZE = 0x8000; // 32KB chunks
+  let binary = "";
+
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
+    // Convert chunk to array and use spread operator
+    binary += String.fromCharCode.apply(null, Array.from(chunk) as any);
+  }
+
+  return btoa(binary);
+}
+
+/**
  * Connection states for the OpenAI Realtime API WebSocket
  */
 export type ConnectionState =
@@ -325,8 +342,7 @@ export function useOpenAIRealtime(
       // Set up event listeners
       ws.onopen = () => {
         console.log("[OpenAI Realtime] 🔌 WebSocket connection opened!");
-        // Start audio capture when connection opens
-        startAudioCapture();
+        // Note: Audio capture is handled by the component, not here
         // Connection state will be updated to "connected" when we receive session.created
       };
 
@@ -412,10 +428,11 @@ export function useOpenAIRealtime(
           int16Data[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
         }
 
-        // Convert to base64
-        const base64Audio = btoa(
-          String.fromCharCode.apply(null, Array.from(int16Data))
-        );
+        // Convert to base64 using a method that properly handles binary data
+        const uint8Array = new Uint8Array(int16Data.buffer);
+
+        // Use a more robust base64 encoding that handles all byte values
+        const base64Audio = arrayBufferToBase64(uint8Array);
 
         // Send to OpenAI
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

@@ -15,6 +15,7 @@ import { Route as ThanksRouteImport } from './routes/thanks'
 import { Route as SelectCharacterRouteImport } from './routes/select-character'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as LogActivityRouteImport } from './routes/log-activity'
+import { Route as HackathonRouteImport } from './routes/hackathon'
 import { Route as BumiRouteImport } from './routes/bumi'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as IndexRouteImport } from './routes/index'
@@ -57,6 +58,11 @@ const QuestsRoute = QuestsRouteImport.update({
 const LogActivityRoute = LogActivityRouteImport.update({
   id: '/log-activity',
   path: '/log-activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HackathonRoute = HackathonRouteImport.update({
+  id: '/hackathon',
+  path: '/hackathon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BumiRoute = BumiRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/bumi': typeof BumiRoute
+  '/hackathon': typeof HackathonRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
   '/select-character': typeof SelectCharacterRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/bumi': typeof BumiRoute
+  '/hackathon': typeof HackathonRoute
   '/log-activity': typeof LogActivityRoute
   '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/bumi': typeof BumiRoute
+  '/hackathon': typeof HackathonRoute
   '/log-activity': typeof LogActivityRoute
   '/quests': typeof QuestsRouteWithChildren
   '/select-character': typeof SelectCharacterRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activity'
     | '/bumi'
+    | '/hackathon'
     | '/log-activity'
     | '/quests'
     | '/select-character'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activity'
     | '/bumi'
+    | '/hackathon'
     | '/log-activity'
     | '/select-character'
     | '/thanks'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activity'
     | '/bumi'
+    | '/hackathon'
     | '/log-activity'
     | '/quests'
     | '/select-character'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivityRoute: typeof ActivityRoute
   BumiRoute: typeof BumiRoute
+  HackathonRoute: typeof HackathonRoute
   LogActivityRoute: typeof LogActivityRoute
   QuestsRoute: typeof QuestsRouteWithChildren
   SelectCharacterRoute: typeof SelectCharacterRoute
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/log-activity'
       fullPath: '/log-activity'
       preLoaderRoute: typeof LogActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hackathon': {
+      id: '/hackathon'
+      path: '/hackathon'
+      fullPath: '/hackathon'
+      preLoaderRoute: typeof HackathonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bumi': {
@@ -428,6 +448,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityRoute: ActivityRoute,
   BumiRoute: BumiRoute,
+  HackathonRoute: HackathonRoute,
   LogActivityRoute: LogActivityRoute,
   QuestsRoute: QuestsRouteWithChildren,
   SelectCharacterRoute: SelectCharacterRoute,

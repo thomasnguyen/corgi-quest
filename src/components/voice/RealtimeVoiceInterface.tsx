@@ -374,10 +374,19 @@ export function RealtimeVoiceInterface({
    */
   const int16ToBase64 = (int16Array: Int16Array): string => {
     const uint8Array = new Uint8Array(int16Array.buffer);
+
+    // Use chunking to avoid call stack issues
+    const CHUNK_SIZE = 0x8000; // 32KB chunks
     let binary = "";
-    for (let i = 0; i < uint8Array.length; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
+
+    for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+      const chunk = uint8Array.subarray(
+        i,
+        Math.min(i + CHUNK_SIZE, uint8Array.length)
+      );
+      binary += String.fromCharCode.apply(null, Array.from(chunk) as any);
     }
+
     return btoa(binary);
   };
 
