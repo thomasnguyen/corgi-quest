@@ -9,31 +9,37 @@ import Foundation
 
 /// Network service for communicating with the Corgi Quest backend API
 class NetworkService {
-    
+
     // MARK: - Configuration
-    
+
     /// Base URL for the API (should be configured based on environment)
     private let baseURL: String
-    
+
     /// URLSession configured with timeout
     private let session: URLSession
-    
+
     /// Maximum number of retry attempts for failed requests
     private let maxRetries = 3
-    
+
     /// Exponential backoff base delay (in seconds)
     private let baseRetryDelay: TimeInterval = 1.0
-    
+
+    /// Use mock data instead of real network calls (for development)
+    private let useMockData: Bool
+
     // MARK: - Initialization
-    
+
     /// Initialize NetworkService with a custom base URL
-    /// - Parameter baseURL: The base URL for the API (defaults to production URL)
-    init(baseURL: String? = nil) {
+    /// - Parameters:
+    ///   - baseURL: The base URL for the API (defaults to production URL)
+    ///   - useMockData: If true, returns mock data without network calls (defaults to true for development)
+    init(baseURL: String? = nil, useMockData: Bool = true) {
         // Use provided URL, or fall back to production URL
         // For local development, pass "http://localhost:3000"
         // For production, use the deployed Netlify URL
         self.baseURL = baseURL ?? "https://corgi-quest.netlify.app"
-        
+        self.useMockData = useMockData
+
         // Configure URLSession with 5 second timeout (per requirements)
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 5.0
@@ -48,16 +54,21 @@ class NetworkService {
     /// - Returns: VRDogStatus containing all training data
     /// - Throws: NetworkError if the request fails
     func fetchVRStatus() async throws -> VRDogStatus {
+        // Return mock data if in development mode
+        if useMockData {
+            return MockData.vrStatus
+        }
+
         let endpoint = "\(baseURL)/api/vr-status"
-        
+
         guard let url = URL(string: endpoint) else {
             throw NetworkError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
+
         return try await performRequestWithRetry(request: request)
     }
     
@@ -68,21 +79,26 @@ class NetworkService {
     /// - Returns: VoiceLogResponse with success status and XP awarded
     /// - Throws: NetworkError if the request fails
     func submitVoiceLog(text: String, sessionContext: SessionContext? = nil) async throws -> VoiceLogResponse {
+        // Return mock data if in development mode
+        if useMockData {
+            return MockData.voiceLogResponse
+        }
+
         let endpoint = "\(baseURL)/api/voice-log"
-        
+
         guard let url = URL(string: endpoint) else {
             throw NetworkError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
+
         // Create request body
         let requestBody = VoiceLogRequest(text: text, sessionContext: sessionContext)
         request.httpBody = try JSONEncoder().encode(requestBody)
-        
+
         return try await performRequestWithRetry(request: request)
     }
     
@@ -223,7 +239,7 @@ enum NetworkError: LocalizedError {
     case connectionFailed
     case decodingError(Error)
     case unknown
-    
+
     var errorDescription: String? {
         switch self {
         case .invalidURL:
@@ -244,4 +260,123 @@ enum NetworkError: LocalizedError {
             return "Unknown error occurred"
         }
     }
+}
+
+// MARK: - Mock Data
+
+/// Mock data for development and testing
+enum MockData {
+    static let vrStatus = VRDogStatus(
+        dogName: "Buddy",
+        level: 12,
+        stats: [
+            StatData(
+                type: "PHY",
+                name: "Physical",
+                level: 10,
+                xp: 450,
+                xpToNextLevel: 600,
+                xpProgress: 0.75
+            ),
+            StatData(
+                type: "INT",
+                name: "Intelligence",
+                level: 8,
+                xp: 320,
+                xpToNextLevel: 500,
+                xpProgress: 0.64
+            ),
+            StatData(
+                type: "IMP",
+                name: "Impulse Control",
+                level: 15,
+                xp: 780,
+                xpToNextLevel: 800,
+                xpProgress: 0.975
+            ),
+            StatData(
+                type: "SOC",
+                name: "Social",
+                level: 6,
+                xp: 120,
+                xpToNextLevel: 400,
+                xpProgress: 0.3
+            )
+        ],
+        goals: GoalData(
+            physical: GoalData.GoalProgress(current: 2, target: 3),
+            mental: GoalData.GoalProgress(current: 1, target: 2),
+            streak: 7
+        ),
+        recentActivities: [
+            ActivityData(
+                id: "1",
+                name: "Loose leash walk around the block",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "PHY", amount: 15),
+                    ActivityData.XPGain(stat: "IMP", amount: 10)
+                ],
+                timestamp: Date().addingTimeInterval(-120),
+                loggedBy: "VR"
+            ),
+            ActivityData(
+                id: "2",
+                name: "Practiced sit-stay for 30 seconds",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "IMP", amount: 20),
+                    ActivityData.XPGain(stat: "INT", amount: 5)
+                ],
+                timestamp: Date().addingTimeInterval(-3600),
+                loggedBy: "Mobile"
+            ),
+            ActivityData(
+                id: "3",
+                name: "Met 3 new dogs at the park",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "SOC", amount: 25),
+                    ActivityData.XPGain(stat: "IMP", amount: 5)
+                ],
+                timestamp: Date().addingTimeInterval(-7200),
+                loggedBy: "Mobile"
+            ),
+            ActivityData(
+                id: "4",
+                name: "Recall training in backyard (10 reps)",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "INT", amount: 15),
+                    ActivityData.XPGain(stat: "PHY", amount: 10)
+                ],
+                timestamp: Date().addingTimeInterval(-86400),
+                loggedBy: "VR"
+            ),
+            ActivityData(
+                id: "5",
+                name: "Crate training - calm for 1 hour",
+                xpBreakdown: [
+                    ActivityData.XPGain(stat: "IMP", amount: 30)
+                ],
+                timestamp: Date().addingTimeInterval(-172800),
+                loggedBy: "Mobile"
+            )
+        ],
+        weeklyXP: [
+            DayXP(day: "Mon", total: 45, date: Date().addingTimeInterval(-518400)),
+            DayXP(day: "Tue", total: 60, date: Date().addingTimeInterval(-432000)),
+            DayXP(day: "Wed", total: 35, date: Date().addingTimeInterval(-345600)),
+            DayXP(day: "Thu", total: 80, date: Date().addingTimeInterval(-259200)),
+            DayXP(day: "Fri", total: 55, date: Date().addingTimeInterval(-172800)),
+            DayXP(day: "Sat", total: 70, date: Date().addingTimeInterval(-86400)),
+            DayXP(day: "Sun", total: 25, date: Date())
+        ]
+    )
+
+    static let voiceLogResponse = VoiceLogResponse(
+        success: true,
+        activityId: UUID().uuidString,
+        xpAwarded: [
+            VoiceLogResponse.XPGain(stat: "PHY", amount: 15),
+            VoiceLogResponse.XPGain(stat: "IMP", amount: 10)
+        ],
+        error: nil
+    )
 }
