@@ -10,8 +10,43 @@ import RealityKit
 import RealityKitContent
 
 struct ContentView: View {
+    @Environment(\.openImmersiveSpace) var openImmersiveSpace
+    @Environment(\.dismissImmersiveSpace) var dismissImmersiveSpace
+    @State private var isImmersiveSpaceShown = false
+
     var body: some View {
-        TrainingRoomView()
+        VStack(spacing: 20) {
+            Text("🐕 Corgi Quest VR")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text("Immersive Dog Training")
+                .font(.title3)
+                .foregroundColor(.secondary)
+
+            Button {
+                Task {
+                    if isImmersiveSpaceShown {
+                        await dismissImmersiveSpace()
+                        isImmersiveSpaceShown = false
+                    } else {
+                        await openImmersiveSpace(id: "TrainingRoom")
+                        isImmersiveSpaceShown = true
+                    }
+                }
+            } label: {
+                Text(isImmersiveSpaceShown ? "Exit Training Room" : "Enter Training Room")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 15)
+                    .background(isImmersiveSpaceShown ? Color.red : Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding()
     }
 }
 
