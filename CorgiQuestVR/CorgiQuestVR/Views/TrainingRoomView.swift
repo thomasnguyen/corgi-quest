@@ -198,20 +198,28 @@ struct TrainingRoomView: View {
     
     /// Creates the stylized room with soft neutral lighting
     private func setupEnvironment(content: RealityViewContent) {
+        // DEBUG: Add a big red sphere right in front to test visibility
+        let debugSphere = ModelEntity(
+            mesh: .generateSphere(radius: 0.3),
+            materials: [SimpleMaterial(color: .red, isMetallic: false)]
+        )
+        debugSphere.position = [0, 1.5, -2] // Eye level, 2m in front
+        content.add(debugSphere)
+
         // Create ambient lighting for soft, neutral illumination
         let ambientLight = PointLight()
         ambientLight.light.intensity = 500
         ambientLight.light.color = .white
         ambientLight.position = [0, 2, 0]
         content.add(ambientLight)
-        
+
         // Add directional light for depth
         let directionalLight = DirectionalLight()
         directionalLight.light.intensity = 300
         directionalLight.light.color = .white
         directionalLight.look(at: [0, 0, 0], from: [2, 3, 2], relativeTo: nil)
         content.add(directionalLight)
-        
+
         // Create floor plane with subtle grid
         let floorMesh = MeshResource.generatePlane(width: 10, depth: 10)
         var floorMaterial = SimpleMaterial()
