@@ -24,59 +24,11 @@ struct TrainingRoomView: View {
     private let repMarkDebounceInterval: TimeInterval = 0.5
     
     var body: some View {
-        ZStack {
-            // 3D Environment
-            RealityView { content in
-                setupEnvironment(content: content)
-                setupPedestal(content: content, dogName: viewModel.dogName)
-            }
-            
-            // Floating UI Panels overlay
-            FloatingPanelsView(
-                dogName: viewModel.dogName,
-                stats: viewModel.stats,
-                goals: viewModel.goals,
-                activities: viewModel.activities,
-                weeklyXP: viewModel.weeklyXP,
-                sessionState: $sessionState
-            )
-
-            // Voice recognition indicator - DISABLED
-            // if voiceCommandHandler.isListening {
-            //     VStack {
-            //         Spacer()
-            //         HStack {
-            //             Image(systemName: "mic.fill")
-            //                 .foregroundColor(.red)
-            //             Text("Listening...")
-            //                 .font(.caption)
-            //         }
-            //         .padding()
-            //         .background(.ultraThinMaterial)
-            //         .cornerRadius(8)
-            //         .padding(.bottom, 50)
-            //     }
-            // }
-            //
-            // // Error message display
-            // if let errorMessage = voiceCommandHandler.errorMessage {
-            //     VStack {
-            //         Text(errorMessage)
-            //             .font(.caption)
-            //             .foregroundColor(.red)
-            //             .padding()
-            //             .background(.ultraThinMaterial)
-            //             .cornerRadius(8)
-            //         Spacer()
-            //     }
-            //     .padding(.top, 50)
-            // }
+        RealityView { content in
+            setupEnvironment(content: content)
+            setupPedestal(content: content, dogName: viewModel.dogName)
         }
         .onAppear {
-            // Voice commands DISABLED for simulator
-            // voiceCommandHandler.requestAuthorization()
-            // voiceCommandHandler.startListening()
-
             // Fetch initial data and start polling
             Task {
                 await viewModel.fetchInitialData()
@@ -84,16 +36,9 @@ struct TrainingRoomView: View {
             }
         }
         .onDisappear {
-            // Voice commands DISABLED
-            // voiceCommandHandler.stopListening()
-
             // Stop polling when view disappears
             viewModel.stopPolling()
         }
-        // Voice commands DISABLED
-        // .onChange(of: voiceCommandHandler.lastCommand) { oldValue, newValue in
-        //     handleVoiceCommand(newValue)
-        // }
     }
     
     // MARK: - Voice Command Handling
@@ -198,34 +143,52 @@ struct TrainingRoomView: View {
     
     /// Creates the stylized room with soft neutral lighting
     private func setupEnvironment(content: RealityViewContent) {
-        // DEBUG: Add a big red sphere right in front to test visibility
-        let debugSphere = ModelEntity(
-            mesh: .generateSphere(radius: 0.3),
+        // DEBUG: Add HUGE bright spheres to test visibility
+        // Red sphere right in front
+        let redSphere = ModelEntity(
+            mesh: .generateSphere(radius: 0.5),
             materials: [SimpleMaterial(color: .red, isMetallic: false)]
         )
-        debugSphere.position = [0, 1.5, -2] // Eye level, 2m in front
-        content.add(debugSphere)
+        redSphere.position = [0, 1.5, -1.5] // Eye level, 1.5m in front
+        content.add(redSphere)
 
-        // Create ambient lighting for soft, neutral illumination
+        // Blue sphere to the left
+        let blueSphere = ModelEntity(
+            mesh: .generateSphere(radius: 0.4),
+            materials: [SimpleMaterial(color: .blue, isMetallic: false)]
+        )
+        blueSphere.position = [-1, 1.5, -2] // Left side
+        content.add(blueSphere)
+
+        // Green sphere to the right
+        let greenSphere = ModelEntity(
+            mesh: .generateSphere(radius: 0.4),
+            materials: [SimpleMaterial(color: .green, isMetallic: false)]
+        )
+        greenSphere.position = [1, 1.5, -2] // Right side
+        content.add(greenSphere)
+
+        // Yellow cube above
+        let yellowCube = ModelEntity(
+            mesh: .generateBox(size: 0.4),
+            materials: [SimpleMaterial(color: .yellow, isMetallic: false)]
+        )
+        yellowCube.position = [0, 2.2, -2] // Above
+        content.add(yellowCube)
+
+        // Very bright lighting
         let ambientLight = PointLight()
-        ambientLight.light.intensity = 500
+        ambientLight.light.intensity = 10000
         ambientLight.light.color = .white
         ambientLight.position = [0, 2, 0]
         content.add(ambientLight)
 
-        // Add directional light for depth
-        let directionalLight = DirectionalLight()
-        directionalLight.light.intensity = 300
-        directionalLight.light.color = .white
-        directionalLight.look(at: [0, 0, 0], from: [2, 3, 2], relativeTo: nil)
-        content.add(directionalLight)
-
-        // Create floor plane with subtle grid
-        let floorMesh = MeshResource.generatePlane(width: 10, depth: 10)
+        // Create bright white floor plane
+        let floorMesh = MeshResource.generatePlane(width: 20, depth: 20)
         var floorMaterial = SimpleMaterial()
-        floorMaterial.color = .init(tint: .gray.withAlphaComponent(0.1))
+        floorMaterial.color = .init(tint: .white.withAlphaComponent(0.5))
         let floor = ModelEntity(mesh: floorMesh, materials: [floorMaterial])
-        floor.position = [0, -0.5, 0]
+        floor.position = [0, 0, 0]
         content.add(floor)
     }
     
