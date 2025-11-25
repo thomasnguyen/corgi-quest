@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import Combine
 import Speech
 import AVFoundation
 
 /// Voice command types supported by the training room
-enum VoiceCommand {
+enum VoiceCommand: Equatable {
     case startCoachMode(activity: String)
     case markRep
     case endSession(description: String)

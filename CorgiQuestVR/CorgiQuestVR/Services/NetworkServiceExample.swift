@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Example usage of NetworkService
 /// This file demonstrates how to use the NetworkService in your ViewModels

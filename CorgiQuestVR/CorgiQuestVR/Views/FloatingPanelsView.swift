@@ -21,26 +21,26 @@ struct FloatingPanelsView: View {
         ZStack {
             // Left Panel: Stat Orbs
             StatOrbsPanel(stats: stats)
-                .position3D(x: -400, y: 0, z: -600)
-            
+                .offset(x: -400, y: 0)
+
             // Top Panel: Today's Goals
             if let goals = goals {
                 GoalsPanel(goals: goals)
-                    .position3D(x: 0, y: 300, z: -600)
+                    .offset(x: 0, y: 300)
             }
-            
+
             // Right Panel: Recent Activities
             ActivitiesPanel(activities: activities)
-                .position3D(x: 400, y: 0, z: -600)
-            
+                .offset(x: 400, y: 0)
+
             // Bottom Panel: Weekly XP Chart
             WeeklyChartPanel(weeklyXP: weeklyXP)
-                .position3D(x: 0, y: -300, z: -600)
-            
+                .offset(x: 0, y: -300)
+
             // Center Panel: Session (conditional)
             if case .active(let sessionData) = sessionState {
                 SessionPanel(sessionData: sessionData)
-                    .position3D(x: 0, y: 0, z: -500)
+                    .offset(x: 0, y: 0)
             }
         }
     }
