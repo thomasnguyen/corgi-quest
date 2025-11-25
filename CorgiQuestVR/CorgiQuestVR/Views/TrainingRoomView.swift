@@ -69,6 +69,20 @@ struct TrainingRoomView: View {
                 dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
                 headAnchor.addChild(dogInfoAttachment)
             }
+
+            // Quick Actions panel - bottom center (Skyrim-style action bar)
+            if let actionsAttachment = attachments.entity(for: "quickActions") {
+                actionsAttachment.position = [0, -0.55, -1.2] // Bottom center
+                actionsAttachment.scale = [1.6, 1.6, 1.6]
+                headAnchor.addChild(actionsAttachment)
+            }
+
+            // Session Panel - center (shows during active training)
+            if case .active = sessionState, let sessionAttachment = attachments.entity(for: "session") {
+                sessionAttachment.position = [0, 0.05, -1.2] // Center
+                sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
+                headAnchor.addChild(sessionAttachment)
+            }
         } attachments: {
             // Define attachments for each panel
             if let goals = viewModel.goals {
@@ -97,6 +111,23 @@ struct TrainingRoomView: View {
                 DogInfoPanel(dogName: viewModel.dogName, level: viewModel.dogLevel)
                     .frame(width: 450)
             }
+
+            Attachment(id: "quickActions") {
+                QuickActionsPanel(
+                    sessionState: sessionState,
+                    onStartTraining: startTrainingSession,
+                    onViewStats: viewFullStats
+                )
+                .frame(width: 500)
+            }
+
+            // Session panel (only appears during active training)
+            if case .active(let sessionData) = sessionState {
+                Attachment(id: "session") {
+                    SessionPanel(sessionData: sessionData)
+                        .frame(width: 450)
+                }
+            }
         }
         .onAppear {
             // Fetch initial data and start polling
@@ -111,8 +142,30 @@ struct TrainingRoomView: View {
         }
     }
     
+    // MARK: - Quick Actions
+
+    /// Start a training session
+    private func startTrainingSession() {
+        // Create a sample training session
+        let sessionData = SessionData(
+            activity: "Leash Training",
+            goal: "5 calm reps",
+            tips: "Keep leash loose, reward calm behavior",
+            targetReps: 5,
+            currentReps: 0,
+            currentSuggestion: nil
+        )
+        sessionState = .active(sessionData)
+    }
+
+    /// View full stats (placeholder for now)
+    private func viewFullStats() {
+        // TODO: In Phase 3, open a detailed stats view
+        print("View Full Stats tapped")
+    }
+
     // MARK: - Voice Command Handling
-    
+
     /// Handle voice commands from the VoiceCommandHandler
     private func handleVoiceCommand(_ command: VoiceCommand?) {
         guard let command = command else { return }

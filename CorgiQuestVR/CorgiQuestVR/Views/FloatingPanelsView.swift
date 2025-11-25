@@ -319,6 +319,86 @@ struct WeeklyChartPanel: View {
     }
 }
 
+/// Quick action buttons - Skyrim-style action bar
+struct QuickActionsPanel: View {
+    let sessionState: SessionState
+    let onStartTraining: () -> Void
+    let onViewStats: () -> Void
+
+    var body: some View {
+        HStack(spacing: 20) {
+            // Start Training button
+            Button(action: onStartTraining) {
+                HStack(spacing: 8) {
+                    Image(systemName: "figure.walk")
+                        .font(.system(size: 20))
+                    Text("Start Training")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.green.opacity(0.8),
+                            Color.green.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+            .disabled(sessionState.isActive)
+            .opacity(sessionState.isActive ? 0.5 : 1.0)
+
+            // View Stats button
+            Button(action: onViewStats) {
+                HStack(spacing: 8) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 20))
+                    Text("View Stats")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue.opacity(0.8),
+                            Color.blue.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.blue.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .blue.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(red: 0.15, green: 0.15, blue: 0.15).opacity(0.85))
+                .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+        )
+    }
+}
+
 /// Displays dog name and level - Skyrim-style compass bar
 struct DogInfoPanel: View {
     let dogName: String
@@ -365,45 +445,94 @@ struct DogInfoPanel: View {
     }
 }
 
-/// Displays active training session information
+/// Displays active training session information - Skyrim quest-style
 struct SessionPanel: View {
     let sessionData: SessionData
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Training Session")
-                .font(.headline)
-            
+        VStack(spacing: 20) {
+            // Title banner
+            Text("⚔️ ACTIVE TRAINING ⚔️")
+                .font(.system(size: 20, weight: .bold, design: .serif))
+                .foregroundColor(.yellow)
+                .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Activity name
             Text(sessionData.activity)
-                .font(.title3)
-                .fontWeight(.bold)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Goal: \(sessionData.goal)")
-                    .font(.subheadline)
-                
-                Text("Tips: \(sessionData.tips)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                .font(.system(size: 28, weight: .bold, design: .serif))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+
+            // Goal
+            HStack {
+                Image(systemName: "target")
+                    .foregroundColor(.green)
+                Text(sessionData.goal)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.green)
             }
-            
-            // Rep counter
-            Text(sessionData.repCounterText)
-                .font(.system(size: 48, weight: .bold))
-                .foregroundColor(sessionData.isComplete ? .green : .primary)
-            
-            // Optional micro-suggestion
+
+            // Rep counter - BIG AND PROMINENT
+            VStack(spacing: 8) {
+                Text("PROGRESS")
+                    .font(.system(size: 14, weight: .semibold, design: .serif))
+                    .foregroundColor(.gray)
+
+                Text(sessionData.repCounterText)
+                    .font(.system(size: 56, weight: .bold, design: .serif))
+                    .foregroundColor(sessionData.isComplete ? .green : .yellow)
+                    .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: 10)
+            }
+            .padding(.vertical, 12)
+
+            // Tips
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundColor(.yellow)
+                    Text("Tips:")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                Text(sessionData.tips)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.3))
+            .cornerRadius(8)
+
+            // Suggestion (if any)
             if let suggestion = sessionData.currentSuggestion {
                 Text(suggestion)
-                    .font(.caption)
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.green)
+                    .padding(10)
+                    .background(Color.green.opacity(0.2))
+                    .cornerRadius(8)
                     .transition(.opacity)
             }
         }
-        .padding(40)
-        .frame(width: 400)
-        .background(.ultraThinMaterial)
+        .padding(30)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.95),
+                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.95)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+        )
         .cornerRadius(20)
+        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
     }
 }
 
