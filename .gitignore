@@ -13,3 +13,5 @@ count.txt
 .vinxi
 todos.json
 .kiro
+# Allow markdown files in .kiro directories
+!.kiro/**/*.md
