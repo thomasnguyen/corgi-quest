@@ -24,22 +24,55 @@ struct TrainingRoomView: View {
     private let repMarkDebounceInterval: TimeInterval = 0.5
     
     var body: some View {
-        ZStack {
-            // 3D Environment with debug objects
-            RealityView { content in
-                setupEnvironment(content: content)
-                setupPedestal(content: content, dogName: viewModel.dogName)
+        RealityView { content, attachments in
+            setupEnvironment(content: content)
+            setupPedestal(content: content, dogName: viewModel.dogName)
+
+            // Create anchor entities for each panel positioned around the user
+            // These will be positioned relative to the user's head
+
+            // Goals panel - top center
+            if let goalsAttachment = attachments.entity(for: "goals") {
+                goalsAttachment.position = [0, 0.4, -1.5] // Slightly above, 1.5m forward
+                content.add(goalsAttachment)
             }
 
-            // Floating UI Panels overlay
-            FloatingPanelsView(
-                dogName: viewModel.dogName,
-                stats: viewModel.stats,
-                goals: viewModel.goals,
-                activities: viewModel.activities,
-                weeklyXP: viewModel.weeklyXP,
-                sessionState: $sessionState
-            )
+            // Stats panel - left
+            if let statsAttachment = attachments.entity(for: "stats") {
+                statsAttachment.position = [-0.8, 0, -1.5] // Left side
+                content.add(statsAttachment)
+            }
+
+            // Activities panel - right
+            if let activitiesAttachment = attachments.entity(for: "activities") {
+                activitiesAttachment.position = [0.8, 0, -1.5] // Right side
+                content.add(activitiesAttachment)
+            }
+
+            // Weekly chart - bottom center
+            if let chartAttachment = attachments.entity(for: "chart") {
+                chartAttachment.position = [0, -0.3, -1.5] // Slightly below
+                content.add(chartAttachment)
+            }
+        } attachments: {
+            // Define attachments for each panel
+            if let goals = viewModel.goals {
+                Attachment(id: "goals") {
+                    GoalsPanel(goals: goals)
+                }
+            }
+
+            Attachment(id: "stats") {
+                StatOrbsPanel(stats: viewModel.stats)
+            }
+
+            Attachment(id: "activities") {
+                ActivitiesPanel(activities: viewModel.activities)
+            }
+
+            Attachment(id: "chart") {
+                WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
+            }
         }
         .onAppear {
             // Fetch initial data and start polling
