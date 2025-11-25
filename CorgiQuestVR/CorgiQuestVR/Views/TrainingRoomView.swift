@@ -32,17 +32,19 @@ struct TrainingRoomView: View {
             }
 
             // HUD Overlay - follows your view like a video game HUD
+            // Make panels MUCH larger and more visible
             VStack(spacing: 0) {
                 // Top HUD area - Goals
                 HStack {
                     Spacer()
                     if let goals = viewModel.goals {
                         GoalsPanel(goals: goals)
-                            .frame(width: 300)
+                            .frame(width: 500)
+                            .scaleEffect(1.5) // Make 50% larger
                     }
                     Spacer()
                 }
-                .padding(.top, 40)
+                .padding(.top, 80)
 
                 Spacer()
 
@@ -50,16 +52,18 @@ struct TrainingRoomView: View {
                 HStack {
                     Spacer()
                     WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
-                        .frame(width: 450)
+                        .frame(width: 600)
+                        .scaleEffect(1.5) // Make 50% larger
                     Spacer()
                 }
-                .padding(.bottom, 40)
+                .padding(.bottom, 80)
             }
 
             // Left HUD area - Stats
             HStack {
                 StatOrbsPanel(stats: viewModel.stats)
-                    .padding(.leading, 30)
+                    .scaleEffect(1.5) // Make 50% larger
+                    .padding(.leading, 60)
                 Spacer()
             }
 
@@ -67,8 +71,19 @@ struct TrainingRoomView: View {
             HStack {
                 Spacer()
                 ActivitiesPanel(activities: viewModel.activities)
-                    .frame(width: 320)
-                    .padding(.trailing, 30)
+                    .frame(width: 450)
+                    .scaleEffect(1.5) // Make 50% larger
+                    .padding(.trailing, 60)
+            }
+
+            // DEBUG: Add a centered red test box to verify HUD is rendering
+            VStack {
+                Text("HUD TEST - Can you see this?")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(30)
+                    .background(Color.red)
+                    .cornerRadius(20)
             }
         }
         .onAppear {
