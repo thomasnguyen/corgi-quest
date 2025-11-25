@@ -130,7 +130,7 @@ class TrainingRoomViewModel: ObservableObject {
     }
     
     /// Stops the polling timer and cleans up resources
-    nonisolated func stopPolling() {
+    func stopPolling() {
         pollingTimer?.invalidate()
         pollingTimer = nil
     }
