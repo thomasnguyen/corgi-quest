@@ -135,8 +135,12 @@ struct TrainingRoomView: View {
             // Session panel (only appears during active training)
             if case .active(let sessionData) = sessionState {
                 Attachment(id: "session") {
-                    SessionPanel(sessionData: sessionData)
-                        .frame(width: 450)
+                    SessionPanel(
+                        sessionData: sessionData,
+                        onMarkRep: handleMarkRep,
+                        onEndSession: handleEndSessionButton
+                    )
+                    .frame(width: 450)
                 }
             }
 
@@ -292,26 +296,40 @@ struct TrainingRoomView: View {
             print("Ignoring 'end session' - no active session")
             return
         }
-        
+
         // Set state to ending
         sessionState = .ending
-        
+
         print("Ending session with description: \(description)")
         print("Completed \(sessionData.currentReps) reps")
-        
+
         // In production, this would:
         // 1. Call NetworkService.submitVoiceLog(text: description)
         // 2. Wait for backend to parse and award XP
         // 3. Refresh the VR dashboard
         // 4. Return to idle state
-        
+
         // For now, simulate a brief delay then return to idle
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             sessionState = .idle
             print("Session ended, returned to idle")
         }
     }
-    
+
+    /// Handle End Session button press
+    private func handleEndSessionButton() {
+        // Only process if there's an active session
+        guard case .active(let sessionData) = sessionState else {
+            print("Ignoring 'end session' button - no active session")
+            return
+        }
+
+        // In production, this would prompt the user to describe the session
+        // For now, just end with a default description
+        let description = "Completed \(sessionData.currentReps) reps of \(sessionData.activity)"
+        handleEndSession(description: description)
+    }
+
     // MARK: - Environment Setup
     
     /// Creates a Skyrim-inspired training hall with warm torchlight

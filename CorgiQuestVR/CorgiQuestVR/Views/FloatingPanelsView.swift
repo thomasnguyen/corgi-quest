@@ -494,6 +494,13 @@ struct DogInfoPanel: View {
 /// Displays active training session information - Skyrim quest-style
 struct SessionPanel: View {
     let sessionData: SessionData
+    let onMarkRep: () -> Void
+    let onEndSession: () -> Void
+
+    @State private var currentTime = Date()
+
+    // Timer to update elapsed time every second
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -502,6 +509,18 @@ struct SessionPanel: View {
                 .font(.system(size: 20, weight: .bold, design: .serif))
                 .foregroundColor(.yellow)
                 .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+
+            // Elapsed timer
+            HStack(spacing: 8) {
+                Image(systemName: "clock.fill")
+                    .foregroundColor(.cyan)
+                Text(sessionData.elapsedTimeText(currentTime: currentTime))
+                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.cyan)
+            }
+            .onReceive(timer) { _ in
+                currentTime = Date()
+            }
 
             Divider()
                 .background(Color.yellow.opacity(0.5))
@@ -560,6 +579,72 @@ struct SessionPanel: View {
                     .background(Color.green.opacity(0.2))
                     .cornerRadius(8)
                     .transition(.opacity)
+            }
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Action buttons
+            HStack(spacing: 16) {
+                // Mark Rep button
+                Button(action: onMarkRep) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20))
+                        Text("Mark Rep")
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.green.opacity(0.8),
+                                Color.green.opacity(0.6)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                    )
+                    .cornerRadius(10)
+                    .shadow(color: .green.opacity(0.4), radius: 6, x: 0, y: 3)
+                }
+                .buttonStyle(.plain)
+
+                // End Session button
+                Button(action: onEndSession) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.system(size: 20))
+                        Text("End Session")
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.red.opacity(0.8),
+                                Color.red.opacity(0.6)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.red.opacity(0.9), lineWidth: 2)
+                    )
+                    .cornerRadius(10)
+                    .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 3)
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(30)
