@@ -21,21 +21,21 @@ struct FloatingPanelsView: View {
         ZStack {
             // Left Panel: Stat Orbs
             StatOrbsPanel(stats: stats)
-                .offset(x: -400, y: 0)
+                .offset(x: -500, y: -50)
 
             // Top Panel: Today's Goals
             if let goals = goals {
                 GoalsPanel(goals: goals)
-                    .offset(x: 0, y: 300)
+                    .offset(x: 0, y: -250)
             }
 
             // Right Panel: Recent Activities
             ActivitiesPanel(activities: activities)
-                .offset(x: 400, y: 0)
+                .offset(x: 500, y: -50)
 
             // Bottom Panel: Weekly XP Chart
             WeeklyChartPanel(weeklyXP: weeklyXP)
-                .offset(x: 0, y: -300)
+                .offset(x: 0, y: 200)
 
             // Center Panel: Session (conditional)
             if case .active(let sessionData) = sessionState {
