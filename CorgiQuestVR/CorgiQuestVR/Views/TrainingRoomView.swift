@@ -37,25 +37,29 @@ struct TrainingRoomView: View {
 
             // Goals panel - top center, 1.5m forward
             if let goalsAttachment = attachments.entity(for: "goals") {
-                goalsAttachment.position = [0, 0.35, -1.5] // Slightly above center
+                goalsAttachment.position = [0, 0.4, -1.2] // Slightly above center, closer
+                goalsAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
                 headAnchor.addChild(goalsAttachment)
             }
 
             // Stats panel - left side
             if let statsAttachment = attachments.entity(for: "stats") {
-                statsAttachment.position = [-0.9, -0.1, -1.5] // Left side, slightly down
+                statsAttachment.position = [-0.75, -0.05, -1.2] // Left side, closer
+                statsAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
                 headAnchor.addChild(statsAttachment)
             }
 
             // Activities panel - right side
             if let activitiesAttachment = attachments.entity(for: "activities") {
-                activitiesAttachment.position = [0.9, -0.1, -1.5] // Right side, slightly down
+                activitiesAttachment.position = [0.75, -0.05, -1.2] // Right side, closer
+                activitiesAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
                 headAnchor.addChild(activitiesAttachment)
             }
 
             // Weekly chart - bottom center
             if let chartAttachment = attachments.entity(for: "chart") {
-                chartAttachment.position = [0, -0.4, -1.5] // Below center
+                chartAttachment.position = [0, -0.35, -1.2] // Below center, closer
+                chartAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
                 headAnchor.addChild(chartAttachment)
             }
         } attachments: {
