@@ -87,7 +87,7 @@
   - Add smooth animation on goal updates
   - _Requirements: 2.3_
 
-- [x] 4.4 Create ActivitiesPanel
+  - [x] 4.4 Create ActivitiesPanel
   - Display last 5 activities in vertical list
   - Show activity name, XP breakdown, timestamp
   - Show who logged the activity
@@ -106,8 +106,8 @@
   - **Property 2: Data changes trigger animations**
   - **Validates: Requirements 3.1, 3.2**
 
-- [ ] 5. Implement Coach Mode session UI
-- [ ] 5.1 Create SessionPanel component
+- [x] 5. Implement Coach Mode session UI
+- [x] 5.1 Create SessionPanel component
   - Display "Training Session" title
   - Show goal description
   - Show training tips
@@ -116,14 +116,14 @@
   - Apply .ultraThinMaterial background
   - _Requirements: 4.2, 5.2_
 
-- [ ] 5.2 Add session state management to TrainingRoomView
+- [x] 5.2 Add session state management to TrainingRoomView
   - Add @State for sessionState
   - Pass sessionState binding to FloatingPanelsView
   - Conditionally render SessionPanel based on state
   - _Requirements: 4.1, 4.2_
 
-- [ ] 6. Implement voice command system
-- [ ] 6.1 Create VoiceCommandHandler class
+- [x] 6. Implement voice command system
+- [x] 6.1 Create VoiceCommandHandler class
   - Set up SFSpeechRecognizer
   - Implement startListening() method
   - Implement parseCommand() for three command types
@@ -135,7 +135,7 @@
   - **Property 3: Voice command activation**
   - **Validates: Requirements 4.1**
 
-- [ ] 6.3 Integrate voice commands with TrainingRoomView
+- [x] 6.3 Integrate voice commands with TrainingRoomView
   - Add @StateObject for VoiceCommandHandler
   - Handle .startCoachMode command to activate session
   - Handle .markRep command to increment counter
