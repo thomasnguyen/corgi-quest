@@ -24,54 +24,51 @@ struct TrainingRoomView: View {
     private let repMarkDebounceInterval: TimeInterval = 0.5
     
     var body: some View {
-        RealityView { content, attachments in
-            setupEnvironment(content: content)
-            setupPedestal(content: content, dogName: viewModel.dogName)
-
-            // Create anchor entities for each panel positioned around the user
-            // These will be positioned relative to the user's head
-
-            // Goals panel - top center
-            if let goalsAttachment = attachments.entity(for: "goals") {
-                goalsAttachment.position = [0, 0.4, -1.5] // Slightly above, 1.5m forward
-                content.add(goalsAttachment)
+        ZStack {
+            // 3D Environment (background)
+            RealityView { content in
+                setupEnvironment(content: content)
+                setupPedestal(content: content, dogName: viewModel.dogName)
             }
 
-            // Stats panel - left
-            if let statsAttachment = attachments.entity(for: "stats") {
-                statsAttachment.position = [-0.8, 0, -1.5] // Left side
-                content.add(statsAttachment)
-            }
-
-            // Activities panel - right
-            if let activitiesAttachment = attachments.entity(for: "activities") {
-                activitiesAttachment.position = [0.8, 0, -1.5] // Right side
-                content.add(activitiesAttachment)
-            }
-
-            // Weekly chart - bottom center
-            if let chartAttachment = attachments.entity(for: "chart") {
-                chartAttachment.position = [0, -0.3, -1.5] // Slightly below
-                content.add(chartAttachment)
-            }
-        } attachments: {
-            // Define attachments for each panel
-            if let goals = viewModel.goals {
-                Attachment(id: "goals") {
-                    GoalsPanel(goals: goals)
+            // HUD Overlay - follows your view like a video game HUD
+            VStack(spacing: 0) {
+                // Top HUD area - Goals
+                HStack {
+                    Spacer()
+                    if let goals = viewModel.goals {
+                        GoalsPanel(goals: goals)
+                            .frame(width: 300)
+                    }
+                    Spacer()
                 }
+                .padding(.top, 40)
+
+                Spacer()
+
+                // Bottom HUD area - Weekly Chart
+                HStack {
+                    Spacer()
+                    WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
+                        .frame(width: 450)
+                    Spacer()
+                }
+                .padding(.bottom, 40)
             }
 
-            Attachment(id: "stats") {
+            // Left HUD area - Stats
+            HStack {
                 StatOrbsPanel(stats: viewModel.stats)
+                    .padding(.leading, 30)
+                Spacer()
             }
 
-            Attachment(id: "activities") {
+            // Right HUD area - Activities
+            HStack {
+                Spacer()
                 ActivitiesPanel(activities: viewModel.activities)
-            }
-
-            Attachment(id: "chart") {
-                WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
+                    .frame(width: 320)
+                    .padding(.trailing, 30)
             }
         }
         .onAppear {
