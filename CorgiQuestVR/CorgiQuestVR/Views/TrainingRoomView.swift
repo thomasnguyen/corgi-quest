@@ -12,9 +12,9 @@ import RealityKit
 struct TrainingRoomView: View {
     // ViewModel for state management and data fetching
     @StateObject private var viewModel = TrainingRoomViewModel()
-    
-    // Session state for Coach Mode
-    @State private var sessionState: SessionState = .idle
+
+    // View state for HUD management
+    @State private var viewState: ViewState = .minimal
 
     // Voice command handler - DISABLED for simulator (microphone permissions hang)
     // @StateObject private var voiceCommandHandler = VoiceCommandHandler()
@@ -39,33 +39,8 @@ struct TrainingRoomView: View {
             // Position HUD panels relative to head (in head-local space)
             // These will follow as the user looks around
 
-            // Goals panel - top center, 1.5m forward
-            if let goalsAttachment = attachments.entity(for: "goals") {
-                goalsAttachment.position = [0, 0.4, -1.2] // Slightly above center, closer
-                goalsAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
-                headAnchor.addChild(goalsAttachment)
-            }
-
-            // Stats panel - left side
-            if let statsAttachment = attachments.entity(for: "stats") {
-                statsAttachment.position = [-0.75, -0.05, -1.2] // Left side, closer
-                statsAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
-                headAnchor.addChild(statsAttachment)
-            }
-
-            // Activities panel - right side
-            if let activitiesAttachment = attachments.entity(for: "activities") {
-                activitiesAttachment.position = [0.75, -0.05, -1.2] // Right side, closer
-                activitiesAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
-                headAnchor.addChild(activitiesAttachment)
-            }
-
-            // Weekly chart - bottom center
-            if let chartAttachment = attachments.entity(for: "chart") {
-                chartAttachment.position = [0, -0.35, -1.2] // Below center, closer
-                chartAttachment.scale = [1.5, 1.5, 1.5] // Make 50% larger
-                headAnchor.addChild(chartAttachment)
-            }
+            // Only show these panels in stats view
+            // (Hidden by default for minimal HUD)
 
             // Dog Name/Level panel - top center (like Skyrim compass bar)
             if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
@@ -74,18 +49,68 @@ struct TrainingRoomView: View {
                 headAnchor.addChild(dogInfoAttachment)
             }
 
+            // Streak display - just below dog info (only if streak > 0)
+            if let streakAttachment = attachments.entity(for: "streak") {
+                streakAttachment.position = [0, 0.2, -1.2] // Below dog info
+                streakAttachment.scale = [1.6, 1.6, 1.6]
+                headAnchor.addChild(streakAttachment)
+            }
+
             // Quick Actions panel - bottom center (Skyrim-style action bar)
-            if let actionsAttachment = attachments.entity(for: "quickActions") {
-                actionsAttachment.position = [0, -0.55, -1.2] // Bottom center
+            // Only show in minimal view
+            if !viewState.isTraining && !viewState.isSummary, let actionsAttachment = attachments.entity(for: "quickActions") {
+                actionsAttachment.position = [0, -0.4, -1.2] // Bottom center
                 actionsAttachment.scale = [1.6, 1.6, 1.6]
                 headAnchor.addChild(actionsAttachment)
             }
 
             // Session Panel - center (shows during active training)
-            if case .active = sessionState, let sessionAttachment = attachments.entity(for: "session") {
-                sessionAttachment.position = [0, 0.05, -1.2] // Center
+            if case .training(let sessionData) = viewState, let sessionAttachment = attachments.entity(for: "session") {
+                sessionAttachment.position = [0, 0.0, -1.2] // Center
                 sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
                 headAnchor.addChild(sessionAttachment)
+            }
+
+            // Stats Screen - full overlay (shows when stats view is active)
+            if viewState.isStats, let statsScreenAttachment = attachments.entity(for: "statsScreen") {
+                statsScreenAttachment.position = [0, 0.0, -1.2] // Center
+                statsScreenAttachment.scale = [1.8, 1.8, 1.8]
+                statsScreenAttachment.opacity = 0
+                headAnchor.addChild(statsScreenAttachment)
+
+                // Fade in animation
+                var transform = statsScreenAttachment.transform
+                transform.scale = [1.5, 1.5, 1.5]
+                statsScreenAttachment.move(to: transform, relativeTo: headAnchor, duration: 0.3, timingFunction: .easeInOut)
+
+                // Fade in opacity
+                Task {
+                    for i in 0...10 {
+                        try? await Task.sleep(nanoseconds: 30_000_000) // 30ms
+                        statsScreenAttachment.opacity = Float(i) / 10.0
+                    }
+                }
+            }
+
+            // Session Summary - center (shows after training ends)
+            if case .summary = viewState, let summaryAttachment = attachments.entity(for: "summary") {
+                summaryAttachment.position = [0, 0.0, -1.2] // Center
+                summaryAttachment.scale = [1.7, 1.7, 1.7]
+                summaryAttachment.opacity = 0
+                headAnchor.addChild(summaryAttachment)
+
+                // Fade in animation
+                var transform = summaryAttachment.transform
+                transform.scale = [1.4, 1.4, 1.4]
+                summaryAttachment.move(to: transform, relativeTo: headAnchor, duration: 0.3, timingFunction: .easeInOut)
+
+                // Fade in opacity
+                Task {
+                    for i in 0...10 {
+                        try? await Task.sleep(nanoseconds: 30_000_000) // 30ms
+                        summaryAttachment.opacity = Float(i) / 10.0
+                    }
+                }
             }
 
             // XP Notifications - float up on right side
@@ -95,45 +120,48 @@ struct TrainingRoomView: View {
                 headAnchor.addChild(xpNotifAttachment)
             }
         } attachments: {
-            // Define attachments for each panel
-            if let goals = viewModel.goals {
-                Attachment(id: "goals") {
-                    GoalsPanel(goals: goals)
-                        .frame(width: 400)
-                }
-            }
-
-            Attachment(id: "stats") {
-                StatOrbsPanel(stats: viewModel.stats)
-                    .frame(width: 250)
-            }
-
-            Attachment(id: "activities") {
-                ActivitiesPanel(activities: viewModel.activities)
-                    .frame(width: 350)
-            }
-
-            Attachment(id: "chart") {
-                WeeklyChartPanel(weeklyXP: viewModel.weeklyXP)
-                    .frame(width: 500)
-            }
-
+            // Dog Info (always visible)
             Attachment(id: "dogInfo") {
                 DogInfoPanel(dogName: viewModel.dogName, level: viewModel.dogLevel)
                     .frame(width: 450)
             }
 
-            Attachment(id: "quickActions") {
-                QuickActionsPanel(
-                    sessionState: sessionState,
-                    onStartTraining: startTrainingSession,
-                    onViewStats: viewFullStats
-                )
-                .frame(width: 500)
+            // Streak display (only if streak > 0)
+            if let goals = viewModel.goals, goals.streak > 0 {
+                Attachment(id: "streak") {
+                    StreakDisplayPanel(streak: goals.streak)
+                        .frame(width: 300)
+                }
             }
 
-            // Session panel (only appears during active training)
-            if case .active(let sessionData) = sessionState {
+            // Quick Actions (only in minimal/stats view)
+            if !viewState.isTraining && !viewState.isSummary {
+                Attachment(id: "quickActions") {
+                    QuickActionsPanel(
+                        isStatsOpen: viewState.isStats,
+                        onStartTraining: startTrainingSession,
+                        onViewStats: toggleStatsView
+                    )
+                    .frame(width: 500)
+                }
+            }
+
+            // Stats Screen (full overlay)
+            if viewState.isStats {
+                Attachment(id: "statsScreen") {
+                    StatsScreenView(
+                        stats: viewModel.stats,
+                        goals: viewModel.goals,
+                        activities: viewModel.activities,
+                        weeklyXP: viewModel.weeklyXP,
+                        onClose: closeStatsView
+                    )
+                    .frame(width: 800)
+                }
+            }
+
+            // Session panel (only during active training)
+            if case .training(let sessionData) = viewState {
                 Attachment(id: "session") {
                     SessionPanel(
                         sessionData: sessionData,
@@ -141,6 +169,17 @@ struct TrainingRoomView: View {
                         onEndSession: handleEndSessionButton
                     )
                     .frame(width: 450)
+                }
+            }
+
+            // Session Summary (after training ends)
+            if case .summary(let summary) = viewState {
+                Attachment(id: "summary") {
+                    SessionSummaryView(
+                        summary: summary,
+                        onDone: returnToMinimal
+                    )
+                    .frame(width: 500)
                 }
             }
 
@@ -196,7 +235,7 @@ struct TrainingRoomView: View {
         }
     }
 
-    // MARK: - Quick Actions
+    // MARK: - View State Actions
 
     /// Start a training session
     private func startTrainingSession() {
@@ -207,15 +246,33 @@ struct TrainingRoomView: View {
             tips: "Keep leash loose, reward calm behavior",
             targetReps: 5,
             currentReps: 0,
+            startTime: Date(),
             currentSuggestion: nil
         )
-        sessionState = .active(sessionData)
+        withAnimation(.easeInOut(duration: 0.3)) {
+            viewState = .training(sessionData)
+        }
     }
 
-    /// View full stats (placeholder for now)
-    private func viewFullStats() {
-        // TODO: In Phase 3, open a detailed stats view
-        print("View Full Stats tapped")
+    /// Toggle stats view
+    private func toggleStatsView() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            viewState = viewState.isStats ? .minimal : .stats
+        }
+    }
+
+    /// Close stats view
+    private func closeStatsView() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            viewState = .minimal
+        }
+    }
+
+    /// Return to minimal view
+    private func returnToMinimal() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            viewState = .minimal
+        }
     }
 
     // MARK: - Voice Command Handling
@@ -246,80 +303,85 @@ struct TrainingRoomView: View {
             tips: "Keep leash loose, reward calm behavior",
             targetReps: 5,
             currentReps: 0,
+            startTime: Date(),
             currentSuggestion: nil
         )
-        
-        sessionState = .active(sessionData)
+
+        viewState = .training(sessionData)
         print("Started coach mode for activity: \(activity)")
     }
     
     /// Handle "Mark rep" command
     private func handleMarkRep() {
         // Only process if there's an active session
-        guard case .active(var sessionData) = sessionState else {
+        guard case .training(var sessionData) = viewState else {
             print("Ignoring 'mark rep' - no active session")
             return
         }
-        
+
         // Debounce: ignore if less than 500ms since last mark
         let now = Date()
         guard now.timeIntervalSince(lastRepMarkTime) >= repMarkDebounceInterval else {
             print("Ignoring 'mark rep' - too soon after last mark")
             return
         }
-        
+
         // Increment rep counter
         sessionData.markRep()
         lastRepMarkTime = now
-        
-        // Update session state
-        sessionState = .active(sessionData)
-        
+
         print("Marked rep: \(sessionData.repCounterText)")
-        
+
         // Optionally add micro-suggestion
         if sessionData.currentReps < sessionData.targetReps {
-            var updatedData = sessionData
-            updatedData.currentSuggestion = "Great rep! Keep going!"
-            sessionState = .active(updatedData)
+            sessionData.currentSuggestion = "Great rep! Keep going!"
         } else {
-            var updatedData = sessionData
-            updatedData.currentSuggestion = "Goal reached! 🎉"
-            sessionState = .active(updatedData)
+            sessionData.currentSuggestion = "Goal reached! 🎉"
+        }
+
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            viewState = .training(sessionData)
         }
     }
     
     /// Handle "End session: [description]" command
     private func handleEndSession(description: String) {
         // Only process if there's an active session
-        guard case .active(let sessionData) = sessionState else {
+        guard case .training(let sessionData) = viewState else {
             print("Ignoring 'end session' - no active session")
             return
         }
 
-        // Set state to ending
-        sessionState = .ending
-
         print("Ending session with description: \(description)")
         print("Completed \(sessionData.currentReps) reps")
 
-        // In production, this would:
-        // 1. Call NetworkService.submitVoiceLog(text: description)
-        // 2. Wait for backend to parse and award XP
-        // 3. Refresh the VR dashboard
-        // 4. Return to idle state
+        // Calculate session duration
+        let duration = Date().timeIntervalSince(sessionData.startTime)
 
-        // For now, simulate a brief delay then return to idle
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            sessionState = .idle
-            print("Session ended, returned to idle")
+        // Create summary with sample XP data
+        // In production, this would come from the backend
+        let summary = SessionSummary(
+            activity: sessionData.activity,
+            duration: duration,
+            repsCompleted: sessionData.currentReps,
+            repsTarget: sessionData.targetReps,
+            xpGained: [
+                SessionSummary.XPGain(statType: "PHY", amount: 25, color: "red"),
+                SessionSummary.XPGain(statType: "IMP", amount: 15, color: "purple")
+            ],
+            startTime: sessionData.startTime
+        )
+
+        // Show summary view
+        withAnimation(.easeInOut(duration: 0.3)) {
+            viewState = .summary(summary)
         }
     }
 
     /// Handle End Session button press
     private func handleEndSessionButton() {
         // Only process if there's an active session
-        guard case .active(let sessionData) = sessionState else {
+        guard case .training(let sessionData) = viewState else {
             print("Ignoring 'end session' button - no active session")
             return
         }

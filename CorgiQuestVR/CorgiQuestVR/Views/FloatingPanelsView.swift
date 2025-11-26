@@ -367,7 +367,7 @@ struct XPNotificationsView: View {
 
 /// Quick action buttons - Skyrim-style action bar
 struct QuickActionsPanel: View {
-    let sessionState: SessionState
+    let isStatsOpen: Bool
     let onStartTraining: () -> Void
     let onViewStats: () -> Void
 
@@ -402,15 +402,13 @@ struct QuickActionsPanel: View {
                 .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
             }
             .buttonStyle(.plain)
-            .disabled(sessionState.isActive)
-            .opacity(sessionState.isActive ? 0.5 : 1.0)
 
             // View Stats button
             Button(action: onViewStats) {
                 HStack(spacing: 8) {
-                    Image(systemName: "chart.bar.fill")
+                    Image(systemName: isStatsOpen ? "xmark.circle.fill" : "chart.bar.fill")
                         .font(.system(size: 20))
-                    Text("View Stats")
+                    Text(isStatsOpen ? "Close Stats" : "View Stats")
                         .font(.system(size: 18, weight: .semibold, design: .serif))
                 }
                 .foregroundColor(.white)
@@ -664,6 +662,304 @@ struct SessionPanel: View {
         )
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+    }
+}
+
+/// Streak display - floating below dog info
+struct StreakDisplayPanel: View {
+    let streak: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("🔥")
+                .font(.system(size: 36))
+                .shadow(color: .orange, radius: 10)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(streak) Day Streak!")
+                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .foregroundColor(.orange)
+                Text("Keep Training!")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.yellow)
+            }
+            Text("🔥")
+                .font(.system(size: 36))
+                .shadow(color: .orange, radius: 10)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.orange.opacity(0.2))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.orange, lineWidth: 2)
+                )
+        )
+        .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+    }
+}
+
+/// Full stats screen overlay
+struct StatsScreenView: View {
+    let stats: [StatData]
+    let goals: GoalData?
+    let activities: [ActivityData]
+    let weeklyXP: [DayXP]
+    let onClose: () -> Void
+    @State private var isVisible = false
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Text("📊 TRAINING STATS")
+                    .font(.system(size: 24, weight: .bold, design: .serif))
+                    .foregroundColor(.yellow)
+                Spacer()
+            }
+            .padding(.bottom, 8)
+
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Stats and Weekly Chart side by side
+                    HStack(alignment: .top, spacing: 20) {
+                        // Stats column
+                        VStack(spacing: 16) {
+                            ForEach(stats) { stat in
+                                StatOrbView(stat: stat)
+                            }
+                        }
+                        .frame(maxWidth: 200)
+
+                        // Charts column
+                        VStack(spacing: 20) {
+                            WeeklyChartPanel(weeklyXP: weeklyXP)
+
+                            if let goals = goals {
+                                GoalsPanel(goals: goals)
+                            }
+                        }
+                    }
+
+                    // Recent Activities
+                    ActivitiesPanel(activities: activities)
+                }
+            }
+
+            // Close button
+            Button(action: onClose) {
+                HStack(spacing: 8) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
+                    Text("Close")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.red.opacity(0.8),
+                            Color.red.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.red.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .red.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(30)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.98),
+                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.98)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+        )
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+        .scaleEffect(isVisible ? 1.0 : 0.9)
+        .opacity(isVisible ? 1.0 : 0.0)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isVisible = true
+            }
+        }
+    }
+}
+
+/// Session summary view - shown after training ends
+struct SessionSummaryView: View {
+    let summary: SessionSummary
+    let onDone: () -> Void
+    @State private var isVisible = false
+
+    var body: some View {
+        VStack(spacing: 24) {
+            // Celebration header
+            Text("🎉 TRAINING COMPLETE! 🎉")
+                .font(.system(size: 24, weight: .bold, design: .serif))
+                .foregroundColor(.green)
+                .shadow(color: .green.opacity(0.6), radius: 10)
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Activity name
+            Text(summary.activity)
+                .font(.system(size: 28, weight: .bold, design: .serif))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+
+            // Session stats
+            HStack(spacing: 30) {
+                VStack(spacing: 4) {
+                    Image(systemName: "clock.fill")
+                        .foregroundColor(.cyan)
+                        .font(.system(size: 20))
+                    Text(summary.durationText)
+                        .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.cyan)
+                    Text("Duration")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+
+                VStack(spacing: 4) {
+                    Image(systemName: "target")
+                        .foregroundColor(.green)
+                        .font(.system(size: 20))
+                    Text("\(summary.repsCompleted)/\(summary.repsTarget)")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.green)
+                    Text("Reps")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // XP Earned
+            VStack(spacing: 12) {
+                Text("XP EARNED")
+                    .font(.system(size: 16, weight: .semibold, design: .serif))
+                    .foregroundColor(.gray)
+
+                ForEach(summary.xpGained, id: \.statType) { xp in
+                    HStack(spacing: 12) {
+                        Image(systemName: "bolt.fill")
+                            .foregroundColor(colorFromString(xp.color))
+                        Text("+\(xp.amount) \(xp.statType)")
+                            .font(.system(size: 20, weight: .bold, design: .serif))
+                            .foregroundColor(colorFromString(xp.color))
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(colorFromString(xp.color).opacity(0.2))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(colorFromString(xp.color), lineWidth: 2)
+                            )
+                    )
+                }
+
+                // Total XP
+                Text("Total: +\(summary.totalXP) XP")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.yellow)
+                    .padding(.top, 8)
+            }
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Done button
+            Button(action: onDone) {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                    Text("Done")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.green.opacity(0.8),
+                            Color.green.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(30)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.98),
+                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.98)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+        )
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+        .scaleEffect(isVisible ? 1.0 : 0.85)
+        .opacity(isVisible ? 1.0 : 0.0)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                isVisible = true
+            }
+        }
+    }
+
+    /// Helper to convert color string to Color
+    private func colorFromString(_ colorName: String) -> Color {
+        switch colorName.lowercased() {
+        case "red": return .red
+        case "blue": return .blue
+        case "purple": return .purple
+        case "green": return .green
+        case "yellow": return .yellow
+        case "orange": return .orange
+        default: return .white
+        }
     }
 }
 
