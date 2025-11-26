@@ -54,19 +54,19 @@ struct TrainingRoomView: View {
                     .frame(width: 450)
             }
 
-            // Streak display (only if streak > 0)
-            if let goals = viewModel.goals, goals.streak > 0 {
+            // Streak display (only if streak > 0 and NOT in stats view)
+            if let goals = viewModel.goals, goals.streak > 0, !viewState.isStats {
                 Attachment(id: "streak") {
                     StreakDisplayPanel(streak: goals.streak)
                         .frame(width: 300)
                 }
             }
 
-            // Quick Actions (only in minimal/stats view)
-            if !viewState.isTraining && !viewState.isSummary {
+            // Quick Actions (only in minimal view - hide during stats/training/summary)
+            if viewState == .minimal {
                 Attachment(id: "quickActions") {
                     QuickActionsPanel(
-                        isStatsOpen: viewState.isStats,
+                        isStatsOpen: false,
                         onStartTraining: startTrainingSession,
                         onViewStats: toggleStatsView
                     )

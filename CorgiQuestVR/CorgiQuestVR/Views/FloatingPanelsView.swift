@@ -1155,18 +1155,19 @@ struct StatsScreenView: View {
             }
         }
         .frame(width: 750, height: 600)
+        .clipShape(RoundedRectangle(cornerRadius: 28))
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
+                .fill(.ultraThinMaterial)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 28)
                 .strokeBorder(
-                    Color.white.opacity(0.2),
-                    lineWidth: 0.5
+                    Color.white.opacity(0.15),
+                    lineWidth: 1
                 )
         )
-        .shadow(color: .black.opacity(0.5), radius: 40, x: 0, y: 20)
+        .shadow(color: .black.opacity(0.4), radius: 30, x: 0, y: 15)
         .scaleEffect(isVisible ? 1.0 : 0.96)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
