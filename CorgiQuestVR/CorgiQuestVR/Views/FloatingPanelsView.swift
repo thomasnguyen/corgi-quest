@@ -866,7 +866,7 @@ struct StreakDisplayPanel: View {
     }
 }
 
-/// Full stats screen overlay - Dashboard style
+/// Full stats screen overlay - Apple-style design
 struct StatsScreenView: View {
     let stats: [StatData]
     let goals: GoalData?
@@ -878,103 +878,85 @@ struct StatsScreenView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header bar with close button
+            // Clean header with close button
             HStack {
-                Text("📊 STATS DASHBOARD")
-                    .font(.system(size: 22, weight: .bold, design: .serif))
+                Text("Statistics")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                    .tracking(1.5)
 
                 Spacer()
 
                 Button(action: onClose) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 24))
-                        Text("CLOSE")
-                            .font(.system(size: 14, weight: .bold, design: .serif))
-                            .tracking(0.5)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.red.opacity(0.8))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .strokeBorder(Color.red, lineWidth: 1.5)
-                            )
-                    )
-                    .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 2)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.white.opacity(0.6))
+                        .symbolRenderingMode(.hierarchical)
                 }
                 .buttonStyle(.plain)
             }
-            .padding(20)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.15, green: 0.15, blue: 0.15).opacity(0.95),
-                        Color(red: 0.1, green: 0.1, blue: 0.1).opacity(0.95)
-                    ]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .background(.ultraThinMaterial)
 
-            // Main dashboard content
+            // Content with proper spacing
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    // Stats Cards - Grid layout
-                    HStack(spacing: 12) {
+                VStack(spacing: 20) {
+                    // Stats cards in grid
+                    HStack(spacing: 14) {
                         ForEach(stats) { stat in
-                            VStack(spacing: 6) {
+                            VStack(spacing: 10) {
                                 ZStack {
                                     Circle()
-                                        .stroke(Color.gray.opacity(0.15), lineWidth: 5)
-                                        .frame(width: 60, height: 60)
+                                        .stroke(stat.color.opacity(0.15), lineWidth: 6)
+                                        .frame(width: 70, height: 70)
 
                                     Circle()
                                         .trim(from: 0, to: stat.xpProgress)
-                                        .stroke(stat.color, lineWidth: 5)
-                                        .frame(width: 60, height: 60)
+                                        .stroke(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    stat.color,
+                                                    stat.color.opacity(0.7)
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                                        )
+                                        .frame(width: 70, height: 70)
                                         .rotationEffect(.degrees(-90))
 
                                     Text("\(stat.level)")
-                                        .font(.system(size: 20, weight: .heavy))
-                                        .foregroundColor(stat.color)
+                                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.white)
                                 }
 
                                 Text(stat.type)
-                                    .font(.system(size: 11, weight: .bold))
+                                    .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.white)
 
                                 Text(stat.name)
-                                    .font(.system(size: 9))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.5))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 16)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(red: 0.12, green: 0.12, blue: 0.12).opacity(0.8))
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.ultraThinMaterial)
                             )
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
 
-                    // Two-column layout for chart and goals
-                    HStack(alignment: .top, spacing: 12) {
-                        // Chart Card
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("WEEKLY XP")
-                                    .font(.system(size: 13, weight: .bold, design: .serif))
-                                    .foregroundColor(.cyan)
-                                    .tracking(0.5)
-                                Spacer()
-                            }
+                    // Chart and Goals side by side
+                    HStack(alignment: .top, spacing: 14) {
+                        // Weekly XP Chart
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Weekly XP")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.white)
 
                             Chart(weeklyXP) { day in
                                 BarMark(
@@ -984,201 +966,214 @@ struct StatsScreenView: View {
                                 .foregroundStyle(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
-                                            Color.cyan.opacity(0.9),
-                                            Color.cyan.opacity(0.5)
+                                            Color.blue,
+                                            Color.cyan
                                         ]),
-                                        startPoint: .top,
-                                        endPoint: .bottom
+                                        startPoint: .bottom,
+                                        endPoint: .top
                                     )
                                 )
-                                .cornerRadius(3)
+                                .cornerRadius(6)
                             }
                             .chartXAxis {
                                 AxisMarks { _ in
                                     AxisValueLabel()
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(.gray)
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundStyle(.white.opacity(0.6))
                                 }
                             }
                             .chartYAxis {
                                 AxisMarks(position: .leading) { _ in
                                     AxisValueLabel()
-                                        .font(.system(size: 8))
-                                        .foregroundStyle(.gray)
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.white.opacity(0.4))
                                 }
                             }
-                            .frame(height: 110)
+                            .frame(height: 120)
                         }
-                        .padding(14)
+                        .padding(18)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.12, green: 0.12, blue: 0.12).opacity(0.8))
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.ultraThinMaterial)
                         )
 
-                        // Goals Card
+                        // Goals
                         if let goals = goals {
-                            VStack(alignment: .leading, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Text("GOALS")
-                                        .font(.system(size: 13, weight: .bold, design: .serif))
-                                        .foregroundColor(.green)
-                                        .tracking(0.5)
+                                    Text("Today's Goals")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(.white)
 
                                     Spacer()
 
                                     if goals.streak > 0 {
                                         HStack(spacing: 4) {
                                             Text("🔥")
-                                                .font(.system(size: 14))
+                                                .font(.system(size: 16))
                                             Text("\(goals.streak)")
-                                                .font(.system(size: 12, weight: .bold))
+                                                .font(.system(size: 13, weight: .semibold))
                                                 .foregroundColor(.orange)
                                         }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color.orange.opacity(0.15))
+                                        )
                                     }
                                 }
 
-                                VStack(spacing: 10) {
+                                VStack(spacing: 12) {
                                     // Physical
-                                    VStack(alignment: .leading, spacing: 4) {
+                                    VStack(alignment: .leading, spacing: 6) {
                                         HStack {
                                             Text("Physical")
-                                                .font(.system(size: 11, weight: .semibold))
-                                                .foregroundColor(.white.opacity(0.9))
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.8))
                                             Spacer()
                                             Text("\(goals.physical.current)/\(goals.physical.target)")
-                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                                .foregroundColor(.red)
+                                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                                .foregroundColor(.white)
                                         }
                                         GeometryReader { geo in
                                             ZStack(alignment: .leading) {
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .fill(Color.gray.opacity(0.15))
-                                                    .frame(height: 6)
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .fill(Color.red)
-                                                    .frame(width: geo.size.width * goals.physical.progress, height: 6)
+                                                Capsule()
+                                                    .fill(Color.white.opacity(0.1))
+                                                    .frame(height: 8)
+                                                Capsule()
+                                                    .fill(
+                                                        LinearGradient(
+                                                            gradient: Gradient(colors: [
+                                                                Color.red,
+                                                                Color.orange
+                                                            ]),
+                                                            startPoint: .leading,
+                                                            endPoint: .trailing
+                                                        )
+                                                    )
+                                                    .frame(width: geo.size.width * goals.physical.progress, height: 8)
                                             }
                                         }
-                                        .frame(height: 6)
+                                        .frame(height: 8)
                                     }
 
                                     // Mental
-                                    VStack(alignment: .leading, spacing: 4) {
+                                    VStack(alignment: .leading, spacing: 6) {
                                         HStack {
                                             Text("Mental")
-                                                .font(.system(size: 11, weight: .semibold))
-                                                .foregroundColor(.white.opacity(0.9))
+                                                .font(.system(size: 12, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.8))
                                             Spacer()
                                             Text("\(goals.mental.current)/\(goals.mental.target)")
-                                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                                .foregroundColor(.blue)
+                                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                                .foregroundColor(.white)
                                         }
                                         GeometryReader { geo in
                                             ZStack(alignment: .leading) {
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .fill(Color.gray.opacity(0.15))
-                                                    .frame(height: 6)
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .fill(Color.blue)
-                                                    .frame(width: geo.size.width * goals.mental.progress, height: 6)
+                                                Capsule()
+                                                    .fill(Color.white.opacity(0.1))
+                                                    .frame(height: 8)
+                                                Capsule()
+                                                    .fill(
+                                                        LinearGradient(
+                                                            gradient: Gradient(colors: [
+                                                                Color.blue,
+                                                                Color.cyan
+                                                            ]),
+                                                            startPoint: .leading,
+                                                            endPoint: .trailing
+                                                        )
+                                                    )
+                                                    .frame(width: geo.size.width * goals.mental.progress, height: 8)
                                             }
                                         }
-                                        .frame(height: 6)
+                                        .frame(height: 8)
                                     }
                                 }
                             }
-                            .padding(14)
+                            .padding(18)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(red: 0.12, green: 0.12, blue: 0.12).opacity(0.8))
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.ultraThinMaterial)
                             )
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 20)
 
-                    // Activities Card
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("RECENT ACTIVITIES")
-                            .font(.system(size: 13, weight: .bold, design: .serif))
-                            .foregroundColor(.purple)
-                            .tracking(0.5)
+                    // Recent Activities
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Recent Activities")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
 
-                        ForEach(activities.prefix(3)) { activity in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(activity.name)
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
+                        ForEach(activities.prefix(2)) { activity in
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(activity.name)
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
 
-                                HStack(spacing: 6) {
-                                    ForEach(activity.xpBreakdown, id: \.stat) { gain in
-                                        Text("\(gain.stat) +\(gain.amount)")
-                                            .font(.system(size: 9, weight: .semibold))
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 3)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 4)
-                                                    .fill(statColor(for: gain.stat).opacity(0.2))
-                                                    .overlay(
-                                                        RoundedRectangle(cornerRadius: 4)
-                                                            .strokeBorder(statColor(for: gain.stat).opacity(0.6), lineWidth: 0.5)
-                                                    )
-                                            )
-                                            .foregroundColor(statColor(for: gain.stat))
+                                    HStack(spacing: 6) {
+                                        ForEach(activity.xpBreakdown, id: \.stat) { gain in
+                                            Text("\(gain.stat) +\(gain.amount)")
+                                                .font(.system(size: 10, weight: .semibold))
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(statColor(for: gain.stat).opacity(0.2))
+                                                )
+                                                .foregroundColor(statColor(for: gain.stat))
+                                        }
                                     }
-
-                                    Spacer()
-
-                                    Text(activity.relativeTimestamp)
-                                        .font(.system(size: 9))
-                                        .foregroundColor(.gray)
                                 }
-                            }
-                            .padding(.vertical, 6)
 
-                            if activity.id != activities.prefix(3).last?.id {
+                                Spacer()
+
+                                Text(activity.relativeTimestamp)
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.4))
+                            }
+                            .padding(.vertical, 4)
+
+                            if activity.id != activities.prefix(2).last?.id {
                                 Divider()
-                                    .background(Color.gray.opacity(0.2))
+                                    .background(Color.white.opacity(0.1))
                             }
                         }
                     }
-                    .padding(14)
+                    .padding(18)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(red: 0.12, green: 0.12, blue: 0.12).opacity(0.8))
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.ultraThinMaterial)
                     )
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
             }
         }
-        .frame(width: 700, height: 550)
+        .frame(width: 750, height: 600)
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 0.05, green: 0.05, blue: 0.05).opacity(0.98))
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 28)
                 .strokeBorder(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.white.opacity(0.15),
-                            Color.white.opacity(0.05)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
+                    Color.white.opacity(0.2),
+                    lineWidth: 0.5
                 )
         )
-        .shadow(color: .black.opacity(0.8), radius: 20, x: 0, y: 10)
-        .scaleEffect(isVisible ? 1.0 : 0.94)
+        .shadow(color: .black.opacity(0.5), radius: 40, x: 0, y: 20)
+        .scaleEffect(isVisible ? 1.0 : 0.96)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 isVisible = true
             }
-            withAnimation(.easeInOut(duration: 0.8).delay(0.2)) {
+            withAnimation(.easeInOut(duration: 1.0).delay(0.3)) {
                 animateChart = true
             }
         }
