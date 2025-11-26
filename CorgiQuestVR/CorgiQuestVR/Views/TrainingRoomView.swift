@@ -263,8 +263,10 @@ struct TrainingRoomView: View {
         // Optionally add micro-suggestion
         if sessionData.currentReps < sessionData.targetReps {
             sessionData.currentSuggestion = "Great rep! Keep going!"
+        } else if sessionData.currentReps == sessionData.targetReps {
+            sessionData.currentSuggestion = "Goal reached! 🎉 Keep going for bonus XP!"
         } else {
-            sessionData.currentSuggestion = "Goal reached! 🎉"
+            sessionData.currentSuggestion = "Amazing! +\(sessionData.currentReps - sessionData.targetReps) bonus reps! 💪"
         }
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {

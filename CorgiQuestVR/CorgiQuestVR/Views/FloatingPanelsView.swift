@@ -540,9 +540,9 @@ struct SessionPanel: View {
 
             // Rep counter - BIG AND PROMINENT
             VStack(spacing: 8) {
-                Text("PROGRESS")
+                Text(sessionData.isComplete ? "BONUS REPS! 🎉" : "PROGRESS")
                     .font(.system(size: 14, weight: .semibold, design: .serif))
-                    .foregroundColor(.gray)
+                    .foregroundColor(sessionData.isComplete ? .green : .gray)
 
                 Text(sessionData.repCounterText)
                     .font(.system(size: 56, weight: .bold, design: .serif))
@@ -565,7 +565,7 @@ struct SessionPanel: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.black.opacity(0.3))
+            .background(Color.black.opacity(0.15))
             .cornerRadius(8)
 
             // Suggestion (if any)
@@ -646,22 +646,13 @@ struct SessionPanel: View {
             }
         }
         .padding(30)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.95),
-                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.95)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(.ultraThinMaterial)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+                .stroke(Color.yellow.opacity(0.8), lineWidth: 3)
         )
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 3)
     }
 }
 
@@ -778,22 +769,13 @@ struct StatsScreenView: View {
             .buttonStyle(.plain)
         }
         .padding(30)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.98),
-                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.98)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(.regularMaterial)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+                .stroke(Color.yellow.opacity(0.8), lineWidth: 3)
         )
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 3)
         .scaleEffect(isVisible ? 1.0 : 0.9)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
@@ -924,22 +906,13 @@ struct SessionSummaryView: View {
             .buttonStyle(.plain)
         }
         .padding(30)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.98),
-                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.98)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(.regularMaterial)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+                .stroke(Color.yellow.opacity(0.8), lineWidth: 3)
         )
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
+        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 3)
         .scaleEffect(isVisible ? 1.0 : 0.85)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
