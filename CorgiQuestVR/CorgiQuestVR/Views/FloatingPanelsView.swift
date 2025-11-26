@@ -510,71 +510,47 @@ struct QuickActionsPanel: View {
     }
 }
 
-/// Displays dog name and level - Skyrim-style compass bar
+/// Displays dog name and level - Sleek minimal design
 struct DogInfoPanel: View {
     let dogName: String
     let level: Int
 
     var body: some View {
-        VStack(spacing: 8) {
-            // Dog name in large fantasy-style font
+        HStack(spacing: 12) {
+            // Dog name - smaller and sleeker
             Text(dogName)
-                .font(.system(size: 36, weight: .bold, design: .serif))
+                .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
-                .shadow(color: .yellow.opacity(0.3), radius: 6, x: 0, y: 0)
-                .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
 
-            // Level display with refined styling
-            HStack(spacing: 6) {
+            // Separator
+            Text("•")
+                .font(.system(size: 14))
+                .foregroundColor(.white.opacity(0.4))
+
+            // Level display - compact
+            HStack(spacing: 4) {
                 Image(systemName: "star.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 12))
                     .foregroundColor(.yellow)
-                Text("LEVEL \(level)")
-                    .font(.system(size: 20, weight: .semibold, design: .serif))
-                    .foregroundColor(.yellow)
-                    .tracking(2)
-                Image(systemName: "star.fill")
-                    .font(.system(size: 16))
+                Text("Lv \(level)")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.yellow)
             }
-            .shadow(color: .yellow.opacity(0.4), radius: 4, x: 0, y: 0)
-            .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+            .shadow(color: .yellow.opacity(0.3), radius: 3, x: 0, y: 0)
+            .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
         }
-        .padding(.vertical, 24)
-        .padding(.horizontal, 48)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 12)
         .background(
-            ZStack {
-                // Dark background with subtle gradient
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.15, green: 0.12, blue: 0.1).opacity(0.95),
-                        Color(red: 0.25, green: 0.2, blue: 0.15).opacity(0.95)
-                    ]),
-                    startPoint: .top,
-                    endPoint: .bottom
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    Capsule()
+                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
                 )
-
-                // Subtle inner glow
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.yellow.opacity(0.4),
-                                Color.orange.opacity(0.2)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1.5
-                    )
-            }
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(Color.yellow.opacity(0.7), lineWidth: 2.5)
-        )
-        .cornerRadius(18)
-        .shadow(color: .black.opacity(0.6), radius: 12, x: 0, y: 6)
+        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
 
