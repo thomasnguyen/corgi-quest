@@ -47,6 +47,7 @@ struct ContentView: View {
             .buttonStyle(.plain)
         }
         .padding()
+        .opacity(isImmersiveSpaceShown ? 0 : 1) // Hide window when in immersive space
         .task {
             // Auto-launch immersive space on startup
             if !isImmersiveSpaceShown {
