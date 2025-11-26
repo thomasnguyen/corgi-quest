@@ -75,42 +75,14 @@ struct TrainingRoomView: View {
             if viewState.isStats, let statsScreenAttachment = attachments.entity(for: "statsScreen") {
                 statsScreenAttachment.position = [0, 0.0, -1.2] // Center
                 statsScreenAttachment.scale = [1.8, 1.8, 1.8]
-                statsScreenAttachment.opacity = 0
                 headAnchor.addChild(statsScreenAttachment)
-
-                // Fade in animation
-                var transform = statsScreenAttachment.transform
-                transform.scale = [1.5, 1.5, 1.5]
-                statsScreenAttachment.move(to: transform, relativeTo: headAnchor, duration: 0.3, timingFunction: .easeInOut)
-
-                // Fade in opacity
-                Task {
-                    for i in 0...10 {
-                        try? await Task.sleep(nanoseconds: 30_000_000) // 30ms
-                        statsScreenAttachment.opacity = Float(i) / 10.0
-                    }
-                }
             }
 
             // Session Summary - center (shows after training ends)
             if case .summary = viewState, let summaryAttachment = attachments.entity(for: "summary") {
                 summaryAttachment.position = [0, 0.0, -1.2] // Center
                 summaryAttachment.scale = [1.7, 1.7, 1.7]
-                summaryAttachment.opacity = 0
                 headAnchor.addChild(summaryAttachment)
-
-                // Fade in animation
-                var transform = summaryAttachment.transform
-                transform.scale = [1.4, 1.4, 1.4]
-                summaryAttachment.move(to: transform, relativeTo: headAnchor, duration: 0.3, timingFunction: .easeInOut)
-
-                // Fade in opacity
-                Task {
-                    for i in 0...10 {
-                        try? await Task.sleep(nanoseconds: 30_000_000) // 30ms
-                        summaryAttachment.opacity = Float(i) / 10.0
-                    }
-                }
             }
 
             // XP Notifications - float up on right side
@@ -246,8 +218,8 @@ struct TrainingRoomView: View {
             tips: "Keep leash loose, reward calm behavior",
             targetReps: 5,
             currentReps: 0,
-            startTime: Date(),
-            currentSuggestion: nil
+            currentSuggestion: nil,
+            startTime: Date()
         )
         withAnimation(.easeInOut(duration: 0.3)) {
             viewState = .training(sessionData)
@@ -303,8 +275,8 @@ struct TrainingRoomView: View {
             tips: "Keep leash loose, reward calm behavior",
             targetReps: 5,
             currentReps: 0,
-            startTime: Date(),
-            currentSuggestion: nil
+            currentSuggestion: nil,
+            startTime: Date()
         )
 
         viewState = .training(sessionData)
