@@ -36,60 +36,16 @@ struct TrainingRoomView: View {
             let headAnchor = AnchorEntity(.head)
             content.add(headAnchor)
 
-            // Position HUD panels relative to head (in head-local space)
-            // These will follow as the user looks around
+            // Position attachments
+            positionAttachments(headAnchor: headAnchor, attachments: attachments)
+        } update: { content, attachments in
+            // Update attachment positions when state changes
+            if let headAnchor = content.entities.first(where: { $0 is AnchorEntity }) as? AnchorEntity {
+                // Remove all children first
+                headAnchor.children.removeAll()
 
-            // Only show these panels in stats view
-            // (Hidden by default for minimal HUD)
-
-            // Dog Name/Level panel - top center (like Skyrim compass bar)
-            if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-                dogInfoAttachment.position = [0, 0.5, -1.2] // Top center
-                dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
-                headAnchor.addChild(dogInfoAttachment)
-            }
-
-            // Streak display - just below dog info (only if streak > 0)
-            if let streakAttachment = attachments.entity(for: "streak") {
-                streakAttachment.position = [0, 0.2, -1.2] // Below dog info
-                streakAttachment.scale = [1.6, 1.6, 1.6]
-                headAnchor.addChild(streakAttachment)
-            }
-
-            // Quick Actions panel - bottom center (Skyrim-style action bar)
-            // Only show in minimal view
-            if !viewState.isTraining && !viewState.isSummary, let actionsAttachment = attachments.entity(for: "quickActions") {
-                actionsAttachment.position = [0, -0.4, -1.2] // Bottom center
-                actionsAttachment.scale = [1.6, 1.6, 1.6]
-                headAnchor.addChild(actionsAttachment)
-            }
-
-            // Session Panel - center (shows during active training)
-            if case .training(let sessionData) = viewState, let sessionAttachment = attachments.entity(for: "session") {
-                sessionAttachment.position = [0, 0.0, -1.2] // Center
-                sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
-                headAnchor.addChild(sessionAttachment)
-            }
-
-            // Stats Screen - full overlay (shows when stats view is active)
-            if viewState.isStats, let statsScreenAttachment = attachments.entity(for: "statsScreen") {
-                statsScreenAttachment.position = [0, 0.0, -1.2] // Center
-                statsScreenAttachment.scale = [1.8, 1.8, 1.8]
-                headAnchor.addChild(statsScreenAttachment)
-            }
-
-            // Session Summary - center (shows after training ends)
-            if case .summary = viewState, let summaryAttachment = attachments.entity(for: "summary") {
-                summaryAttachment.position = [0, 0.0, -1.2] // Center
-                summaryAttachment.scale = [1.7, 1.7, 1.7]
-                headAnchor.addChild(summaryAttachment)
-            }
-
-            // XP Notifications - float up on right side
-            if let xpNotifAttachment = attachments.entity(for: "xpNotifications") {
-                xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
-                xpNotifAttachment.scale = [1.4, 1.4, 1.4]
-                headAnchor.addChild(xpNotifAttachment)
+                // Re-add with updated positions
+                positionAttachments(headAnchor: headAnchor, attachments: attachments)
             }
         } attachments: {
             // Dog Info (always visible)
@@ -364,8 +320,62 @@ struct TrainingRoomView: View {
         handleEndSession(description: description)
     }
 
+    // MARK: - Attachment Positioning
+
+    /// Position all attachments relative to the head anchor
+    private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
+        // Dog Name/Level panel - top center (like Skyrim compass bar)
+        if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
+            dogInfoAttachment.position = [0, 0.5, -1.2] // Top center
+            dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
+            headAnchor.addChild(dogInfoAttachment)
+        }
+
+        // Streak display - just below dog info (only if streak > 0)
+        if let streakAttachment = attachments.entity(for: "streak") {
+            streakAttachment.position = [0, 0.2, -1.2] // Below dog info
+            streakAttachment.scale = [1.6, 1.6, 1.6]
+            headAnchor.addChild(streakAttachment)
+        }
+
+        // Quick Actions panel - bottom center (Skyrim-style action bar)
+        if let actionsAttachment = attachments.entity(for: "quickActions") {
+            actionsAttachment.position = [0, -0.4, -1.2] // Bottom center
+            actionsAttachment.scale = [1.6, 1.6, 1.6]
+            headAnchor.addChild(actionsAttachment)
+        }
+
+        // Session Panel - center (shows during active training)
+        if let sessionAttachment = attachments.entity(for: "session") {
+            sessionAttachment.position = [0, 0.0, -1.2] // Center
+            sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
+            headAnchor.addChild(sessionAttachment)
+        }
+
+        // Stats Screen - full overlay (shows when stats view is active)
+        if let statsScreenAttachment = attachments.entity(for: "statsScreen") {
+            statsScreenAttachment.position = [0, 0.0, -1.2] // Center
+            statsScreenAttachment.scale = [1.8, 1.8, 1.8]
+            headAnchor.addChild(statsScreenAttachment)
+        }
+
+        // Session Summary - center (shows after training ends)
+        if let summaryAttachment = attachments.entity(for: "summary") {
+            summaryAttachment.position = [0, 0.0, -1.2] // Center
+            summaryAttachment.scale = [1.7, 1.7, 1.7]
+            headAnchor.addChild(summaryAttachment)
+        }
+
+        // XP Notifications - float up on right side
+        if let xpNotifAttachment = attachments.entity(for: "xpNotifications") {
+            xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
+            xpNotifAttachment.scale = [1.4, 1.4, 1.4]
+            headAnchor.addChild(xpNotifAttachment)
+        }
+    }
+
     // MARK: - Environment Setup
-    
+
     /// Creates a Skyrim-inspired training hall with warm torchlight
     private func setupEnvironment(content: RealityViewContent) {
         // Stone floor (like Skyrim dungeons/halls)
