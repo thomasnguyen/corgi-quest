@@ -96,7 +96,7 @@ struct TrainingRoomView: View {
                         onMarkRep: handleMarkRep,
                         onEndSession: handleEndSessionButton
                     )
-                    .frame(width: 450)
+                    .frame(width: 350) // Smaller width so it doesn't block view
                 }
             }
 
@@ -347,10 +347,11 @@ struct TrainingRoomView: View {
             headAnchor.addChild(actionsAttachment)
         }
 
-        // Session Panel - center (shows during active training)
+        // Session Panel - left side (shows during active training)
+        // Positioned to the side so you can see your dog clearly!
         if let sessionAttachment = attachments.entity(for: "session") {
-            sessionAttachment.position = [0, 0.0, -1.2] // Center
-            sessionAttachment.scale = [1.7, 1.7, 1.7] // Large and prominent
+            sessionAttachment.position = [-0.6, -0.1, -1.2] // Left side, slightly down
+            sessionAttachment.scale = [1.2, 1.2, 1.2] // Smaller so it doesn't block view
             headAnchor.addChild(sessionAttachment)
         }
 
