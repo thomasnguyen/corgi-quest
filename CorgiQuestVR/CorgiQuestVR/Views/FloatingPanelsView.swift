@@ -445,49 +445,185 @@ struct QuickActionsPanel: View {
     }
 }
 
-/// Displays dog name and level - Skyrim-style compass bar
+/// Displays dog name and level - Elegant RPG-style nameplate
 struct DogInfoPanel: View {
     let dogName: String
     let level: Int
 
-    var body: some View {
-        VStack(spacing: 12) {
-            // Dog name in large fantasy-style font
-            Text(dogName)
-                .font(.system(size: 32, weight: .bold, design: .serif))
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+    @State private var shimmerOffset: CGFloat = -200
 
-            // Level display with ornate styling
-            HStack(spacing: 8) {
-                Image(systemName: "shield.fill")
-                    .foregroundColor(.yellow)
-                Text("Level \(level)")
-                    .font(.system(size: 24, weight: .semibold, design: .serif))
-                    .foregroundColor(.yellow)
-                Image(systemName: "shield.fill")
-                    .foregroundColor(.yellow)
+    var body: some View {
+        VStack(spacing: 16) {
+            // Decorative top divider
+            HStack(spacing: 12) {
+                Rectangle()
+                    .fill(LinearGradient(
+                        colors: [.clear, Color.yellow.opacity(0.6), Color.yellow.opacity(0.6), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ))
+                    .frame(height: 1)
+
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.yellow, Color.orange],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: .yellow.opacity(0.8), radius: 6)
+
+                Rectangle()
+                    .fill(LinearGradient(
+                        colors: [.clear, Color.yellow.opacity(0.6), Color.yellow.opacity(0.6), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ))
+                    .frame(height: 1)
             }
-            .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
-        }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 40)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.9),
-                    Color(red: 0.3, green: 0.25, blue: 0.2).opacity(0.9)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
+            .frame(maxWidth: 300)
+
+            // Dog name with elegant styling
+            Text(dogName)
+                .font(.system(size: 40, weight: .bold, design: .serif))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.white, Color(white: 0.9)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 2)
+                .shadow(color: Color.yellow.opacity(0.3), radius: 8)
+                .overlay(
+                    // Shimmer effect
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [.clear, Color.white.opacity(0.3), .clear],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 60)
+                        .offset(x: shimmerOffset)
+                        .blur(radius: 8)
+                        .mask(
+                            Text(dogName)
+                                .font(.system(size: 40, weight: .bold, design: .serif))
+                        )
+                )
+                .onAppear {
+                    withAnimation(Animation.linear(duration: 3).repeatForever(autoreverses: false)) {
+                        shimmerOffset = 200
+                    }
+                }
+
+            // Level display with refined elegance
+            HStack(spacing: 12) {
+                // Left ornament
+                Image(systemName: "sparkles")
+                    .font(.system(size: 14))
+                    .foregroundColor(Color.yellow.opacity(0.8))
+                    .shadow(color: .yellow.opacity(0.6), radius: 4)
+
+                // Level text with gradient
+                HStack(spacing: 6) {
+                    Text("Level")
+                        .font(.system(size: 18, weight: .medium, design: .serif))
+                        .foregroundColor(Color.yellow.opacity(0.9))
+
+                    Text("\(level)")
+                        .font(.system(size: 32, weight: .bold, design: .serif))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.yellow, Color.orange],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                }
+                .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 2)
+                .shadow(color: Color.yellow.opacity(0.5), radius: 8)
+
+                // Right ornament
+                Image(systemName: "sparkles")
+                    .font(.system(size: 14))
+                    .foregroundColor(Color.yellow.opacity(0.8))
+                    .shadow(color: .yellow.opacity(0.6), radius: 4)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(
+                Capsule()
+                    .fill(Color.black.opacity(0.4))
+                    .overlay(
+                        Capsule()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.yellow.opacity(0.6), Color.orange.opacity(0.4)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
             )
+
+            // Decorative bottom divider
+            Rectangle()
+                .fill(LinearGradient(
+                    colors: [.clear, Color.yellow.opacity(0.6), Color.yellow.opacity(0.6), .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                ))
+                .frame(width: 250, height: 1)
+        }
+        .padding(.vertical, 24)
+        .padding(.horizontal, 48)
+        .background(
+            ZStack {
+                // Main background with subtle gradient
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.12, green: 0.12, blue: 0.15).opacity(0.95),
+                                Color(red: 0.08, green: 0.08, blue: 0.12).opacity(0.95)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                // Inner glow
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.yellow.opacity(0.4), Color.orange.opacity(0.2)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+                    .blur(radius: 1)
+
+                // Outer border
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.yellow.opacity(0.7), Color.orange.opacity(0.5)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+            }
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.yellow.opacity(0.6), lineWidth: 2)
-        )
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+        .shadow(color: Color.yellow.opacity(0.2), radius: 20, x: 0, y: 0)
+        .shadow(color: .black.opacity(0.6), radius: 15, x: 0, y: 8)
     }
 }
 
