@@ -13,5 +13,10 @@ struct CorgiQuestVRApp: App {
         WindowGroup {
             ContentView()
         }
+
+        ImmersiveSpace(id: "TrainingRoom") {
+            TrainingRoomView()
+        }
+        .immersionStyle(selection: .constant(.mixed), in: .mixed)
     }
 }

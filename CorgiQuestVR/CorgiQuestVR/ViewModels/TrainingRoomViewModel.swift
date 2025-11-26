@@ -42,10 +42,10 @@ class TrainingRoomViewModel: ObservableObject {
     
     /// Network service for API calls
     private let networkService: NetworkService
-    
+
     /// Timer for polling updates
-    private var pollingTimer: Timer?
-    
+    nonisolated(unsafe) private var pollingTimer: Timer?
+
     /// Polling interval in seconds
     private let pollingInterval: TimeInterval = 3.0
     
@@ -130,7 +130,7 @@ class TrainingRoomViewModel: ObservableObject {
     }
     
     /// Stops the polling timer and cleans up resources
-    func stopPolling() {
+    nonisolated func stopPolling() {
         pollingTimer?.invalidate()
         pollingTimer = nil
     }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import Combine
 
 /// Arranges floating UI panels around the central pedestal in 3D space
 struct FloatingPanelsView: View {
@@ -16,31 +17,37 @@ struct FloatingPanelsView: View {
     let activities: [ActivityData]
     let weeklyXP: [DayXP]
     @Binding var sessionState: SessionState
-    
+    let onMarkRep: () -> Void
+    let onEndSession: () -> Void
+
     var body: some View {
         ZStack {
             // Left Panel: Stat Orbs
             StatOrbsPanel(stats: stats)
-                .offset(x: -400, y: 0)
+                .offset(x: -500, y: -50)
 
             // Top Panel: Today's Goals
             if let goals = goals {
                 GoalsPanel(goals: goals)
-                    .offset(x: 0, y: 300)
+                    .offset(x: 0, y: -250)
             }
 
             // Right Panel: Recent Activities
             ActivitiesPanel(activities: activities)
-                .offset(x: 400, y: 0)
+                .offset(x: 500, y: -50)
 
             // Bottom Panel: Weekly XP Chart
             WeeklyChartPanel(weeklyXP: weeklyXP)
-                .offset(x: 0, y: -300)
+                .offset(x: 0, y: 200)
 
             // Center Panel: Session (conditional)
             if case .active(let sessionData) = sessionState {
-                SessionPanel(sessionData: sessionData)
-                    .offset(x: 0, y: 0)
+                SessionPanel(
+                    sessionData: sessionData,
+                    onMarkRep: onMarkRep,
+                    onEndSession: onEndSession
+                )
+                .offset(x: 0, y: 0)
             }
         }
     }
@@ -165,14 +172,32 @@ struct GoalsPanel: View {
                 .frame(height: 8)
             }
             
-            // Streak
-            HStack {
+            // Streak - PROMINENT DISPLAY (Skyrim-style)
+            HStack(spacing: 12) {
                 Text("🔥")
-                    .font(.title3)
-                Text("\(goals.streak) day streak")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 40))
+                    .shadow(color: .orange, radius: 10)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(goals.streak) Day Streak!")
+                        .font(.system(size: 20, weight: .bold, design: .serif))
+                        .foregroundColor(.orange)
+                    Text("Keep Training!")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.yellow)
+                }
+                Text("🔥")
+                    .font(.system(size: 40))
+                    .shadow(color: .orange, radius: 10)
             }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.orange.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.orange, lineWidth: 2)
+                    )
+            )
         }
         .padding(30)
         .frame(width: 300)
@@ -301,45 +326,344 @@ struct WeeklyChartPanel: View {
     }
 }
 
-/// Displays active training session information
-struct SessionPanel: View {
-    let sessionData: SessionData
-    
+/// XP Notifications - floating pop-ups
+struct XPNotificationsView: View {
+    let notifications: [XPNotification]
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Training Session")
-                .font(.headline)
-            
-            Text(sessionData.activity)
-                .font(.title3)
-                .fontWeight(.bold)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Goal: \(sessionData.goal)")
-                    .font(.subheadline)
-                
-                Text("Tips: \(sessionData.tips)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Rep counter
-            Text(sessionData.repCounterText)
-                .font(.system(size: 48, weight: .bold))
-                .foregroundColor(sessionData.isComplete ? .green : .primary)
-            
-            // Optional micro-suggestion
-            if let suggestion = sessionData.currentSuggestion {
-                Text(suggestion)
-                    .font(.caption)
-                    .foregroundColor(.green)
-                    .transition(.opacity)
+        VStack(alignment: .trailing, spacing: 12) {
+            ForEach(notifications) { notification in
+                HStack(spacing: 10) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(notification.color)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("+\(notification.amount) \(notification.statType) XP")
+                            .font(.system(size: 18, weight: .bold, design: .serif))
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(notification.color.opacity(0.25))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(notification.color, lineWidth: 2)
+                        )
+                        .shadow(color: notification.color.opacity(0.6), radius: 10)
+                )
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .opacity.combined(with: .scale(scale: 0.8))
+                ))
             }
         }
-        .padding(40)
-        .frame(width: 400)
-        .background(.ultraThinMaterial)
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: notifications)
+    }
+}
+
+/// Quick action buttons - Skyrim-style action bar
+struct QuickActionsPanel: View {
+    let sessionState: SessionState
+    let onStartTraining: () -> Void
+    let onViewStats: () -> Void
+
+    var body: some View {
+        HStack(spacing: 20) {
+            // Start Training button
+            Button(action: onStartTraining) {
+                HStack(spacing: 8) {
+                    Image(systemName: "figure.walk")
+                        .font(.system(size: 20))
+                    Text("Start Training")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.green.opacity(0.8),
+                            Color.green.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+            .disabled(sessionState.isActive)
+            .opacity(sessionState.isActive ? 0.5 : 1.0)
+
+            // View Stats button
+            Button(action: onViewStats) {
+                HStack(spacing: 8) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 20))
+                    Text("View Stats")
+                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue.opacity(0.8),
+                            Color.blue.opacity(0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.blue.opacity(0.9), lineWidth: 2)
+                )
+                .cornerRadius(12)
+                .shadow(color: .blue.opacity(0.4), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(red: 0.15, green: 0.15, blue: 0.15).opacity(0.85))
+                .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+        )
+    }
+}
+
+/// Displays dog name and level - Skyrim-style compass bar
+struct DogInfoPanel: View {
+    let dogName: String
+    let level: Int
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Dog name in large fantasy-style font
+            Text(dogName)
+                .font(.system(size: 32, weight: .bold, design: .serif))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+
+            // Level display with ornate styling
+            HStack(spacing: 8) {
+                Image(systemName: "shield.fill")
+                    .foregroundColor(.yellow)
+                Text("Level \(level)")
+                    .font(.system(size: 24, weight: .semibold, design: .serif))
+                    .foregroundColor(.yellow)
+                Image(systemName: "shield.fill")
+                    .foregroundColor(.yellow)
+            }
+            .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+        }
+        .padding(.vertical, 20)
+        .padding(.horizontal, 40)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.9),
+                    Color(red: 0.3, green: 0.25, blue: 0.2).opacity(0.9)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.yellow.opacity(0.6), lineWidth: 2)
+        )
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+    }
+}
+
+/// Displays active training session information - Skyrim quest-style
+struct SessionPanel: View {
+    let sessionData: SessionData
+    let onMarkRep: () -> Void
+    let onEndSession: () -> Void
+
+    @State private var currentTime = Date()
+
+    // Timer to update elapsed time every second
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Title banner
+            Text("⚔️ ACTIVE TRAINING ⚔️")
+                .font(.system(size: 20, weight: .bold, design: .serif))
+                .foregroundColor(.yellow)
+                .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 2)
+
+            // Elapsed timer
+            HStack(spacing: 8) {
+                Image(systemName: "clock.fill")
+                    .foregroundColor(.cyan)
+                Text(sessionData.elapsedTimeText(currentTime: currentTime))
+                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.cyan)
+            }
+            .onReceive(timer) { _ in
+                currentTime = Date()
+            }
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Activity name
+            Text(sessionData.activity)
+                .font(.system(size: 28, weight: .bold, design: .serif))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+
+            // Goal
+            HStack {
+                Image(systemName: "target")
+                    .foregroundColor(.green)
+                Text(sessionData.goal)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.green)
+            }
+
+            // Rep counter - BIG AND PROMINENT
+            VStack(spacing: 8) {
+                Text("PROGRESS")
+                    .font(.system(size: 14, weight: .semibold, design: .serif))
+                    .foregroundColor(.gray)
+
+                Text(sessionData.repCounterText)
+                    .font(.system(size: 56, weight: .bold, design: .serif))
+                    .foregroundColor(sessionData.isComplete ? .green : .yellow)
+                    .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: 10)
+            }
+            .padding(.vertical, 12)
+
+            // Tips
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundColor(.yellow)
+                    Text("Tips:")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                Text(sessionData.tips)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.3))
+            .cornerRadius(8)
+
+            // Suggestion (if any)
+            if let suggestion = sessionData.currentSuggestion {
+                Text(suggestion)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.green)
+                    .padding(10)
+                    .background(Color.green.opacity(0.2))
+                    .cornerRadius(8)
+                    .transition(.opacity)
+            }
+
+            Divider()
+                .background(Color.yellow.opacity(0.5))
+
+            // Action buttons
+            HStack(spacing: 16) {
+                // Mark Rep button
+                Button(action: onMarkRep) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 20))
+                        Text("Mark Rep")
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.green.opacity(0.8),
+                                Color.green.opacity(0.6)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                    )
+                    .cornerRadius(10)
+                    .shadow(color: .green.opacity(0.4), radius: 6, x: 0, y: 3)
+                }
+                .buttonStyle(.plain)
+
+                // End Session button
+                Button(action: onEndSession) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.system(size: 20))
+                        Text("End Session")
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.red.opacity(0.8),
+                                Color.red.opacity(0.6)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.red.opacity(0.9), lineWidth: 2)
+                    )
+                    .cornerRadius(10)
+                    .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 3)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(30)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.2, green: 0.15, blue: 0.1).opacity(0.95),
+                    Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.95)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.yellow.opacity(0.7), lineWidth: 3)
+        )
         .cornerRadius(20)
+        .shadow(color: .black.opacity(0.7), radius: 15, x: 0, y: 5)
     }
 }
 
@@ -390,6 +714,8 @@ struct SessionPanel: View {
             DayXP(day: "Sat", total: 90, date: Date().addingTimeInterval(-1 * 86400)),
             DayXP(day: "Sun", total: 40, date: Date())
         ],
-        sessionState: .constant(.idle)
+        sessionState: .constant(.idle),
+        onMarkRep: { print("Mark rep pressed") },
+        onEndSession: { print("End session pressed") }
     )
 }

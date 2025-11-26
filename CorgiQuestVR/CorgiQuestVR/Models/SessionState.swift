@@ -36,6 +36,7 @@ struct SessionData: Equatable, Codable {
     let targetReps: Int // Target rep count
     var currentReps: Int // Current rep count
     var currentSuggestion: String? // Optional micro-suggestion
+    let startTime: Date // Session start time for elapsed timer
     
     /// Progress as a percentage (0.0 to 1.0)
     var progress: Double {
@@ -52,14 +53,23 @@ struct SessionData: Equatable, Codable {
     var repCounterText: String {
         "\(currentReps) / \(targetReps)"
     }
-    
-    init(activity: String, goal: String, tips: String, targetReps: Int, currentReps: Int = 0, currentSuggestion: String? = nil) {
+
+    /// Elapsed time as a formatted string (e.g., "02:34")
+    func elapsedTimeText(currentTime: Date = Date()) -> String {
+        let elapsed = currentTime.timeIntervalSince(startTime)
+        let minutes = Int(elapsed) / 60
+        let seconds = Int(elapsed) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    init(activity: String, goal: String, tips: String, targetReps: Int, currentReps: Int = 0, currentSuggestion: String? = nil, startTime: Date = Date()) {
         self.activity = activity
         self.goal = goal
         self.tips = tips
         self.targetReps = targetReps
         self.currentReps = currentReps
         self.currentSuggestion = currentSuggestion
+        self.startTime = startTime
     }
     
     /// Increment the rep counter

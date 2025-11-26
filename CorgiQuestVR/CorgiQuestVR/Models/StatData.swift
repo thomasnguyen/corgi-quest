@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 /// Represents a single stat orb with XP progress
-struct StatData: Identifiable, Codable {
+struct StatData: Identifiable, Codable, Equatable {
     let id: String
     let type: String // "PHY", "INT", "IMP", or "SOC"
     let name: String // Full name (e.g., "Physical")
