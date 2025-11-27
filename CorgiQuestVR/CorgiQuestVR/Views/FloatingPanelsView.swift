@@ -454,8 +454,6 @@ struct QuickActionsPanel: View {
                         .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
                 )
                 .cornerRadius(14)
-                .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 10, x: 0, y: 4)
-                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
             .buttonStyle(.plain)
 
@@ -507,8 +505,6 @@ struct QuickActionsPanel: View {
                         .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
                 )
                 .cornerRadius(14)
-                .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 10, x: 0, y: 4)
-                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
             }
             .buttonStyle(.plain)
         }
@@ -759,7 +755,6 @@ struct SessionPanel: View {
                             .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
                     )
                     .cornerRadius(10)
-                    .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 6, x: 0, y: 2)
                 }
                 .buttonStyle(.plain)
 
@@ -810,7 +805,6 @@ struct SessionPanel: View {
                             .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
                     )
                     .cornerRadius(10)
-                    .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 6, x: 0, y: 2)
                 }
                 .buttonStyle(.plain)
             }
