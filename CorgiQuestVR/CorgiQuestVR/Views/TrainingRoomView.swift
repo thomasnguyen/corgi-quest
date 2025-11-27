@@ -58,7 +58,7 @@ struct TrainingRoomView: View {
             if let goals = viewModel.goals, goals.streak > 0, !viewState.isStats {
                 Attachment(id: "streak") {
                     StreakDisplayPanel(streak: goals.streak)
-                        .frame(width: 200) // Smaller width
+                        .frame(width: 80) // Much smaller - just enough for emoji and number
                 }
             }
 
@@ -376,15 +376,15 @@ struct TrainingRoomView: View {
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
         // Dog Name/Level panel - top center-left
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [-0.2, 0.5, -1.2] // Top center-left
+            dogInfoAttachment.position = [-0.25, 0.5, -1.2] // Top center-left
             dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
             headAnchor.addChild(dogInfoAttachment)
         }
 
-        // Streak display - to the right of dog info, smaller
+        // Streak display - very close to the right of dog info
         if let streakAttachment = attachments.entity(for: "streak") {
-            streakAttachment.position = [0.35, 0.5, -1.2] // Right of dog info, same height
-            streakAttachment.scale = [1.2, 1.2, 1.2] // Smaller
+            streakAttachment.position = [0.18, 0.5, -1.2] // Much closer to dog info, same height
+            streakAttachment.scale = [1.5, 1.5, 1.5] // Slightly larger for visibility
             headAnchor.addChild(streakAttachment)
         }
 

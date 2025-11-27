@@ -510,41 +510,52 @@ struct QuickActionsPanel: View {
     }
 }
 
-/// Displays dog name and level - Sleek minimal design
+/// Displays dog name and level - RPG-style with golden gradient
 struct DogInfoPanel: View {
     let dogName: String
     let level: Int
 
     var body: some View {
         HStack(spacing: 12) {
-            // Dog name - smaller and sleeker
+            // Dog name - golden gradient like web UI
             Text(dogName)
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 26, weight: .bold, design: .serif))
+                .foregroundStyle(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                            Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.5), radius: 8, x: 0, y: 0) // Golden glow
 
             // Separator
             Text("•")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.4))
 
-            // Level display - compact
+            // Level display - compact with star
             HStack(spacing: 4) {
                 Image(systemName: "star.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
+                    .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.6), radius: 4, x: 0, y: 0)
                 Text("Lv \(level)")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(.yellow)
+                    .font(.system(size: 16, weight: .semibold, design: .serif))
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
             }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
         .background(
             Capsule()
-                .fill(.ultraThinMaterial)
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.8)) // #121216
                 .overlay(
                     Capsule()
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.239, green: 0.239, blue: 0.239).opacity(0.3), lineWidth: 1) // #3d3d3d
                 )
         )
     }
@@ -772,35 +783,30 @@ struct SessionPanel: View {
     }
 }
 
-/// Streak display - floating next to dog info, smaller and cleaner
+/// Streak display - compact RPG badge matching web UI style
 struct StreakDisplayPanel: View {
     let streak: Int
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
+            // Fire emoji - smaller like web
             Text("🔥")
-                .font(.system(size: 20))
-            VStack(alignment: .center, spacing: 1) {
-                Text("\(streak) DAY STREAK")
-                    .font(.system(size: 12, weight: .bold, design: .serif))
-                    .foregroundColor(.orange)
-                    .tracking(0.5)
-                Text("Keep it up!")
-                    .font(.system(size: 9, weight: .medium, design: .serif))
-                    .foregroundColor(.yellow.opacity(0.9))
-            }
-            Text("🔥")
-                .font(.system(size: 20))
+                .font(.system(size: 14))
+
+            // Streak count - matches web UI styling
+            Text("\(streak)")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(Color(red: 0.976, green: 0.863, blue: 0.627)) // #F9DCA0
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(Color.orange.opacity(0.4), lineWidth: 1)
+            Capsule()
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.8)) // #121216
+                .overlay(
+                    Capsule()
+                        .strokeBorder(Color(red: 0.239, green: 0.239, blue: 0.239).opacity(0.3), lineWidth: 1) // #3d3d3d
+                )
         )
     }
 }
