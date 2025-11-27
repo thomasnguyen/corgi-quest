@@ -376,9 +376,9 @@ struct TrainingRoomView: View {
 
     /// Position all attachments relative to the head anchor
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
-        // Dog Name/Level/Streak panel - top left (one combined card)
+        // Dog Name/Level/Streak panel - top center (one combined card)
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [-0.20, 0.5, -1.2] // Top left
+            dogInfoAttachment.position = [0, 0.5, -1.2] // Top center - horizontally centered
             dogInfoAttachment.scale = [1.6, 1.6, 1.6] // Slightly smaller for cleaner look
             headAnchor.addChild(dogInfoAttachment)
         }

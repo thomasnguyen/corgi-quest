@@ -518,6 +518,23 @@ struct DogInfoPanel: View {
 
     var body: some View {
         HStack(spacing: 12) {
+            // Streak display - only if streak > 0 (FIRST, on the left)
+            if let streak = streak, streak > 0 {
+                // Streak badge
+                HStack(spacing: 6) {
+                    Text("🔥")
+                        .font(.system(size: 14))
+                    Text("\(streak)")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0.976, green: 0.863, blue: 0.627)) // #F9DCA0
+                }
+
+                // Separator
+                Text("•")
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.4))
+            }
+
             // Dog name - golden gradient like web UI
             Text(dogName)
                 .font(.system(size: 26, weight: .bold, design: .serif))
@@ -547,23 +564,6 @@ struct DogInfoPanel: View {
                 Text("Lv \(level)")
                     .font(.system(size: 16, weight: .semibold, design: .serif))
                     .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
-            }
-
-            // Streak display - only if streak > 0
-            if let streak = streak, streak > 0 {
-                // Separator
-                Text("•")
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.4))
-
-                // Streak badge
-                HStack(spacing: 6) {
-                    Text("🔥")
-                        .font(.system(size: 14))
-                    Text("\(streak)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0.976, green: 0.863, blue: 0.627)) // #F9DCA0
-                }
             }
         }
         .padding(.horizontal, 24)
