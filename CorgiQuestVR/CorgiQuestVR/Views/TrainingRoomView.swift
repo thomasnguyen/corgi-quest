@@ -58,18 +58,66 @@ struct TrainingRoomView: View {
             if let goals = viewModel.goals, goals.streak > 0, !viewState.isStats {
                 Attachment(id: "streak") {
                     StreakDisplayPanel(streak: goals.streak)
-                        .frame(width: 300)
+                        .frame(width: 200) // Smaller width
                 }
             }
 
-            // Quick Actions (only in minimal view - hide during stats/training/summary)
+            // Buttons overlay (only in minimal view - no background panel)
             if viewState == .minimal {
-                Attachment(id: "quickActions") {
-                    QuickActionsPanel(
-                        isStatsOpen: false,
-                        onStartTraining: startTrainingSession,
-                        onViewStats: toggleStatsView
-                    )
+                Attachment(id: "floatingButtons") {
+                    HStack(spacing: 16) {
+                        // Start Training button
+                        Button(action: startTrainingSession) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "figure.run")
+                                    .font(.system(size: 18, weight: .semibold))
+                                Text("START TRAINING")
+                                    .font(.system(size: 17, weight: .bold, design: .serif))
+                                    .tracking(1)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.green.opacity(0.9),
+                                        Color.green.opacity(0.7)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .cornerRadius(14)
+                        }
+                        .buttonStyle(.plain)
+
+                        // View Stats button
+                        Button(action: toggleStatsView) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "chart.xyaxis.line")
+                                    .font(.system(size: 18, weight: .semibold))
+                                Text("VIEW STATS")
+                                    .font(.system(size: 17, weight: .bold, design: .serif))
+                                    .tracking(1)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.blue.opacity(0.9),
+                                        Color.blue.opacity(0.7)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .cornerRadius(14)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     .frame(width: 500)
                 }
             }
@@ -326,25 +374,25 @@ struct TrainingRoomView: View {
 
     /// Position all attachments relative to the head anchor
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
-        // Dog Name/Level panel - top center (like Skyrim compass bar)
+        // Dog Name/Level panel - top center-left
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [0, 0.5, -1.2] // Top center
+            dogInfoAttachment.position = [-0.2, 0.5, -1.2] // Top center-left
             dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
             headAnchor.addChild(dogInfoAttachment)
         }
 
-        // Streak display - just below dog info (only if streak > 0)
+        // Streak display - to the right of dog info, smaller
         if let streakAttachment = attachments.entity(for: "streak") {
-            streakAttachment.position = [0, 0.2, -1.2] // Below dog info
-            streakAttachment.scale = [1.6, 1.6, 1.6]
+            streakAttachment.position = [0.35, 0.5, -1.2] // Right of dog info, same height
+            streakAttachment.scale = [1.2, 1.2, 1.2] // Smaller
             headAnchor.addChild(streakAttachment)
         }
 
-        // Quick Actions panel - bottom center (Skyrim-style action bar)
-        if let actionsAttachment = attachments.entity(for: "quickActions") {
-            actionsAttachment.position = [0, -0.4, -1.2] // Bottom center
-            actionsAttachment.scale = [1.6, 1.6, 1.6]
-            headAnchor.addChild(actionsAttachment)
+        // Floating buttons - bottom center (no background panel)
+        if let buttonsAttachment = attachments.entity(for: "floatingButtons") {
+            buttonsAttachment.position = [0, -0.4, -1.2] // Bottom center
+            buttonsAttachment.scale = [1.6, 1.6, 1.6]
+            headAnchor.addChild(buttonsAttachment)
         }
 
         // Session Panel - left side (shows during active training)

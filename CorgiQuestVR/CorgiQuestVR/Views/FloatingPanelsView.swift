@@ -521,7 +521,6 @@ struct DogInfoPanel: View {
             Text(dogName)
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
 
             // Separator
             Text("•")
@@ -537,8 +536,6 @@ struct DogInfoPanel: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.yellow)
             }
-            .shadow(color: .yellow.opacity(0.3), radius: 3, x: 0, y: 0)
-            .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
@@ -550,7 +547,6 @@ struct DogInfoPanel: View {
                         .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
                 )
         )
-        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -776,69 +772,36 @@ struct SessionPanel: View {
     }
 }
 
-/// Streak display - floating below dog info
+/// Streak display - floating next to dog info, smaller and cleaner
 struct StreakDisplayPanel: View {
     let streak: Int
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             Text("🔥")
-                .font(.system(size: 32))
-                .shadow(color: .orange.opacity(0.8), radius: 12)
-            VStack(alignment: .center, spacing: 2) {
+                .font(.system(size: 20))
+            VStack(alignment: .center, spacing: 1) {
                 Text("\(streak) DAY STREAK")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .font(.system(size: 12, weight: .bold, design: .serif))
                     .foregroundColor(.orange)
-                    .tracking(1)
-                    .shadow(color: .orange.opacity(0.4), radius: 4, x: 0, y: 0)
-                    .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 1)
+                    .tracking(0.5)
                 Text("Keep it up!")
-                    .font(.system(size: 12, weight: .medium, design: .serif))
+                    .font(.system(size: 9, weight: .medium, design: .serif))
                     .foregroundColor(.yellow.opacity(0.9))
-                    .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
             }
             Text("🔥")
-                .font(.system(size: 32))
-                .shadow(color: .orange.opacity(0.8), radius: 12)
+                .font(.system(size: 20))
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
         .background(
-            ZStack {
-                // Dark background
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.9))
-
-                // Inner glow
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.orange.opacity(0.15),
-                                Color.clear
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-            }
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.orange.opacity(0.8),
-                            Color.orange.opacity(0.5)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 2
-                )
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.orange.opacity(0.4), lineWidth: 1)
         )
-        .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 0)
-        .shadow(color: .black.opacity(0.6), radius: 10, x: 0, y: 5)
     }
 }
 
