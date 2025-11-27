@@ -811,6 +811,54 @@ struct StreakDisplayPanel: View {
     }
 }
 
+/// XP Progress Bar - matching web UI style
+struct XPProgressBar: View {
+    let currentXP: Int
+    let maxXP: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // XP text label
+            HStack(spacing: 4) {
+                Text("Level")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
+                Text("\(currentXP)/\(maxXP)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.white)
+            }
+
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background bar
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(red: 0.16, green: 0.16, blue: 0.16)) // Dark background
+                        .frame(height: 8)
+
+                    // Progress fill with golden gradient
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.961, green: 0.765, blue: 0.373), // #F5C35F
+                                    Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geometry.size.width * CGFloat(min(Double(currentXP) / Double(maxXP), 1.0)), height: 8)
+                }
+            }
+            .frame(height: 8)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .frame(width: 250)
+    }
+}
+
 /// Full stats screen overlay - Apple-style design
 struct StatsScreenView: View {
     let stats: [StatData]

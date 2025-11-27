@@ -62,6 +62,12 @@ struct TrainingRoomView: View {
                 }
             }
 
+            // XP Progress Bar (always visible)
+            Attachment(id: "xpBar") {
+                XPProgressBar(currentXP: viewModel.overallXp, maxXP: viewModel.xpToNextLevel)
+                    .frame(width: 250)
+            }
+
             // Buttons overlay (only in minimal view - no background panel)
             if viewState == .minimal {
                 Attachment(id: "floatingButtons") {
@@ -376,16 +382,23 @@ struct TrainingRoomView: View {
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
         // Dog Name/Level panel - top center-left
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [-0.25, 0.5, -1.2] // Top center-left
+            dogInfoAttachment.position = [-0.30, 0.5, -1.2] // More to the left
             dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
             headAnchor.addChild(dogInfoAttachment)
         }
 
-        // Streak display - very close to the right of dog info
+        // Streak display - right next to dog info
         if let streakAttachment = attachments.entity(for: "streak") {
-            streakAttachment.position = [0.18, 0.5, -1.2] // Much closer to dog info, same height
+            streakAttachment.position = [0.08, 0.5, -1.2] // Right next to dog info, same height
             streakAttachment.scale = [1.5, 1.5, 1.5] // Slightly larger for visibility
             headAnchor.addChild(streakAttachment)
+        }
+
+        // XP Progress Bar - below dog info panel
+        if let xpBarAttachment = attachments.entity(for: "xpBar") {
+            xpBarAttachment.position = [0, 0.35, -1.2] // Below dog info, centered
+            xpBarAttachment.scale = [1.6, 1.6, 1.6]
+            headAnchor.addChild(xpBarAttachment)
         }
 
         // Floating buttons - bottom center (no background panel)

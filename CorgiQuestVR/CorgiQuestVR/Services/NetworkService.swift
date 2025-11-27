@@ -196,6 +196,8 @@ class NetworkService {
 struct VRDogStatus: Codable {
     let dogName: String
     let level: Int
+    let overallXp: Int
+    let xpToNextLevel: Int
     let stats: [StatData]
     let goals: GoalData
     let recentActivities: [ActivityData]
@@ -269,6 +271,8 @@ enum MockData {
     static let vrStatus = VRDogStatus(
         dogName: "Buddy",
         level: 12,
+        overallXp: 450,
+        xpToNextLevel: 600,
         stats: [
             StatData(
                 type: "PHY",
