@@ -17,6 +17,16 @@
 
 # Note: Nitro handles redirects automatically via dist/_redirects
 
+# CORS headers for VR API endpoints
+# Requirements: 6.3
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Max-Age = "86400"
+
 # Headers for security and performance
 [[headers]]
   for = "/*"
