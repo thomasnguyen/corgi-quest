@@ -721,18 +721,27 @@ struct SessionPanel: View {
                             .font(.system(size: 15, weight: .bold, design: .serif))
                             .tracking(0.5)
                     }
-                    .foregroundColor(.white)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                                Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(
                         ZStack {
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color.green.opacity(0.9),
-                                    Color.green.opacity(0.7)
+                                    Color(red: 0.702, green: 0.537, blue: 0.443), // #B38971
+                                    Color(red: 0.373, green: 0.333, blue: 0.325)  // #5F5553
                                 ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
 
                             LinearGradient(
@@ -747,10 +756,10 @@ struct SessionPanel: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.green.opacity(0.9), lineWidth: 1.5)
+                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
                     )
                     .cornerRadius(10)
-                    .shadow(color: .green.opacity(0.4), radius: 6, x: 0, y: 2)
+                    .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 6, x: 0, y: 2)
                 }
                 .buttonStyle(.plain)
 
@@ -763,18 +772,27 @@ struct SessionPanel: View {
                             .font(.system(size: 15, weight: .bold, design: .serif))
                             .tracking(0.5)
                     }
-                    .foregroundColor(.white)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                                Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(
                         ZStack {
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color.red.opacity(0.9),
-                                    Color.red.opacity(0.7)
+                                    Color(red: 0.702, green: 0.537, blue: 0.443), // #B38971
+                                    Color(red: 0.373, green: 0.333, blue: 0.325)  // #5F5553
                                 ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
 
                             LinearGradient(
@@ -789,10 +807,10 @@ struct SessionPanel: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.red.opacity(0.9), lineWidth: 1.5)
+                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
                     )
                     .cornerRadius(10)
-                    .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 2)
+                    .shadow(color: Color(red: 0.976, green: 0.863, blue: 0.627).opacity(0.3), radius: 6, x: 0, y: 2)
                 }
                 .buttonStyle(.plain)
             }
