@@ -77,18 +77,31 @@ struct TrainingRoomView: View {
                                     .font(.system(size: 17, weight: .bold, design: .serif))
                                     .tracking(1)
                             }
-                            .foregroundColor(.white)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                                        Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                             .padding(.horizontal, 28)
                             .padding(.vertical, 16)
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
-                                        Color.green.opacity(0.9),
-                                        Color.green.opacity(0.7)
+                                        Color(red: 0.702, green: 0.537, blue: 0.443), // #B38971
+                                        Color(red: 0.373, green: 0.333, blue: 0.325)  // #5F5553
                                     ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                                    startPoint: .top,
+                                    endPoint: .bottom
                                 )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
                             )
                             .cornerRadius(14)
                         }
@@ -103,18 +116,31 @@ struct TrainingRoomView: View {
                                     .font(.system(size: 17, weight: .bold, design: .serif))
                                     .tracking(1)
                             }
-                            .foregroundColor(.white)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                                        Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                             .padding(.horizontal, 28)
                             .padding(.vertical, 16)
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: [
-                                        Color.blue.opacity(0.9),
-                                        Color.blue.opacity(0.7)
+                                        Color(red: 0.702, green: 0.537, blue: 0.443), // #B38971
+                                        Color(red: 0.373, green: 0.333, blue: 0.325)  // #5F5553
                                     ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                                    startPoint: .top,
+                                    endPoint: .bottom
                                 )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
                             )
                             .cornerRadius(14)
                         }
