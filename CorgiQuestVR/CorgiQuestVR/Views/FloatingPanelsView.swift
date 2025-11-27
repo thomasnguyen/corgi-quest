@@ -451,7 +451,7 @@ struct QuickActionsPanel: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
+                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                 )
                 .cornerRadius(14)
             }
@@ -502,7 +502,7 @@ struct QuickActionsPanel: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
+                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                 )
                 .cornerRadius(14)
             }
@@ -752,7 +752,7 @@ struct SessionPanel: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
+                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                     )
                     .cornerRadius(10)
                 }
@@ -802,7 +802,7 @@ struct SessionPanel: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1.5) // #F9DCA0
+                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                     )
                     .cornerRadius(10)
                 }
@@ -1364,7 +1364,7 @@ struct SessionSummaryView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 2) // #F9DCA0
+                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                 )
                 .cornerRadius(12)
             }

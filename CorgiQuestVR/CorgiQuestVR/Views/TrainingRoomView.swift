@@ -101,7 +101,7 @@ struct TrainingRoomView: View {
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
+                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                             )
                             .cornerRadius(14)
                         }
@@ -140,7 +140,7 @@ struct TrainingRoomView: View {
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 1) // #F9DCA0
+                                    .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3) // #F9DCA0
                             )
                             .cornerRadius(14)
                         }
