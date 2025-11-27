@@ -1328,25 +1328,45 @@ struct SessionSummaryView: View {
                     Text("Done")
                         .font(.system(size: 18, weight: .semibold, design: .serif))
                 }
-                .foregroundColor(.white)
-                .padding(.horizontal, 40)
-                .padding(.vertical, 14)
-                .background(
+                .foregroundStyle(
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color.green.opacity(0.8),
-                            Color.green.opacity(0.6)
+                            Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                            Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
                         ]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
+                .padding(.horizontal, 40)
+                .padding(.vertical, 14)
+                .background(
+                    ZStack {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.702, green: 0.537, blue: 0.443), // #B38971
+                                Color(red: 0.373, green: 0.333, blue: 0.325)  // #5F5553
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+
+                        // Subtle highlight at top
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.2),
+                                Color.clear
+                            ]),
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    }
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.green.opacity(0.9), lineWidth: 2)
+                        .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 2) // #F9DCA0
                 )
                 .cornerRadius(12)
-                .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
             }
             .buttonStyle(.plain)
         }
