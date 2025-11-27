@@ -48,21 +48,17 @@ struct TrainingRoomView: View {
                 positionAttachments(headAnchor: headAnchor, attachments: attachments)
             }
         } attachments: {
-            // Dog Info (always visible)
+            // Dog Info with streak (always visible)
             Attachment(id: "dogInfo") {
-                DogInfoPanel(dogName: viewModel.dogName, level: viewModel.dogLevel)
-                    .frame(width: 450)
+                DogInfoPanel(
+                    dogName: viewModel.dogName,
+                    level: viewModel.dogLevel,
+                    streak: viewModel.goals?.streak
+                )
+                .frame(width: 550) // Wider to accommodate streak
             }
 
-            // Streak display (only if streak > 0 and NOT in stats view)
-            if let goals = viewModel.goals, goals.streak > 0, !viewState.isStats {
-                Attachment(id: "streak") {
-                    StreakDisplayPanel(streak: goals.streak)
-                        .frame(width: 80) // Much smaller - just enough for emoji and number
-                }
-            }
-
-            // XP Progress Bar (always visible)
+            // XP Progress Bar (always visible, centered)
             Attachment(id: "xpBar") {
                 XPProgressBar(currentXP: viewModel.overallXp, maxXP: viewModel.xpToNextLevel)
                     .frame(width: 250)
@@ -380,23 +376,16 @@ struct TrainingRoomView: View {
 
     /// Position all attachments relative to the head anchor
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
-        // Dog Name/Level panel - top center-left
+        // Dog Name/Level/Streak panel - top left (one combined card)
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [-0.30, 0.5, -1.2] // More to the left
-            dogInfoAttachment.scale = [1.8, 1.8, 1.8] // Larger for prominence
+            dogInfoAttachment.position = [-0.20, 0.5, -1.2] // Top left
+            dogInfoAttachment.scale = [1.6, 1.6, 1.6] // Slightly smaller for cleaner look
             headAnchor.addChild(dogInfoAttachment)
         }
 
-        // Streak display - right next to dog info
-        if let streakAttachment = attachments.entity(for: "streak") {
-            streakAttachment.position = [0.08, 0.5, -1.2] // Right next to dog info, same height
-            streakAttachment.scale = [1.5, 1.5, 1.5] // Slightly larger for visibility
-            headAnchor.addChild(streakAttachment)
-        }
-
-        // XP Progress Bar - below dog info panel
+        // XP Progress Bar - below and centered
         if let xpBarAttachment = attachments.entity(for: "xpBar") {
-            xpBarAttachment.position = [0, 0.35, -1.2] // Below dog info, centered
+            xpBarAttachment.position = [0, 0.32, -1.2] // Centered, below dog info
             xpBarAttachment.scale = [1.6, 1.6, 1.6]
             headAnchor.addChild(xpBarAttachment)
         }
