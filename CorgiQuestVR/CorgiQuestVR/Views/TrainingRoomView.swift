@@ -383,9 +383,9 @@ struct TrainingRoomView: View {
             headAnchor.addChild(dogInfoAttachment)
         }
 
-        // XP Progress Bar - below and centered
+        // XP Progress Bar - very close below the info card
         if let xpBarAttachment = attachments.entity(for: "xpBar") {
-            xpBarAttachment.position = [0, 0.32, -1.2] // Centered, below dog info
+            xpBarAttachment.position = [0, 0.42, -1.2] // Much closer to dog info card
             xpBarAttachment.scale = [1.6, 1.6, 1.6]
             headAnchor.addChild(xpBarAttachment)
         }
