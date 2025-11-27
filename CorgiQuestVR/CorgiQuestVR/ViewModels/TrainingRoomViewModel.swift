@@ -28,9 +28,15 @@ class TrainingRoomViewModel: ObservableObject {
     
     /// Dog's name
     @Published var dogName: String = ""
-    
+
     /// Overall level
     @Published var dogLevel: Int = 1
+
+    /// Current overall XP
+    @Published var overallXp: Int = 0
+
+    /// XP needed for next level
+    @Published var xpToNextLevel: Int = 100
     
     /// Connection status indicator
     @Published var isConnected: Bool = true
@@ -76,6 +82,8 @@ class TrainingRoomViewModel: ObservableObject {
     func updateUI(with status: VRDogStatus) {
         dogName = status.dogName
         dogLevel = status.level
+        overallXp = status.overallXp
+        xpToNextLevel = status.xpToNextLevel
         stats = status.stats
         goals = status.goals
         activities = Array(status.recentActivities.prefix(5)) // Limit to 5 items

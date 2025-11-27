@@ -510,47 +510,72 @@ struct QuickActionsPanel: View {
     }
 }
 
-/// Displays dog name and level - Sleek minimal design
+/// Displays dog name, level, and streak - RPG-style with golden gradient, all in one panel
 struct DogInfoPanel: View {
     let dogName: String
     let level: Int
+    let streak: Int?
 
     var body: some View {
         HStack(spacing: 12) {
-            // Dog name - smaller and sleeker
+            // Streak display - only if streak > 0 (FIRST, on the left)
+            if let streak = streak, streak > 0 {
+                // Streak badge
+                HStack(spacing: 6) {
+                    Text("🔥")
+                        .font(.system(size: 14))
+                    Text("\(streak)")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0.976, green: 0.863, blue: 0.627)) // #F9DCA0
+                }
+
+                // Separator
+                Text("•")
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.4))
+            }
+
+            // Dog name - golden gradient like web UI
             Text(dogName)
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+                .font(.system(size: 26, weight: .bold, design: .serif))
+                .foregroundStyle(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 0.996, green: 0.937, blue: 0.816), // #FEEFD0
+                            Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.5), radius: 8, x: 0, y: 0) // Golden glow
 
             // Separator
             Text("•")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.4))
 
-            // Level display - compact
+            // Level display - compact with star
             HStack(spacing: 4) {
                 Image(systemName: "star.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
+                    .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.6), radius: 4, x: 0, y: 0)
                 Text("Lv \(level)")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(.yellow)
+                    .font(.system(size: 16, weight: .semibold, design: .serif))
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
             }
-            .shadow(color: .yellow.opacity(0.3), radius: 3, x: 0, y: 0)
-            .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
         .background(
             Capsule()
-                .fill(.ultraThinMaterial)
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.8)) // #121216
                 .overlay(
                     Capsule()
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.239, green: 0.239, blue: 0.239).opacity(0.3), lineWidth: 1) // #3d3d3d
                 )
         )
-        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -776,69 +801,79 @@ struct SessionPanel: View {
     }
 }
 
-/// Streak display - floating below dog info
+/// Streak display - compact RPG badge matching web UI style
 struct StreakDisplayPanel: View {
     let streak: Int
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 6) {
+            // Fire emoji - smaller like web
             Text("🔥")
-                .font(.system(size: 32))
-                .shadow(color: .orange.opacity(0.8), radius: 12)
-            VStack(alignment: .center, spacing: 2) {
-                Text("\(streak) DAY STREAK")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
-                    .foregroundColor(.orange)
-                    .tracking(1)
-                    .shadow(color: .orange.opacity(0.4), radius: 4, x: 0, y: 0)
-                    .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 1)
-                Text("Keep it up!")
-                    .font(.system(size: 12, weight: .medium, design: .serif))
-                    .foregroundColor(.yellow.opacity(0.9))
-                    .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
-            }
-            Text("🔥")
-                .font(.system(size: 32))
-                .shadow(color: .orange.opacity(0.8), radius: 12)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(
-            ZStack {
-                // Dark background
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(red: 0.15, green: 0.1, blue: 0.05).opacity(0.9))
+                .font(.system(size: 14))
 
-                // Inner glow
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.orange.opacity(0.15),
-                                Color.clear
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.orange.opacity(0.8),
-                            Color.orange.opacity(0.5)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 2
+            // Streak count - matches web UI styling
+            Text("\(streak)")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(Color(red: 0.976, green: 0.863, blue: 0.627)) // #F9DCA0
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.8)) // #121216
+                .overlay(
+                    Capsule()
+                        .strokeBorder(Color(red: 0.239, green: 0.239, blue: 0.239).opacity(0.3), lineWidth: 1) // #3d3d3d
                 )
         )
-        .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 0)
-        .shadow(color: .black.opacity(0.6), radius: 10, x: 0, y: 5)
+    }
+}
+
+/// XP Progress Bar - matching web UI style
+struct XPProgressBar: View {
+    let currentXP: Int
+    let maxXP: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // XP text label
+            HStack(spacing: 4) {
+                Text("Level")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
+                Text("\(currentXP)/\(maxXP)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.white)
+            }
+
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background bar
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(red: 0.16, green: 0.16, blue: 0.16)) // Dark background
+                        .frame(height: 8)
+
+                    // Progress fill with golden gradient
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.961, green: 0.765, blue: 0.373), // #F5C35F
+                                    Color(red: 0.988, green: 0.835, blue: 0.529)  // #FCD587
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geometry.size.width * CGFloat(min(Double(currentXP) / Double(maxXP), 1.0)), height: 8)
+                }
+            }
+            .frame(height: 8)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .frame(width: 250)
     }
 }
 

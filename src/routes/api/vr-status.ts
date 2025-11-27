@@ -29,6 +29,8 @@ const convex = new ConvexHttpClient(convexUrl);
 interface VRDogStatus {
   dogName: string;
   level: number;
+  overallXp: number;
+  xpToNextLevel: number;
   stats: Array<{
     type: string;
     name: string;
@@ -118,6 +120,8 @@ export const getVRStatus = createServerFn({
     const vrStatus: VRDogStatus = {
       dogName: dog.name,
       level: dog.overallLevel,
+      overallXp: dog.overallXp,
+      xpToNextLevel: dog.xpToNextLevel,
       stats: dogProfile.stats.map((stat) => ({
         type: stat.statType,
         name: statNames[stat.statType] || stat.statType,
