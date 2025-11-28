@@ -33,6 +33,14 @@ class SpatialAudioManager: ObservableObject {
     /// Listener position (user's head position)
     @Published var listenerPosition: SIMD3<Float> = [0, 0, 0]
     
+    /// Maximum concurrent audio sources (can be reduced for performance)
+    /// Requirements: 6.3
+    var maxConcurrentSources: Int = 5
+    
+    /// Whether to use low CPU mode
+    /// Requirements: 6.3
+    var useLowCPUMode: Bool = false
+    
     // MARK: - Initialization
     
     init(config: AudioConfig = AudioConfig()) {
@@ -110,6 +118,7 @@ class SpatialAudioManager: ObservableObject {
     // MARK: - Playback
     
     /// Plays a sound at a specific 3D position
+    /// Requirements: 6.3
     /// - Parameters:
     ///   - sound: The type of sound to play
     ///   - position: 3D position in space where the sound originates
@@ -117,6 +126,26 @@ class SpatialAudioManager: ObservableObject {
     func playSound(_ sound: SoundType, at position: SIMD3<Float>, volume: Float = 1.0) {
         guard let buffer = audioBuffers[sound] else {
             print("Warning: No buffer loaded for \(sound)")
+            return
+        }
+        
+        // Check if we've reached max concurrent sources
+        // Requirements: 6.3
+        if activePlayers.count >= maxConcurrentSources {
+            // Stop oldest sound to make room
+            if let oldestKey = activePlayers.keys.first {
+                if let oldPlayer = activePlayers[oldestKey] {
+                    oldPlayer.stop()
+                    audioEngine.detach(oldPlayer)
+                }
+                activePlayers.removeValue(forKey: oldestKey)
+            }
+        }
+        
+        // In low CPU mode, skip sounds if we're near the limit
+        // Requirements: 6.3
+        if useLowCPUMode && activePlayers.count >= maxConcurrentSources - 1 {
+            print("Skipping sound in low CPU mode: \(sound)")
             return
         }
         
@@ -152,6 +181,13 @@ class SpatialAudioManager: ObservableObject {
         
         player.play()
         activePlayers[sound] = player
+    }
+    
+    /// Gets the current number of active audio sources
+    /// Requirements: 6.3
+    /// - Returns: Number of currently playing sounds
+    func getActiveSourceCount() -> Int {
+        return activePlayers.count
     }
     
     /// Adjusts volume based on distance from listener

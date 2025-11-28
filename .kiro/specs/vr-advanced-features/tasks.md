@@ -55,13 +55,13 @@
   - Add visual feedback during drag
   - _Requirements: 2.2_
 
-- [ ]* 2.5 Write unit tests for gesture recognition
+- [ ] 2.5 Write unit tests for gesture recognition
   - Test tap detection from hand positions
   - Test pinch gesture tracking
   - Test hover threshold boundaries
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 3. Build particle system
+- [x] 3. Build particle system
   - Create `ParticleSystem.swift` with RealityKit integration
   - Implement particle struct with position, velocity, color, lifetime
   - Add physics simulation (gravity, velocity updates)
@@ -72,14 +72,14 @@
   - **Property 3: Particle Lifetime Bounds**
   - **Validates: Requirements 3.4**
 
-- [ ] 3.2 Create particle emitter configurations
+- [x] 3.2 Create particle emitter configurations
   - Define level-up particle config (25 particles, stat colors)
   - Define goal completion confetti config
   - Add particle pooling for performance
   - Implement particle cleanup after lifetime
   - _Requirements: 3.1, 3.2, 3.4_
 
-- [ ] 3.3 Hook particle effects to events
+- [x] 3.3 Hook particle effects to events
   - Trigger particles on stat level-up
   - Trigger confetti on goal completion
   - Position emitters at panel locations
@@ -91,7 +91,7 @@
   - Test particle cleanup
   - _Requirements: 3.3, 3.4_
 
-- [ ] 4. Implement adaptive positioning
+- [x] 4. Implement adaptive positioning
   - Create `AdaptivePositioner.swift` with gaze tracking
   - Implement gaze direction calculation from ARKit
   - Add panel transform interpolation for smooth movement
@@ -102,7 +102,7 @@
   - **Property 4: Panel Position Smoothness**
   - **Validates: Requirements 4.1, 4.4**
 
-- [ ] 4.2 Add occlusion handling
+- [x] 4.2 Add occlusion handling
   - Integrate WorldTrackingProvider for mesh anchors
   - Detect panel-mesh intersections
   - Reposition panels to avoid occlusion
@@ -113,7 +113,7 @@
   - **Property 7: Occlusion Avoidance**
   - **Validates: Requirements 4.5**
 
-- [ ] 4.4 Implement context-aware positioning
+- [x] 4.4 Implement context-aware positioning
   - Bring session panel to center when training starts
   - Fade out irrelevant panels during active session
   - Reset positions when user looks away
@@ -125,7 +125,7 @@
   - Test transform interpolation
   - _Requirements: 4.1, 4.4_
 
-- [ ] 5. Add environmental integration
+- [x] 5. Add environmental integration
   - Create `LightingAdapter.swift` to detect room brightness
   - Implement panel brightness adjustment based on lighting
   - Add high contrast mode for outdoor detection
@@ -138,7 +138,7 @@
   - Test outdoor detection
   - _Requirements: 5.1, 5.2, 5.4_
 
-- [ ] 6. Performance optimization and monitoring
+- [x] 6. Performance optimization and monitoring
   - Add frame time measurement and logging
   - Implement dynamic particle count reduction
   - Add memory pressure monitoring
@@ -164,7 +164,7 @@
   - Measure gesture recognition latency
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 7. Integration and polish
+- [x] 7. Integration and polish
   - Wire all systems together in main VR view
   - Add feature toggles for debugging
   - Implement graceful degradation on errors

@@ -7,8 +7,11 @@
 
 import SwiftUI
 import RealityKit
+import ARKit
 
 /// Main immersive training room view with 3D environment and floating UI panels
+/// Integrates all advanced VR features with graceful degradation and accessibility support
+/// Requirements: All (Task 7)
 struct TrainingRoomView: View {
     // ViewModel for state management and data fetching
     @StateObject private var viewModel = TrainingRoomViewModel()
@@ -27,6 +30,16 @@ struct TrainingRoomView: View {
     
     // Panel position manager for drag repositioning
     @StateObject private var positionManager = PanelPositionManager()
+    
+    // Adaptive positioner for context-aware panel positioning
+    @StateObject private var adaptivePositioner = AdaptivePositioner()
+    
+    // Particle renderer for celebration effects
+    @State private var particleRenderer: ParticleRenderer?
+    
+    // World tracking for mesh anchors (occlusion handling)
+    @State private var worldTrackingSession: ARKitSession?
+    @State private var worldTrackingProvider: WorldTrackingProvider?
 
     // Debounce timer for rep marking
     @State private var lastRepMarkTime: Date = .distantPast
@@ -39,6 +52,15 @@ struct TrainingRoomView: View {
     // Stat detail modal state
     @State private var selectedStat: StatData?
     @State private var showStatDetail: Bool = false
+    
+    // App configuration for feature toggles and accessibility
+    @ObservedObject private var config = AppConfiguration.shared
+    
+    // Settings view presentation
+    @State private var showSettings: Bool = false
+    
+    // Error state for graceful degradation
+    @State private var systemErrors: [String: Error] = [:]
 
     var body: some View {
         RealityView { content, attachments in
@@ -49,9 +71,18 @@ struct TrainingRoomView: View {
             let headAnchor = AnchorEntity(.head)
             content.add(headAnchor)
 
+            // Setup particle renderer
+            let renderer = ParticleRenderer(particleSystem: viewModel.celebrationEffects.particleSystem)
+            renderer.setup(in: content)
+            particleRenderer = renderer
+
             // Position attachments
             positionAttachments(headAnchor: headAnchor, attachments: attachments)
         } update: { content, attachments in
+            // Record frame for performance monitoring
+            // Requirements: 6.1
+            viewModel.recordFrame()
+            
             // Update attachment positions when state changes
             if let headAnchor = content.entities.first(where: { $0 is AnchorEntity }) as? AnchorEntity {
                 // Remove all children first
@@ -60,6 +91,9 @@ struct TrainingRoomView: View {
                 // Re-add with updated positions
                 positionAttachments(headAnchor: headAnchor, attachments: attachments)
             }
+            
+            // Update particle rendering
+            particleRenderer?.update()
         } attachments: {
             // Dog Info with streak (always visible)
             Attachment(id: "dogInfo") {
@@ -221,6 +255,27 @@ struct TrainingRoomView: View {
                     )
                 }
             }
+            
+            // Performance Overlay (debug)
+            if config.showPerformanceOverlay {
+                Attachment(id: "performanceOverlay") {
+                    PerformanceOverlay(performanceMonitor: viewModel.performanceMonitor)
+                        .frame(width: 200)
+                }
+            }
+            
+            // Settings Button
+            Attachment(id: "settingsButton") {
+                Button(action: { showSettings = true }) {
+                    Image(systemName: "gear")
+                        .font(.system(size: 24))
+                        .foregroundStyle(.white)
+                        .padding(12)
+                        .background(.black.opacity(0.5))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
         }
         .onAppear {
             // Fetch initial data and start polling
@@ -228,8 +283,15 @@ struct TrainingRoomView: View {
                 await viewModel.fetchInitialData()
                 viewModel.startPolling()
                 
-                // Start hand tracking
-                await handTracking.startTracking()
+                // Start hand tracking (with graceful degradation)
+                if config.isFeatureEnabled("handTracking") {
+                    await startHandTracking()
+                }
+                
+                // Start world tracking for occlusion handling (with graceful degradation)
+                if config.isFeatureEnabled("adaptivePositioning") {
+                    await startWorldTracking()
+                }
             }
         }
         .onDisappear {
@@ -238,6 +300,12 @@ struct TrainingRoomView: View {
             
             // Stop hand tracking
             handTracking.stopTracking()
+            
+            // Stop world tracking
+            stopWorldTracking()
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .onChange(of: viewModel.stats) { oldStats, newStats in
             detectXPChanges(old: oldStats, new: newStats)
@@ -253,11 +321,139 @@ struct TrainingRoomView: View {
         }
     }
 
+    // MARK: - System Initialization with Graceful Degradation
+    
+    /// Starts hand tracking with error handling
+    /// Requirements: 2.1, 2.2, 2.3, 2.4, 2.5 (Task 7)
+    private func startHandTracking() async {
+        do {
+            await handTracking.startTracking()
+            print("✅ Hand tracking started successfully")
+        } catch {
+            handleSystemError(feature: "handTracking", error: error)
+        }
+    }
+    
+    /// Handles system errors with graceful degradation
+    /// Requirements: All (Task 7)
+    private func handleSystemError(feature: String, error: Error) {
+        print("❌ Error in \(feature): \(error.localizedDescription)")
+        
+        // Store error for debugging
+        systemErrors[feature] = error
+        
+        // Degrade feature if graceful degradation is enabled
+        if config.enableGracefulDegradation {
+            config.degradeFeature(feature)
+            
+            // Provide audio description if enabled
+            if config.audioDescriptionsEnabled {
+                announceError(feature: feature)
+            }
+        }
+    }
+    
+    /// Announces errors via audio description
+    /// Requirements: All (Task 7 - Accessibility)
+    private func announceError(feature: String) {
+        let message: String
+        switch feature {
+        case "handTracking":
+            message = "Hand tracking unavailable. Use voice commands instead."
+        case "spatialAudio":
+            message = "Spatial audio unavailable. Continuing without sound."
+        case "particleEffects":
+            message = "Visual effects disabled."
+        case "adaptivePositioning":
+            message = "Adaptive positioning unavailable. Panels in fixed positions."
+        case "environmentalIntegration":
+            message = "Environmental features unavailable."
+        default:
+            message = "Feature unavailable: \(feature)"
+        }
+        
+        // In production, this would use AVSpeechSynthesizer
+        print("🔊 Audio Description: \(message)")
+    }
+    
+    // MARK: - World Tracking (Occlusion Handling)
+    
+    /// Starts world tracking to detect mesh anchors for occlusion handling
+    /// Requirements: 4.5 (Task 7)
+    private func startWorldTracking() async {
+        // Check if world tracking is supported
+        guard WorldTrackingProvider.isSupported else {
+            print("World tracking not supported on this device")
+            handleSystemError(feature: "adaptivePositioning", error: NSError(domain: "WorldTracking", code: -1, userInfo: [NSLocalizedDescriptionKey: "Not supported"]))
+            return
+        }
+        
+        do {
+            // Create ARKit session and world tracking provider
+            let session = ARKitSession()
+            let provider = WorldTrackingProvider()
+            
+            // Request authorization for world sensing
+            let authorizationResult = await session.requestAuthorization(for: [.worldSensing])
+            
+            guard authorizationResult[.worldSensing] == .allowed else {
+                print("World sensing authorization denied")
+                handleSystemError(feature: "adaptivePositioning", error: NSError(domain: "WorldTracking", code: -2, userInfo: [NSLocalizedDescriptionKey: "Authorization denied"]))
+                return
+            }
+            
+            // Run the session
+            try await session.run([provider])
+            
+            // Store references
+            worldTrackingSession = session
+            worldTrackingProvider = provider
+            
+            // Start monitoring mesh anchors
+            Task {
+                await monitorMeshAnchors(provider: provider)
+            }
+            
+            print("✅ World tracking started successfully")
+        } catch {
+            handleSystemError(feature: "adaptivePositioning", error: error)
+        }
+    }
+    
+    /// Monitors mesh anchor updates from the world tracking provider
+    /// Requirements: 4.5
+    private func monitorMeshAnchors(provider: WorldTrackingProvider) async {
+        // Monitor anchor updates
+        for await update in provider.anchorUpdates {
+            // Get all current anchors
+            let anchors = Array(update.anchors)
+            
+            // Update adaptive positioner with mesh anchors
+            await MainActor.run {
+                adaptivePositioner.updateMeshAnchors(anchors)
+                
+                // Update occlusion avoidance (smooth repositioning)
+                adaptivePositioner.updateOcclusionAvoidance()
+            }
+        }
+    }
+    
+    /// Stops world tracking and clears mesh anchor data
+    private func stopWorldTracking() {
+        worldTrackingSession = nil
+        worldTrackingProvider = nil
+        adaptivePositioner.clearMeshAnchors()
+        print("World tracking stopped")
+    }
+    
     // MARK: - Gesture Handling
     
     /// Handles detected hand gestures
-    /// Requirements: 2.1, 2.2, 2.5
+    /// Requirements: 2.1, 2.2, 2.5 (Task 7)
     private func handleGesture(_ gesture: HandGesture?) {
+        // Check if hand tracking is enabled
+        guard config.isFeatureEnabled("handTracking") else { return }
+        
         guard let gesture = gesture else {
             // Gesture ended - check if we were dragging
             if positionManager.isDragging {
@@ -370,6 +566,7 @@ struct TrainingRoomView: View {
     // MARK: - View State Actions
 
     /// Start a training session
+    /// Requirements: 4.2, 4.3
     private func startTrainingSession() {
         // Create a sample training session
         let sessionData = SessionData(
@@ -381,6 +578,10 @@ struct TrainingRoomView: View {
             currentSuggestion: nil,
             startTime: Date()
         )
+        
+        // Activate context-aware positioning: bring session panel to center, fade out others
+        adaptivePositioner.activateTrainingMode()
+        
         withAnimation(.easeInOut(duration: 0.3)) {
             viewState = .training(sessionData)
         }
@@ -401,7 +602,11 @@ struct TrainingRoomView: View {
     }
 
     /// Return to minimal view
+    /// Requirements: 4.4
     private func returnToMinimal() {
+        // Reset panels to default positions when leaving training mode
+        adaptivePositioner.deactivateTrainingMode()
+        
         withAnimation(.easeInOut(duration: 0.3)) {
             viewState = .minimal
         }
@@ -426,6 +631,7 @@ struct TrainingRoomView: View {
     }
     
     /// Handle "Coach mode: [activity]" command
+    /// Requirements: 4.2, 4.3
     private func handleStartCoachMode(activity: String) {
         // Create a new training session
         // In production, this would fetch tips and goals from the backend
@@ -439,6 +645,9 @@ struct TrainingRoomView: View {
             startTime: Date()
         )
 
+        // Activate context-aware positioning
+        adaptivePositioner.activateTrainingMode()
+        
         viewState = .training(sessionData)
         print("Started coach mode for activity: \(activity)")
     }
@@ -479,6 +688,7 @@ struct TrainingRoomView: View {
     }
     
     /// Handle "End session: [description]" command
+    /// Requirements: 4.4
     private func handleEndSession(description: String) {
         // Only process if there's an active session
         guard case .training(let sessionData) = viewState else {
@@ -491,6 +701,9 @@ struct TrainingRoomView: View {
 
         // Play session end sound at center panel position
         viewModel.playSessionEndSound()
+
+        // Deactivate context-aware positioning when session ends
+        adaptivePositioner.deactivateTrainingMode()
 
         // Calculate session duration
         let duration = Date().timeIntervalSince(sessionData.startTime)
@@ -532,12 +745,24 @@ struct TrainingRoomView: View {
     // MARK: - Attachment Positioning
 
     /// Position all attachments relative to the head anchor
+    /// Requirements: 4.2, 4.3, 4.4 (Task 7 - with accessibility support)
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
+        // Get accessibility scale multiplier
+        let scaleMultiplier = config.getPanelScaleMultiplier()
+        let baseScale: Float = 1.6
+        let adjustedScale = baseScale * scaleMultiplier
+        
         // Dog Name/Level/Streak panel - top center (one combined card)
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
             let position = positionManager.position(for: .dogInfo)
             dogInfoAttachment.position = position
-            dogInfoAttachment.scale = [1.6, 1.6, 1.6] // Slightly smaller for cleaner look
+            dogInfoAttachment.scale = [adjustedScale, adjustedScale, adjustedScale]
+            
+            // Apply accessibility opacity
+            let baseOpacity = 0.95
+            let adjustedOpacity = config.getPanelOpacity(baseOpacity: baseOpacity)
+            dogInfoAttachment.components[OpacityComponent.self] = OpacityComponent(opacity: Float(adjustedOpacity))
+            
             headAnchor.addChild(dogInfoAttachment)
         }
 
@@ -545,52 +770,118 @@ struct TrainingRoomView: View {
         if let xpBarAttachment = attachments.entity(for: "xpBar") {
             let position = positionManager.position(for: .xpBar)
             xpBarAttachment.position = position
-            xpBarAttachment.scale = [1.6, 1.6, 1.6]
+            xpBarAttachment.scale = [adjustedScale, adjustedScale, adjustedScale]
+            
+            // Apply accessibility opacity
+            let baseOpacity = 0.95
+            let adjustedOpacity = config.getPanelOpacity(baseOpacity: baseOpacity)
+            xpBarAttachment.components[OpacityComponent.self] = OpacityComponent(opacity: Float(adjustedOpacity))
+            
             headAnchor.addChild(xpBarAttachment)
         }
 
         // Floating buttons - bottom center (no background panel)
+        // Fade out during training mode
         if let buttonsAttachment = attachments.entity(for: "floatingButtons") {
             buttonsAttachment.position = [0, -0.4, -1.2] // Bottom center
-            buttonsAttachment.scale = [1.6, 1.6, 1.6]
+            buttonsAttachment.scale = [adjustedScale, adjustedScale, adjustedScale]
+            
+            // Apply adaptive opacity (fade out during training) with accessibility
+            let baseOpacity: Float
+            if config.isFeatureEnabled("adaptivePositioning") && adaptivePositioner.isContextAware {
+                baseOpacity = 0.3
+            } else {
+                baseOpacity = 1.0
+            }
+            let adjustedOpacity = config.getPanelOpacity(baseOpacity: Double(baseOpacity))
+            buttonsAttachment.components[OpacityComponent.self] = OpacityComponent(opacity: Float(adjustedOpacity))
+            
             headAnchor.addChild(buttonsAttachment)
         }
 
-        // Session Panel - left side (shows during active training)
-        // Positioned to the side so you can see your dog clearly!
+        // Session Panel - uses adaptive positioning during training
+        // Requirements: 4.2, 4.3 (Task 7 - with feature toggles)
         if let sessionAttachment = attachments.entity(for: "session") {
-            let position = positionManager.position(for: .session)
-            sessionAttachment.position = position
-            sessionAttachment.scale = [1.2, 1.2, 1.2] // Smaller so it doesn't block view
+            let basePosition = positionManager.position(for: .session)
+            
+            // Apply adaptive positioning if enabled
+            let adaptiveTransform: Transform
+            let adaptiveOpacity: Double
+            if config.isFeatureEnabled("adaptivePositioning") {
+                adaptiveTransform = adaptivePositioner.getTransform(for: .session)
+                adaptiveOpacity = adaptivePositioner.getOpacity(for: .session)
+            } else {
+                adaptiveTransform = Transform(position: .zero, rotation: simd_quatf(), scale: 1.0)
+                adaptiveOpacity = 1.0
+            }
+            
+            // Combine base position with adaptive offset
+            sessionAttachment.position = [
+                basePosition.x + adaptiveTransform.position.x,
+                basePosition.y + adaptiveTransform.position.y,
+                basePosition.z + adaptiveTransform.position.z
+            ]
+            
+            // Apply adaptive scale with accessibility multiplier
+            let baseScale: Float = 1.2
+            let finalScale = baseScale * adaptiveTransform.scale * scaleMultiplier
+            sessionAttachment.scale = [finalScale, finalScale, finalScale]
+            
+            // Apply adaptive opacity with accessibility adjustment
+            let finalOpacity = config.getPanelOpacity(baseOpacity: adaptiveOpacity)
+            sessionAttachment.components[OpacityComponent.self] = OpacityComponent(opacity: Float(finalOpacity))
+            
             headAnchor.addChild(sessionAttachment)
         }
 
         // Stats Screen - full overlay (shows when stats view is active)
         if let statsScreenAttachment = attachments.entity(for: "statsScreen") {
             statsScreenAttachment.position = [0, 0.0, -1.2] // Center
-            statsScreenAttachment.scale = [1.8, 1.8, 1.8]
+            let statsScale: Float = 1.8 * scaleMultiplier
+            statsScreenAttachment.scale = [statsScale, statsScale, statsScale]
             headAnchor.addChild(statsScreenAttachment)
         }
 
         // Session Summary - center (shows after training ends)
         if let summaryAttachment = attachments.entity(for: "summary") {
             summaryAttachment.position = [0, 0.0, -1.2] // Center
-            summaryAttachment.scale = [1.7, 1.7, 1.7]
+            let summaryScale: Float = 1.7 * scaleMultiplier
+            summaryAttachment.scale = [summaryScale, summaryScale, summaryScale]
             headAnchor.addChild(summaryAttachment)
         }
 
-        // XP Notifications - float up on right side
-        if let xpNotifAttachment = attachments.entity(for: "xpNotifications") {
-            xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
-            xpNotifAttachment.scale = [1.4, 1.4, 1.4]
-            headAnchor.addChild(xpNotifAttachment)
+        // XP Notifications - float up on right side (only if particles enabled)
+        if config.isFeatureEnabled("particleEffects") {
+            if let xpNotifAttachment = attachments.entity(for: "xpNotifications") {
+                xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
+                let notifScale: Float = 1.4 * scaleMultiplier
+                xpNotifAttachment.scale = [notifScale, notifScale, notifScale]
+                headAnchor.addChild(xpNotifAttachment)
+            }
         }
         
         // Stat Detail Modal - center overlay
         if let statDetailAttachment = attachments.entity(for: "statDetail") {
             statDetailAttachment.position = [0, 0.0, -1.0] // Center, slightly closer
-            statDetailAttachment.scale = [1.5, 1.5, 1.5]
+            let detailScale: Float = 1.5 * scaleMultiplier
+            statDetailAttachment.scale = [detailScale, detailScale, detailScale]
             headAnchor.addChild(statDetailAttachment)
+        }
+        
+        // Performance Overlay - top right corner (debug)
+        if config.showPerformanceOverlay {
+            if let perfAttachment = attachments.entity(for: "performanceOverlay") {
+                perfAttachment.position = [0.8, 0.5, -1.0] // Top right
+                perfAttachment.scale = [1.2, 1.2, 1.2]
+                headAnchor.addChild(perfAttachment)
+            }
+        }
+        
+        // Settings Button - top left corner
+        if let settingsAttachment = attachments.entity(for: "settingsButton") {
+            settingsAttachment.position = [-0.8, 0.5, -1.0] // Top left
+            settingsAttachment.scale = [1.0, 1.0, 1.0]
+            headAnchor.addChild(settingsAttachment)
         }
     }
 
