@@ -131,9 +131,7 @@ class TrainingRoomViewModel: ObservableObject {
         checkStatCompletion(newStats: status.stats)
         
         // Check for goal completion before updating
-        if let newGoals = status.goals {
-            checkGoalCompletion(newGoals: newGoals)
-        }
+        checkGoalCompletion(newGoals: status.goals)
         
         dogName = status.dogName
         dogLevel = status.level
@@ -286,25 +284,25 @@ class TrainingRoomViewModel: ObservableObject {
     /// Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
     /// - Parameters:
     ///   - cameraTransform: Current camera transform from ARKit
-    ///   - lightEstimate: Light estimation data from ARKit
+    ///   - ambientIntensity: Ambient light intensity in lumens/lux
     ///   - meshAnchors: Detected mesh anchors for real surfaces
     func updateEnvironment(
         cameraTransform: simd_float4x4,
-        lightEstimate: ARLightEstimate?,
+        ambientIntensity: Float?,
         meshAnchors: [MeshAnchor]
     ) {
         // Update lighting adaptation (Requirements: 5.1, 5.2, 5.4)
-        if let estimate = lightEstimate {
-            lightingAdapter.updateFromARLightEstimate(estimate)
+        if let intensity = ambientIntensity {
+            lightingAdapter.updateFromAmbientIntensity(intensity)
         }
-        
+
         // Update environment detection (Requirements: 5.5)
         environmentDetector.update(
             cameraTransform: cameraTransform,
-            lightEstimate: lightEstimate,
+            ambientIntensity: ambientIntensity,
             meshAnchors: meshAnchors
         )
-        
+
         // Handle space changes - reset panel positions (Requirement: 5.5)
         if environmentDetector.hasChangedSpace {
             // Trigger panel position reset in the view
@@ -525,11 +523,10 @@ class TrainingRoomViewModel: ObservableObject {
     }
     
     // MARK: - Cleanup
-    
+
     nonisolated deinit {
         stopPolling()
-        Task { @MainActor in
-            celebrationEffects.stop()
-        }
+        // Note: celebrationEffects.stop() is MainActor-isolated and cannot be called from deinit
+        // Timer cleanup happens automatically when the timer is deallocated
     }
 }

@@ -30,18 +30,18 @@ class EnvironmentDetector: ObservableObject {
     /// Update environment detection from ARKit data
     func update(
         cameraTransform: simd_float4x4,
-        lightEstimate: ARLightEstimate?,
+        ambientIntensity: Float?,
         meshAnchors: [MeshAnchor]
     ) {
         // Update mesh anchors for surface detection
         updateMeshAnchors(meshAnchors)
-        
+
         // Detect space changes
         detectSpaceChange(cameraTransform: cameraTransform)
-        
+
         // Detect indoor/outdoor based on lighting
-        if let estimate = lightEstimate {
-            detectEnvironmentType(lightEstimate: estimate)
+        if let intensity = ambientIntensity {
+            detectEnvironmentType(ambientIntensity: intensity)
         }
     }
     
@@ -49,25 +49,26 @@ class EnvironmentDetector: ObservableObject {
     func findNearestSurface(to position: SIMD3<Float>) -> SIMD3<Float>? {
         var nearestDistance: Float = .infinity
         var nearestPosition: SIMD3<Float>?
-        
+
         for (_, meshAnchor) in meshAnchors {
-            // Get mesh geometry
+            // Get mesh geometry and transform
             let geometry = meshAnchor.geometry
             let vertices = geometry.vertices
-            
-            // Check vertices for closest point
-            for vertex in vertices {
-                let worldPosition = meshAnchor.transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
+            let transform = meshAnchor.originFromAnchorTransform
+
+            // Access vertex buffer
+            vertices.asSIMD3(ofType: Float.self).forEach { vertex in
+                let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 let vertexPosition = SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z)
                 let distance = simd_distance(position, vertexPosition)
-                
+
                 if distance < nearestDistance {
                     nearestDistance = distance
                     nearestPosition = vertexPosition
                 }
             }
         }
-        
+
         // Only return if surface is reasonably close (within 1 meter)
         return nearestDistance < 1.0 ? nearestPosition : nil
     }
@@ -88,20 +89,26 @@ class EnvironmentDetector: ObservableObject {
     /// Get all detected surfaces
     func getAllSurfaces() -> [SIMD3<Float>] {
         var surfaces: [SIMD3<Float>] = []
-        
+
         for (_, meshAnchor) in meshAnchors {
             let geometry = meshAnchor.geometry
             let vertices = geometry.vertices
-            
+            let transform = meshAnchor.originFromAnchorTransform
+
             // Sample vertices (not all, for performance)
-            let stride = max(1, vertices.count / 20)
-            for i in stride(from: 0, to: vertices.count, by: stride) {
-                let vertex = vertices[i]
-                let worldPosition = meshAnchor.transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
+            var vertexArray: [SIMD3<Float>] = []
+            vertices.asSIMD3(ofType: Float.self).forEach { vertex in
+                vertexArray.append(vertex)
+            }
+
+            let strideValue = max(1, vertexArray.count / 20)
+            for i in Swift.stride(from: 0, to: vertexArray.count, by: strideValue) {
+                let vertex = vertexArray[i]
+                let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 surfaces.append(SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z))
             }
         }
-        
+
         return surfaces
     }
     
@@ -136,9 +143,7 @@ class EnvironmentDetector: ObservableObject {
         }
     }
     
-    private func detectEnvironmentType(lightEstimate: ARLightEstimate) {
-        let ambientIntensity = lightEstimate.ambientIntensity
-        
+    private func detectEnvironmentType(ambientIntensity: Float) {
         // Detect outdoor based on very high light levels
         if ambientIntensity > 10000.0 {
             currentEnvironment = .outdoor
