@@ -267,110 +267,100 @@ enum NetworkError: LocalizedError {
 // MARK: - Mock Data
 
 /// Mock data for development and testing
+/// Based on actual Convex seed data for Bumi
 enum MockData {
     static let vrStatus = VRDogStatus(
-        dogName: "Buddy",
-        level: 12,
-        overallXp: 450,
-        xpToNextLevel: 600,
+        dogName: "Bumi",
+        level: 8,
+        overallXp: 50,
+        xpToNextLevel: 100,
         stats: [
             StatData(
                 type: "PHY",
                 name: "Physical",
-                level: 10,
-                xp: 450,
-                xpToNextLevel: 600,
+                level: 9,
+                xp: 75,
+                xpToNextLevel: 100,
                 xpProgress: 0.75
             ),
             StatData(
                 type: "INT",
                 name: "Intelligence",
-                level: 8,
-                xp: 320,
-                xpToNextLevel: 500,
-                xpProgress: 0.64
+                level: 7,
+                xp: 30,
+                xpToNextLevel: 100,
+                xpProgress: 0.30
             ),
             StatData(
                 type: "IMP",
                 name: "Impulse Control",
-                level: 15,
-                xp: 780,
-                xpToNextLevel: 800,
-                xpProgress: 0.975
+                level: 5,
+                xp: 20,
+                xpToNextLevel: 100,
+                xpProgress: 0.20
             ),
             StatData(
                 type: "SOC",
                 name: "Social",
                 level: 6,
-                xp: 120,
-                xpToNextLevel: 400,
-                xpProgress: 0.3
+                xp: 60,
+                xpToNextLevel: 100,
+                xpProgress: 0.60
             )
         ],
         goals: GoalData(
-            physical: GoalData.GoalProgress(current: 2, target: 3),
-            mental: GoalData.GoalProgress(current: 1, target: 2),
-            streak: 7
+            physical: GoalData.GoalProgress(current: 35, target: 50),
+            mental: GoalData.GoalProgress(current: 20, target: 30),
+            streak: 15
         ),
         recentActivities: [
             ActivityData(
                 id: "1",
-                name: "Loose leash walk around the block",
+                name: "Puzzle Toy",
                 xpBreakdown: [
-                    ActivityData.XPGain(stat: "PHY", amount: 15),
-                    ActivityData.XPGain(stat: "IMP", amount: 10)
+                    ActivityData.XPGain(stat: "INT", amount: 30)
                 ],
-                timestamp: Date().addingTimeInterval(-120),
-                loggedBy: "VR"
+                timestamp: Date().addingTimeInterval(-1800), // 30 min ago
+                loggedBy: "Holly"
             ),
             ActivityData(
                 id: "2",
-                name: "Practiced sit-stay for 30 seconds",
+                name: "Fetch",
                 xpBreakdown: [
-                    ActivityData.XPGain(stat: "IMP", amount: 20),
-                    ActivityData.XPGain(stat: "INT", amount: 5)
+                    ActivityData.XPGain(stat: "PHY", amount: 21),
+                    ActivityData.XPGain(stat: "IMP", amount: 9)
                 ],
-                timestamp: Date().addingTimeInterval(-3600),
-                loggedBy: "Mobile"
+                timestamp: Date().addingTimeInterval(-3600), // 1 hour ago
+                loggedBy: "Thomas"
             ),
             ActivityData(
                 id: "3",
-                name: "Met 3 new dogs at the park",
+                name: "Training Session",
                 xpBreakdown: [
-                    ActivityData.XPGain(stat: "SOC", amount: 25),
-                    ActivityData.XPGain(stat: "IMP", amount: 5)
+                    ActivityData.XPGain(stat: "IMP", amount: 24),
+                    ActivityData.XPGain(stat: "INT", amount: 16)
                 ],
-                timestamp: Date().addingTimeInterval(-7200),
-                loggedBy: "Mobile"
+                timestamp: Date().addingTimeInterval(-7200), // 2 hours ago
+                loggedBy: "Holly"
             ),
             ActivityData(
                 id: "4",
-                name: "Recall training in backyard (10 reps)",
+                name: "Morning Walk",
                 xpBreakdown: [
-                    ActivityData.XPGain(stat: "INT", amount: 15),
-                    ActivityData.XPGain(stat: "PHY", amount: 10)
+                    ActivityData.XPGain(stat: "PHY", amount: 45)
                 ],
-                timestamp: Date().addingTimeInterval(-86400),
-                loggedBy: "VR"
-            ),
-            ActivityData(
-                id: "5",
-                name: "Crate training - calm for 1 hour",
-                xpBreakdown: [
-                    ActivityData.XPGain(stat: "IMP", amount: 30)
-                ],
-                timestamp: Date().addingTimeInterval(-172800),
-                loggedBy: "Mobile"
+                timestamp: Date().addingTimeInterval(-10800), // 3 hours ago
+                loggedBy: "Thomas"
             )
         ],
         weeklyXP: [
-            DayXP(day: "Mon", total: 45, date: Date().addingTimeInterval(-518400)),
-            DayXP(day: "Tue", total: 60, date: Date().addingTimeInterval(-432000)),
-            DayXP(day: "Wed", total: 35, date: Date().addingTimeInterval(-345600)),
-            DayXP(day: "Thu", total: 80, date: Date().addingTimeInterval(-259200)),
-            DayXP(day: "Fri", total: 55, date: Date().addingTimeInterval(-172800)),
-            DayXP(day: "Sat", total: 70, date: Date().addingTimeInterval(-86400)),
-            DayXP(day: "Sun", total: 25, date: Date())
+            DayXP(day: "Mon", total: 85, date: Date().addingTimeInterval(-518400)),
+            DayXP(day: "Tue", total: 120, date: Date().addingTimeInterval(-432000)),
+            DayXP(day: "Wed", total: 95, date: Date().addingTimeInterval(-345600)),
+            DayXP(day: "Thu", total: 110, date: Date().addingTimeInterval(-259200)),
+            DayXP(day: "Fri", total: 140, date: Date().addingTimeInterval(-172800)),
+            DayXP(day: "Sat", total: 105, date: Date().addingTimeInterval(-86400)),
+            DayXP(day: "Sun", total: 145, date: Date())
         ]
     )
 
@@ -378,8 +368,8 @@ enum MockData {
         success: true,
         activityId: UUID().uuidString,
         xpAwarded: [
-            VoiceLogResponse.XPGain(stat: "PHY", amount: 15),
-            VoiceLogResponse.XPGain(stat: "IMP", amount: 10)
+            VoiceLogResponse.XPGain(stat: "IMP", amount: 24),
+            VoiceLogResponse.XPGain(stat: "INT", amount: 16)
         ],
         error: nil
     )

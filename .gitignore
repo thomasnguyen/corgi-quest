@@ -12,6 +12,7 @@ count.txt
 .netlify
 .vinxi
 todos.json
-.kiro
-# Allow markdown files in .kiro directories
-!.kiro/**/*.md
+# Kiro IDE - ignore cache/temp files but keep specs, steering, and hooks
+.kiro/cache
+.kiro/tmp
+.kiro/.state

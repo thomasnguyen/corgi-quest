@@ -1,0 +1,13 @@
+{
+  "name": "Schema Documentation Sync",
+  "description": "Automatically update schema documentation when convex/schema.ts changes",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "convex/schema.ts"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are maintaining documentation for Corgi Quest's Convex real-time database schema.\n\nWhen convex/schema.ts changes:\n\n1. Analyze the current schema structure (11 tables: users, households, dogs, dog_stats, activities, activity_stat_gains, daily_goals, streaks, mood_logs, cosmetic_items, equipped_items)\n\n2. Create or update docs/schema-overview.md with:\n   - Brief description of each table and its purpose\n   - Key fields and their data types\n   - Relationships between tables (e.g., households → dogs → stats)\n   - Which indexes exist and why\n   - Real-time subscription patterns (which queries subscribe to which tables)\n\n3. Keep the documentation:\n   - Concise and developer-friendly\n   - Focused on how tables relate to each other\n   - Clear about which frontend components depend on which tables\n   - Updated to reflect the current schema (not outdated)\n\n4. If new tables or significant fields were added, note them prominently\n\n5. Ensure the documentation helps another developer understand:\n   - How data flows through the system\n   - Which mutations affect which tables\n   - How real-time updates propagate to the UI"
+  },
+  "enabled": true
+}

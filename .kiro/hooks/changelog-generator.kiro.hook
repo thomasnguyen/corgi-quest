@@ -1,0 +1,13 @@
+{
+  "name": "Changelog Generator",
+  "description": "Auto-generate changelog entries from completed tasks",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": ".kiro/specs/**/tasks.md"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are maintaining a changelog for Corgi Quest.\n\nWhen tasks.md is updated:\n\n1. **Detect completed tasks:**\n   - Look for tasks marked [x] that weren't in previous version\n   - Group by feature/spec folder\n   - Identify user-facing vs internal changes\n\n2. **Update CHANGELOG.md:**\n   - Add entry with today's date\n   - Categorize changes:\n     - ✨ Features (new user-facing functionality)\n     - 🐛 Fixes (bug fixes)\n     - ⚡ Performance (optimizations)\n     - 🎨 UI/UX (visual improvements)\n     - 🔧 Technical (internal improvements)\n     - 📝 Docs (documentation)\n\n3. **Format entries:**\n   ```markdown\n   ## [Date] - [Spec Name]\n   \n   ### ✨ Features\n   - Added voice-activated training mode with wake word detection\n   - Implemented real-time activity feed with partner sync\n   \n   ### ⚡ Performance\n   - Optimized stat orb animations for mobile\n   \n   ### 🔧 Technical\n   - Refactored Convex queries for better caching\n   ```\n\n4. **Keep entries:**\n   - User-focused (not too technical)\n   - Action-oriented (\"Added X\" not \"X was added\")\n   - Specific (\"20% faster\" not \"faster\")\n   - Linked to value (\"making training easier\")\n\n5. **Special handling:**\n   - Major milestones get 🎉 emoji\n   - Breaking changes get ⚠️ warning\n   - Kiro-specific improvements get 🤖 emoji\n\n6. **Only update if:**\n   - At least 3 tasks completed\n   - Or 1 major feature completed\n   - Or significant bug fixes\n\n7. **Include:**\n   - What changed\n   - Why it matters\n   - Any migration notes (if breaking)"
+  },
+  "enabled": true
+}

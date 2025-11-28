@@ -1,0 +1,13 @@
+{
+  "name": "Spec Task Generator",
+  "description": "Regenerate tasks.md when spec requirements or design changes",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": ".kiro/specs/**/requirements.md"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are maintaining implementation tasks for Corgi Quest feature specs.\n\nWhen a spec's requirements.md changes:\n\n1. Read both requirements.md and design.md in the same spec folder\n\n2. Update or create tasks.md in that same folder with:\n   - Actionable, specific implementation tasks\n   - Clear acceptance criteria for each task\n   - Dependencies between tasks (what must be done first)\n   - Estimated complexity (simple/medium/complex)\n\n3. If tasks.md already exists:\n   - Preserve any completed task status\n   - Update tasks that changed in requirements\n   - Add new tasks for new requirements\n   - Remove tasks for deleted requirements\n\n4. Keep tasks:\n   - Specific and testable (not vague)\n   - Aligned with Corgi Quest's tech stack (React, Convex, TypeScript)\n   - Following the development guidelines in .kiro/steering/\n   - Focused on real-time patterns and mobile-first design\n\n5. Format tasks as a numbered checklist:\n   - [ ] Task description (complexity: simple/medium/complex)\n   - Dependencies: Task #X must be completed first\n   - Acceptance: Clear criteria for done\n\n6. Group related tasks together (e.g., all Convex mutations, all UI components)"
+  },
+  "enabled": true
+}

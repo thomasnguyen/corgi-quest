@@ -1,0 +1,13 @@
+{
+  "name": "Training Mode Pipeline Documentation",
+  "description": "Update training mode documentation when voice/AI components change",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "src/components/training/**/*.tsx"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are documenting the Training Mode feature for Corgi Quest.\n\nWhen training mode components change:\n\n1. Analyze the current voice → AI → XP pipeline by examining:\n   - src/components/training/ components\n   - src/hooks/useOpenAIRealtime.ts\n   - src/hooks/useWebSpeechRecognition.ts\n   - src/lib/trainingModeInstructions.ts\n   - Related Convex mutations in convex/mutations.ts\n\n2. Create or update docs/training-mode-pipeline.md with:\n\n   **Voice Input**\n   - How voice is captured (Web Speech API vs OpenAI Realtime)\n   - Wake word detection (\"Hey Corgi\")\n   - Recording state management\n\n   **AI Processing**\n   - How audio/text is sent to OpenAI\n   - Activity parsing logic\n   - Stat and XP calculation\n\n   **Database Updates**\n   - Which Convex mutations are called\n   - What data is written (activities, stat gains, daily goals)\n   - How optimistic updates work\n\n   **Real-Time UI Updates**\n   - How the activity feed updates instantly\n   - How stat orbs animate with new XP\n   - How daily goals progress updates\n\n3. Include a simple flow diagram in markdown:\n   ```\n   User speaks → Wake word detected → Recording starts → \n   Audio sent to OpenAI → Activity parsed → \n   Convex mutation called → Database updated → \n   Real-time subscription triggers → UI updates\n   ```\n\n4. Document edge cases:\n   - What happens if voice recognition fails\n   - How errors are handled\n   - Fallback to manual entry\n\n5. Keep it practical and focused on how the system actually works"
+  },
+  "enabled": true
+}

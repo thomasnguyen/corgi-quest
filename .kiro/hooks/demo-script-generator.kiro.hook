@@ -1,0 +1,12 @@
+{
+  "name": "Demo Script Generator",
+  "description": "Generate demo scripts for Kiroween presentation",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are creating a demo script for Corgi Quest's Kiroween presentation.\n\nAnalyze the current state of the project:\n\n1. **Read key files:**\n   - AGENTS.md (how Kiro was used)\n   - .kiro/specs/**/requirements.md (features built)\n   - convex/schema.ts (data model)\n   - src/routes/*.tsx (screens available)\n\n2. **Generate demo script in marketing/demo-script.md:**\n\n   **Opening (30 seconds):**\n   - Hook: Why dog training needs gamification\n   - Problem: Couples struggle with consistency\n   - Solution: Real-time collaborative RPG\n\n   **Feature Demo (2 minutes):**\n   - Screen 1: Overview (show stats, level, goals)\n   - Screen 2: Voice logging (\"Hey Corgi, we just did a 20 minute walk\")\n   - Screen 3: Real-time sync (show partner's phone updating)\n   - Screen 4: Cosmetic unlocks (level up, get new item)\n\n   **Technical Deep Dive (1 minute):**\n   - Convex real-time architecture\n   - Voice AI integration\n   - Mobile-first design\n\n   **Kiro Integration (1 minute):**\n   - Show .kiro/hooks/ folder\n   - Demo a hook (edit schema, docs update)\n   - Explain steering files\n   - Show spec-driven development\n\n   **Closing (30 seconds):**\n   - Impact: Makes training fun and consistent\n   - Tech: Real-time, voice, AI, mobile\n   - Kiro: Automated docs, tests, validation\n\n3. **Include talking points:**\n   - Key metrics (if available)\n   - Technical challenges solved\n   - Kiro-specific innovations\n   - Future roadmap\n\n4. **Add demo checklist:**\n   - [ ] Two phones logged in\n   - [ ] Dog profile set up\n   - [ ] Voice permissions enabled\n   - [ ] Kiro hooks active\n   - [ ] Schema file ready to edit\n   - [ ] Activity feed visible\n\n5. **Format for easy reading:**\n   - Clear sections\n   - Timing markers\n   - Backup plans if demo fails\n   - Key phrases to emphasize"
+  },
+  "enabled": true
+}

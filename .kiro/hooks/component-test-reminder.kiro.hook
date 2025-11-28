@@ -1,0 +1,13 @@
+{
+  "name": "Component Test Reminder",
+  "description": "Remind about test coverage when creating new components",
+  "trigger": {
+    "type": "onFileCreate",
+    "filePattern": "src/components/**/*.tsx"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "A new React component was just created in src/components/.\n\nProvide a brief reminder about testing best practices:\n\n1. Suggest creating a corresponding test file if this is a complex component\n\n2. For components that:\n   - Use Convex queries/mutations → Consider integration tests\n   - Have complex user interactions → Consider interaction tests\n   - Render conditionally → Test all branches\n   - Use animations → Test animation triggers\n\n3. Keep the reminder short and actionable\n\n4. Don't create test files automatically - just remind the developer\n\n5. If this is a simple presentational component, mention that visual testing might be sufficient\n\nFormat:\n```\n📝 Test Reminder for [ComponentName]\n\n[Brief testing suggestions based on component type]\n\nConsider: [Specific test scenarios]\n```"
+  },
+  "enabled": true
+}

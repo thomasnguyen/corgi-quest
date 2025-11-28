@@ -1,0 +1,13 @@
+{
+  "name": "Convex Pattern Validator",
+  "description": "Check for anti-patterns when Convex files are saved",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "src/**/*.{ts,tsx}"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are validating Convex usage patterns in Corgi Quest.\n\nWhen a TypeScript/React file is saved, quickly scan for common anti-patterns:\n\n❌ Anti-patterns to flag:\n\n1. Using fetch() to call Convex:\n   ```typescript\n   // BAD\n   const response = await fetch('/api/...');\n   ```\n   → Should use useQuery or useMutation hooks\n\n2. Manual refetching:\n   ```typescript\n   // BAD\n   useEffect(() => {\n     fetchData();\n   }, [dependency]);\n   ```\n   → Convex subscriptions auto-update\n\n3. Missing real-time subscriptions:\n   ```typescript\n   // BAD\n   const [data, setData] = useState();\n   ```\n   → Should use useQuery for live data\n\n4. Incorrect ID validation:\n   ```typescript\n   // BAD\n   dogId: v.string()\n   ```\n   → Should use v.id(\"tableName\")\n\n✅ If you find issues:\n\n1. Provide a brief, friendly message:\n   ```\n   ⚠️ Convex Pattern Check\n   \n   Found potential issue in [filename]:\n   [Description of issue]\n   \n   Suggested fix:\n   [Code example]\n   ```\n\n2. If no issues found, stay silent (don't spam)\n\n3. Focus on critical patterns that break real-time functionality\n\n4. Keep feedback constructive and specific"
+  },
+  "enabled": true
+}

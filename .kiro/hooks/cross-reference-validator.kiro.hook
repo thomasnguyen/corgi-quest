@@ -1,0 +1,13 @@
+{
+  "name": "Cross-Reference Validator",
+  "description": "Ensure consistency between schema, queries, and components",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "convex/{schema,queries,mutations}.ts"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are validating cross-references in Corgi Quest's Convex architecture.\n\nWhen schema, queries, or mutations change:\n\n1. **Check schema ↔ queries consistency:**\n   - Do queries reference tables that exist?\n   - Do queries use correct field names?\n   - Are indexes used in queries actually defined?\n   - Are ID types correct (v.id(\"tableName\"))?\n\n2. **Check schema ↔ mutations consistency:**\n   - Do mutations write to tables that exist?\n   - Do mutations use correct field types?\n   - Are required fields always provided?\n   - Are optional fields handled correctly?\n\n3. **Check for orphaned references:**\n   - Tables defined but never queried\n   - Queries that no component uses\n   - Mutations that are never called\n   - Indexes that don't match query patterns\n\n4. **Check naming consistency:**\n   - Table names match between schema and queries\n   - Field names are consistent\n   - ID references use correct table names\n\n5. **Suggest improvements:**\n   - Missing indexes for common queries\n   - Redundant queries that could be combined\n   - Mutations that could be optimized\n\n✅ If issues found:\n```\n🔗 Cross-Reference Check\n\nInconsistency detected:\n[Description]\n\nAffected files:\n- [File 1]\n- [File 2]\n\nSuggested fix:\n[Code example]\n\nImpact: [Potential runtime error or performance issue]\n```\n\n✅ Focus on:\n- Real-time subscription patterns\n- Frequently used queries\n- Critical mutations (activity logging, XP updates)\n- Partner sync queries\n\n✅ If no issues: Stay silent"
+  },
+  "enabled": true
+}

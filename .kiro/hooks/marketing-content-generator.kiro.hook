@@ -1,0 +1,13 @@
+{
+  "name": "Marketing Content Generator",
+  "description": "Generate tweet ideas and marketing copy when features are completed",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": ".kiro/specs/**/tasks.md"
+  },
+  "action": {
+    "type": "agentPrompt",
+    "prompt": "You are a marketing content generator for Corgi Quest.\n\nWhen tasks.md is updated:\n\n1. Scan for recently completed tasks (marked with [x])\n\n2. If significant features were completed, generate marketing content in marketing/tweet-ideas.md:\n\n   **Tweet Ideas:**\n   - 3 engaging tweets about the new feature\n   - Include relevant emojis (🐕, 🎮, ⚡, 🎯)\n   - Highlight the real-time collaboration aspect\n   - Keep under 280 characters\n   - Use hashtags: #Kiroween #CorgiQuest #DogTraining\n\n   **Feature Highlights:**\n   - One-liner description\n   - Key benefit for users\n   - Technical innovation (Convex, AI, voice)\n\n3. Only generate content for major milestones:\n   - New screens completed\n   - Voice features working\n   - AI integrations live\n   - Real-time features shipped\n\n4. Keep tone:\n   - Excited but not hype-y\n   - Technical but accessible\n   - Focus on user value\n   - Mention the couple collaboration angle\n\n5. Format:\n   ```markdown\n   ## [Feature Name] - [Date]\n   \n   ### Tweet Options\n   1. [Tweet text]\n   2. [Tweet text]\n   3. [Tweet text]\n   \n   ### Demo Talking Points\n   - [Point 1]\n   - [Point 2]\n   ```"
+  },
+  "enabled": true
+}
