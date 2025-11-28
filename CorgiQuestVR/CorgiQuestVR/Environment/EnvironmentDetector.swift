@@ -53,13 +53,10 @@ class EnvironmentDetector: ObservableObject {
         for (_, meshAnchor) in meshAnchors {
             // Get mesh geometry and transform
             let geometry = meshAnchor.geometry
-            let vertices = geometry.vertices
             let transform = meshAnchor.originFromAnchorTransform
 
-            // Access vertex buffer
-            let vertexCount = vertices.count
-            for i in 0..<vertexCount {
-                let vertex = vertices[i]
+            // Access vertex buffer using buffer API
+            geometry.vertices.asSIMD3(ofType: Float.self).forEach { vertex in
                 let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 let vertexPosition = SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z)
                 let distance = simd_distance(position, vertexPosition)
@@ -94,15 +91,15 @@ class EnvironmentDetector: ObservableObject {
 
         for (_, meshAnchor) in meshAnchors {
             let geometry = meshAnchor.geometry
-            let vertices = geometry.vertices
             let transform = meshAnchor.originFromAnchorTransform
 
             // Sample vertices (not all, for performance)
-            let vertexCount = vertices.count
+            let vertexArray = Array(geometry.vertices.asSIMD3(ofType: Float.self))
+            let vertexCount = vertexArray.count
             let strideValue = max(1, vertexCount / 20)
             
             for i in Swift.stride(from: 0, to: vertexCount, by: strideValue) {
-                let vertex = vertices[i]
+                let vertex = vertexArray[i]
                 let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 surfaces.append(SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z))
             }
