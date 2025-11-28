@@ -15,12 +15,12 @@ import Combine
 class ShadowRenderer: ObservableObject {
     // MARK: - Published Properties
     
-    @Published var shadowsEnabled: Bool = true
+    @Published var shadowsEnabled: Bool = false // Disabled by default
     @Published var shadowIntensity: Float = 0.3
     
     /// Whether shadow rendering is enabled (for performance optimization)
     /// Requirements: 6.5
-    var isEnabled: Bool = true
+    var isEnabled: Bool = false // Disabled by default
     
     // MARK: - Private Properties
     

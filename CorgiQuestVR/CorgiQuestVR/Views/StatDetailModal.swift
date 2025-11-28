@@ -68,7 +68,6 @@ struct StatDetailModal: View {
                     )
                     .frame(width: 180, height: 180)
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: stat.color.opacity(0.6), radius: 15)
                 
                 VStack(spacing: 8) {
                     Text("Level \(stat.level)")
@@ -137,7 +136,6 @@ struct StatDetailModal: View {
                                 )
                             )
                             .frame(width: geometry.size.width * progressAnimation, height: 12)
-                            .shadow(color: stat.color.opacity(0.6), radius: 8)
                     }
                 }
                 .frame(height: 12)
@@ -145,7 +143,7 @@ struct StatDetailModal: View {
             .padding(20)
             .background {
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.black.opacity(0.3))
+                    .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.5)) // #121216
             }
             
             // Recent Gains (placeholder - would come from backend)
@@ -163,7 +161,7 @@ struct StatDetailModal: View {
             .padding(20)
             .background {
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.black.opacity(0.3))
+                    .fill(Color(red: 0.071, green: 0.071, blue: 0.086).opacity(0.5)) // #121216
             }
             
             Spacer()
@@ -238,8 +236,6 @@ struct StatDetailModal: View {
                     lineWidth: 2
                 )
         )
-        .shadow(color: stat.color.opacity(0.3), radius: 20, x: 0, y: 10)
-        .shadow(color: .black.opacity(0.5), radius: 30, x: 0, y: 15)
         .scaleEffect(isVisible ? 1.0 : 0.9)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {

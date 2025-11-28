@@ -34,9 +34,6 @@ struct PanelHoverModifier: ViewModifier {
                     )
                     .animation(.easeInOut(duration: 0.3), value: isHovered)
             )
-            .shadow(
-                color: panelColor.opacity(isHovered ? glowIntensity * 0.6 : 0.0),
-                radius: isHovered ? 20 : 0,
                 x: 0,
                 y: 0
             )

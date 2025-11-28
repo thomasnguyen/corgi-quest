@@ -94,13 +94,12 @@ struct StatOrbsPanel: View {
         .padding(30)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.85))
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.961, green: 0.769, blue: 0.373).opacity(0.2), lineWidth: 1) // #f5c35f
                 )
         )
-        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -197,7 +196,7 @@ struct GoalsPanel: View {
                                 )
                             )
                             .frame(width: geometry.size.width * animatedPhysicalProgress, height: 10)
-                            .shadow(color: .red.opacity(0.6), radius: 8)
+        
                         
                         // Shimmer overlay when progressing
                         if animatedPhysicalProgress > 0 && animatedPhysicalProgress < 1.0 {
@@ -252,7 +251,7 @@ struct GoalsPanel: View {
                                 )
                             )
                             .frame(width: geometry.size.width * animatedMentalProgress, height: 10)
-                            .shadow(color: .blue.opacity(0.6), radius: 8)
+        
                         
                         // Shimmer overlay when progressing
                         if animatedMentalProgress > 0 && animatedMentalProgress < 1.0 {
@@ -281,7 +280,6 @@ struct GoalsPanel: View {
             HStack(spacing: 12) {
                 Text("🔥")
                     .font(.system(size: 40))
-                    .shadow(color: .orange, radius: 10)
                     .scaleEffect(streakPulse)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(goals.streak) Day Streak!")
@@ -293,7 +291,6 @@ struct GoalsPanel: View {
                 }
                 Text("🔥")
                     .font(.system(size: 40))
-                    .shadow(color: .orange, radius: 10)
                     .scaleEffect(streakPulse)
             }
             .padding(12)
@@ -315,19 +312,18 @@ struct GoalsPanel: View {
                             )
                     )
             )
-            .shadow(color: .orange.opacity(0.5), radius: 15)
+
         }
         .padding(30)
         .frame(width: 320)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.85))
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.961, green: 0.769, blue: 0.373).opacity(0.2), lineWidth: 1) // #f5c35f
                 )
         )
-        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
         .onAppear {
             // Animate progress bars on appear
             withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
@@ -409,13 +405,12 @@ struct ActivitiesPanel: View {
         .frame(width: 320)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.85))
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.961, green: 0.769, blue: 0.373).opacity(0.2), lineWidth: 1) // #f5c35f
                 )
         )
-        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
         .animation(.easeInOut(duration: 0.3), value: activities.map { $0.id })
     }
     
@@ -501,13 +496,12 @@ struct WeeklyChartPanel: View {
         .frame(width: 420)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.85))
+                .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.961, green: 0.769, blue: 0.373).opacity(0.2), lineWidth: 1) // #f5c35f
                 )
         )
-        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -522,13 +516,11 @@ struct XPNotificationsView: View {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(notification.color)
-                        .shadow(color: notification.color.opacity(0.8), radius: 6, x: 0, y: 0)
 
                     Text("+\(notification.amount) \(notification.statType)")
                         .font(.system(size: 17, weight: .bold, design: .serif))
                         .foregroundColor(.white)
                         .tracking(0.5)
-                        .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 1)
 
                     Text("XP")
                         .font(.system(size: 13, weight: .semibold, design: .serif))
@@ -539,9 +531,9 @@ struct XPNotificationsView: View {
                 .padding(.vertical, 12)
                 .background(
                     ZStack {
-                        // Dark base
+                        // Dark base - matching web app
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(red: 0.1, green: 0.1, blue: 0.1).opacity(0.95))
+                            .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
 
                         // Colored glow overlay
                         RoundedRectangle(cornerRadius: 12)
@@ -571,8 +563,6 @@ struct XPNotificationsView: View {
                             lineWidth: 2
                         )
                 )
-                .shadow(color: notification.color.opacity(0.4), radius: 12, x: 0, y: 0)
-                .shadow(color: .black.opacity(0.6), radius: 6, x: 0, y: 3)
                 .transition(.asymmetric(
                     insertion: .move(edge: .trailing).combined(with: .opacity).combined(with: .scale(scale: 0.9)),
                     removal: .opacity.combined(with: .scale(scale: 0.85))
@@ -698,14 +688,13 @@ struct QuickActionsPanel: View {
         .background(
             ZStack {
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(Color(red: 0.12, green: 0.12, blue: 0.12).opacity(0.92))
+                    .fill(Color(red: 0.071, green: 0.071, blue: 0.086)) // #121216
 
                 // Subtle inner border
                 RoundedRectangle(cornerRadius: 18)
-                    .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
+                    .strokeBorder(Color(red: 0.961, green: 0.769, blue: 0.373).opacity(0.2), lineWidth: 1) // #f5c35f
             }
         )
-        .shadow(color: .black.opacity(0.6), radius: 12, x: 0, y: 6)
     }
 }
 
@@ -747,7 +736,7 @@ struct DogInfoPanel: View {
                         endPoint: .bottom
                     )
                 )
-                .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.5), radius: 8, x: 0, y: 0) // Golden glow
+
 
             // Separator
             Text("•")
@@ -759,7 +748,6 @@ struct DogInfoPanel: View {
                 Image(systemName: "star.fill")
                     .font(.system(size: 12))
                     .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
-                    .shadow(color: Color(red: 0.961, green: 0.765, blue: 0.373).opacity(0.6), radius: 4, x: 0, y: 0)
                 Text("Lv \(level)")
                     .font(.system(size: 16, weight: .semibold, design: .serif))
                     .foregroundColor(Color(red: 0.961, green: 0.765, blue: 0.373)) // #F5C35F
@@ -796,8 +784,6 @@ struct SessionPanel: View {
                 .font(.system(size: 18, weight: .bold, design: .serif))
                 .foregroundColor(.yellow)
                 .tracking(1.5)
-                .shadow(color: .yellow.opacity(0.4), radius: 6, x: 0, y: 0)
-                .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
 
             // Elapsed timer
             HStack(spacing: 8) {
@@ -821,7 +807,6 @@ struct SessionPanel: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .shadow(color: .black.opacity(0.6), radius: 2, x: 0, y: 1)
 
             // Goal
             HStack(spacing: 6) {
@@ -843,8 +828,6 @@ struct SessionPanel: View {
                 Text(sessionData.repCounterText)
                     .font(.system(size: 48, weight: .heavy, design: .serif))
                     .foregroundColor(sessionData.isComplete ? .green : .yellow)
-                    .shadow(color: sessionData.isComplete ? .green.opacity(0.6) : .yellow.opacity(0.5), radius: 12)
-                    .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
             }
             .padding(.vertical, 8)
 
@@ -1011,8 +994,6 @@ struct SessionPanel: View {
                 )
         )
         .cornerRadius(18)
-        .shadow(color: .yellow.opacity(0.2), radius: 8, x: 0, y: 0)
-        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
     }
 }
 
@@ -1160,7 +1141,6 @@ struct StatsScreenView: View {
                                     .frame(width: 65, height: 65)
                                     .rotationEffect(.degrees(-90))
                                     .scaleEffect(glowScale[stat.type] ?? 1.0)
-                                    .shadow(color: stat.color.opacity(0.6), radius: (glowScale[stat.type] ?? 1.0) > 1.0 ? 15 : 5)
 
                                 Text("\(stat.level)")
                                     .font(.system(size: 22, weight: .semibold, design: .rounded))
@@ -1402,7 +1382,6 @@ struct StatsScreenView: View {
                     lineWidth: 1
                 )
         )
-        .shadow(color: .black.opacity(0.5), radius: 35, x: 0, y: 18)
         .scaleEffect(isVisible ? 1.0 : 0.96)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
@@ -1472,7 +1451,6 @@ struct SessionSummaryView: View {
             Text("🎉 TRAINING COMPLETE! 🎉")
                 .font(.system(size: 24, weight: .bold, design: .serif))
                 .foregroundColor(.green)
-                .shadow(color: .green.opacity(0.6), radius: 10)
 
             Divider()
                 .background(Color.yellow.opacity(0.5))
@@ -1606,7 +1584,6 @@ struct SessionSummaryView: View {
                 .stroke(Color.yellow.opacity(0.8), lineWidth: 3)
         )
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 3)
         .scaleEffect(isVisible ? 1.0 : 0.85)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
