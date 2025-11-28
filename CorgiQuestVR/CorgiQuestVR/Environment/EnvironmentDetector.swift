@@ -55,15 +55,19 @@ class EnvironmentDetector: ObservableObject {
             let geometry = meshAnchor.geometry
             let transform = meshAnchor.originFromAnchorTransform
 
-            // Access vertex buffer using buffer API
-            geometry.vertices.asSIMD3(ofType: Float.self).forEach { vertex in
-                let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
-                let vertexPosition = SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z)
-                let distance = simd_distance(position, vertexPosition)
+            // Access vertex buffer
+            let vertices = geometry.vertices
+            vertices.buffer.contents().withMemoryRebound(to: SIMD3<Float>.self, capacity: vertices.count) { vertexPointer in
+                for i in 0..<vertices.count {
+                    let vertex = vertexPointer[i]
+                    let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
+                    let vertexPosition = SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z)
+                    let distance = simd_distance(position, vertexPosition)
 
-                if distance < nearestDistance {
-                    nearestDistance = distance
-                    nearestPosition = vertexPosition
+                    if distance < nearestDistance {
+                        nearestDistance = distance
+                        nearestPosition = vertexPosition
+                    }
                 }
             }
         }
@@ -94,14 +98,16 @@ class EnvironmentDetector: ObservableObject {
             let transform = meshAnchor.originFromAnchorTransform
 
             // Sample vertices (not all, for performance)
-            let vertexArray = Array(geometry.vertices.asSIMD3(ofType: Float.self))
-            let vertexCount = vertexArray.count
+            let vertices = geometry.vertices
+            let vertexCount = vertices.count
             let strideValue = max(1, vertexCount / 20)
             
-            for i in Swift.stride(from: 0, to: vertexCount, by: strideValue) {
-                let vertex = vertexArray[i]
-                let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
-                surfaces.append(SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z))
+            vertices.buffer.contents().withMemoryRebound(to: SIMD3<Float>.self, capacity: vertexCount) { vertexPointer in
+                for i in Swift.stride(from: 0, to: vertexCount, by: strideValue) {
+                    let vertex = vertexPointer[i]
+                    let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
+                    surfaces.append(SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z))
+                }
             }
         }
 
