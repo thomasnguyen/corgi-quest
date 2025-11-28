@@ -97,19 +97,19 @@ class HandTrackingManager: ObservableObject {
     /// Stops hand tracking and cleans up resources
     /// Requirements: 2.1
     nonisolated func stopTracking() {
-        handTrackingTask?.cancel()
-        handTrackingTask = nil
-
-        handTrackingProvider = nil
-
         Task { @MainActor in
+            handTrackingTask?.cancel()
+            handTrackingTask = nil
+
+            handTrackingProvider = nil
+
             isTracking = false
             leftHandPosition = nil
             rightHandPosition = nil
             detectedGesture = nil
-        }
 
-        print("Hand tracking stopped")
+            print("Hand tracking stopped")
+        }
     }
     
     /// Checks if a hand is near a specific panel

@@ -8,6 +8,7 @@
 import SwiftUI
 import RealityKit
 import ARKit
+import Combine
 
 /// Manages shadow rendering for VR panels on real surfaces
 @MainActor
@@ -66,7 +67,7 @@ class ShadowRenderer: ObservableObject {
                 position: surfacePosition
             )
             shadowEntities[panelId] = shadowEntity
-            scene.addAnchor(AnchorEntity(world: surfacePosition))
+            // Note: In visionOS, shadows are managed differently - entity is added to parent container
         }
     }
     
@@ -109,7 +110,7 @@ class ShadowRenderer: ObservableObject {
         // Create shadow material with transparency
         var material = UnlitMaterial()
         material.color = .init(tint: .black.withAlphaComponent(CGFloat(intensity)))
-        material.blending = .transparent(opacity: .init(floatLiteral: Double(intensity)))
+        material.blending = .transparent(opacity: .init(floatLiteral: Float(intensity)))
         
         // Create the shadow entity
         let shadowEntity = ModelEntity(mesh: mesh, materials: [material])
@@ -132,7 +133,7 @@ class ShadowRenderer: ObservableObject {
         // Update material opacity
         if var material = entity.model?.materials.first as? UnlitMaterial {
             material.color = .init(tint: .black.withAlphaComponent(CGFloat(intensity)))
-            material.blending = .transparent(opacity: .init(floatLiteral: Double(intensity)))
+            material.blending = .transparent(opacity: .init(floatLiteral: Float(intensity)))
             entity.model?.materials = [material]
         }
     }

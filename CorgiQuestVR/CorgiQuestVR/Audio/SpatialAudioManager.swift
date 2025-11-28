@@ -8,6 +8,7 @@
 import Foundation
 import AVFoundation
 import simd
+import Combine
 
 /// Manages spatial audio playback with 3D positioning
 @MainActor
@@ -229,12 +230,16 @@ class SpatialAudioManager: ObservableObject {
         }
         activePlayers.removeAll()
     }
-    
-    // MARK: - Cleanup
-    
-    deinit {
-        stopAllSounds()
+
+    /// Cleanup method that can be called from deinit
+    nonisolated func cleanup() {
         audioEngine.stop()
+    }
+
+    // MARK: - Cleanup
+
+    deinit {
+        cleanup()
     }
 }
 

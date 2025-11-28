@@ -8,6 +8,7 @@
 import SwiftUI
 import ARKit
 import RealityKit
+import Combine
 
 /// Manages panel brightness and contrast based on environmental lighting conditions
 @MainActor
