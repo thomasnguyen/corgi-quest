@@ -8,6 +8,7 @@
 import Foundation
 import RealityKit
 import SwiftUI
+import Combine
 
 /// Coordinates celebration effects for level-ups and goal completions
 /// Requirements: 3.1, 3.2, 3.5
@@ -50,10 +51,12 @@ class CelebrationEffects: ObservableObject {
     }
     
     /// Stop the particle update loop
-    func stop() {
+    nonisolated func stop() {
         updateTimer?.invalidate()
         updateTimer = nil
-        particleSystem.clear()
+        Task { @MainActor in
+            particleSystem.clear()
+        }
     }
     
     /// Update particle physics

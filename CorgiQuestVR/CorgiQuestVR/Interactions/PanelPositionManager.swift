@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import simd
+import Combine
 
 /// Manages panel positions and handles drag repositioning
 /// Requirements: 2.2

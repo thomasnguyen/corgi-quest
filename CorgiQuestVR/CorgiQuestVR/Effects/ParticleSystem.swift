@@ -8,6 +8,7 @@
 import Foundation
 import RealityKit
 import SwiftUI
+import Combine
 
 /// Particle system for celebration effects in VR
 /// Requirements: 3.1, 3.2, 3.3, 3.4
@@ -17,19 +18,20 @@ class ParticleSystem: ObservableObject {
     // MARK: - Particle Structure
     
     /// Individual particle with physics properties
-    struct Particle {
+    struct Particle: Identifiable {
+        let id: UUID = UUID()
         var position: SIMD3<Float>
         var velocity: SIMD3<Float>
         var color: Color
         var alpha: Float
         var lifetime: TimeInterval
         var age: TimeInterval
-        
+
         /// Check if particle is still alive
         var isAlive: Bool {
             return age < lifetime
         }
-        
+
         /// Calculate current alpha based on age (linear fade)
         /// Requirements: 3.4
         var currentAlpha: Float {
