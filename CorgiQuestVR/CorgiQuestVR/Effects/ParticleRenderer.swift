@@ -51,9 +51,10 @@ class ParticleRenderer {
         let particles = particleSystem.particles
         
         // Remove dead particle entities
-        let particleIDs = Set(particles.map { ObjectIdentifier($0) })
-        let entitiesToRemove = particleEntities.keys.filter { id in
-            !particleIDs.contains(ObjectIdentifier(id))
+        let particleIDs = Set(particles.map { $0.id })
+        let currentKeys = Array(particleEntities.keys)
+        let entitiesToRemove = currentKeys.filter { id in
+            !particleIDs.contains(id)
         }
         
         for id in entitiesToRemove {
@@ -65,16 +66,14 @@ class ParticleRenderer {
         
         // Update or create particle entities
         for particle in particles {
-            let particleID = UUID() // In production, particles would have stable IDs
-            
-            if let entity = particleEntities[particleID] {
+            if let entity = particleEntities[particle.id] {
                 // Update existing entity
                 updateParticleEntity(entity, with: particle)
             } else {
                 // Create new entity
                 let entity = createParticleEntity(for: particle)
                 container.addChild(entity)
-                particleEntities[particleID] = entity
+                particleEntities[particle.id] = entity
             }
         }
     }

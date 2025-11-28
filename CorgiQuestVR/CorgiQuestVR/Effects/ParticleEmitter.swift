@@ -8,6 +8,7 @@
 import Foundation
 import RealityKit
 import SwiftUI
+import Combine
 
 /// Manages particle emission for specific events
 /// Requirements: 3.1, 3.2, 3.4

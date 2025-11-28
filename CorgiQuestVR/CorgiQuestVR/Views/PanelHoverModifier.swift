@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 /// View modifier that adds hover effects to panels
 /// Requirements: 2.3, 2.4

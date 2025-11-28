@@ -17,7 +17,8 @@ class ParticleSystem: ObservableObject {
     // MARK: - Particle Structure
     
     /// Individual particle with physics properties
-    struct Particle {
+    struct Particle: Identifiable {
+        let id: UUID = UUID()
         var position: SIMD3<Float>
         var velocity: SIMD3<Float>
         var color: Color
