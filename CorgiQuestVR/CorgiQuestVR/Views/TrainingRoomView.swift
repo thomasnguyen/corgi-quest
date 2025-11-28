@@ -425,12 +425,12 @@ struct TrainingRoomView: View {
     private func monitorMeshAnchors(provider: WorldTrackingProvider) async {
         // Monitor anchor updates
         for await update in provider.anchorUpdates {
-            // Get all current anchors
-            let anchors = Array(update.anchors)
+            // Get the anchor from the update
+            let anchor = update.anchor
             
-            // Update adaptive positioner with mesh anchors
+            // Update adaptive positioner with mesh anchor
             await MainActor.run {
-                adaptivePositioner.updateMeshAnchors(anchors)
+                adaptivePositioner.updateMeshAnchors([anchor])
                 
                 // Update occlusion avoidance (smooth repositioning)
                 adaptivePositioner.updateOcclusionAvoidance()
@@ -805,27 +805,31 @@ struct TrainingRoomView: View {
             let basePosition = positionManager.position(for: .session)
             
             // Apply adaptive positioning if enabled
-            let adaptiveTransform: Transform
+            let adaptiveTransform: AdaptivePositioner.PanelTransform
             let adaptiveOpacity: Double
             if config.isFeatureEnabled("adaptivePositioning") {
                 adaptiveTransform = adaptivePositioner.getTransform(for: .session)
                 adaptiveOpacity = adaptivePositioner.getOpacity(for: .session)
             } else {
-                adaptiveTransform = Transform(position: .zero, rotation: simd_quatf(), scale: 1.0)
+                adaptiveTransform = AdaptivePositioner.PanelTransform(
+                    position: SIMD3<Float>(0, 0, 0),
+                    rotation: simd_quatf(angle: 0, axis: SIMD3<Float>(0, 1, 0)),
+                    scale: 1.0
+                )
                 adaptiveOpacity = 1.0
             }
             
             // Combine base position with adaptive offset
-            sessionAttachment.position = [
+            sessionAttachment.position = SIMD3<Float>(
                 basePosition.x + adaptiveTransform.position.x,
                 basePosition.y + adaptiveTransform.position.y,
                 basePosition.z + adaptiveTransform.position.z
-            ]
+            )
             
             // Apply adaptive scale with accessibility multiplier
             let baseScale: Float = 1.2
             let finalScale = baseScale * adaptiveTransform.scale * scaleMultiplier
-            sessionAttachment.scale = [finalScale, finalScale, finalScale]
+            sessionAttachment.scale = SIMD3<Float>(finalScale, finalScale, finalScale)
             
             // Apply adaptive opacity with accessibility adjustment
             let finalOpacity = config.getPanelOpacity(baseOpacity: adaptiveOpacity)
