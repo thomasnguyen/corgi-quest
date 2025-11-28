@@ -57,7 +57,9 @@ class EnvironmentDetector: ObservableObject {
             let transform = meshAnchor.originFromAnchorTransform
 
             // Access vertex buffer
-            vertices.asSIMD3(ofType: Float.self).forEach { vertex in
+            let vertexCount = vertices.count
+            for i in 0..<vertexCount {
+                let vertex = vertices[i]
                 let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 let vertexPosition = SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z)
                 let distance = simd_distance(position, vertexPosition)
@@ -96,14 +98,11 @@ class EnvironmentDetector: ObservableObject {
             let transform = meshAnchor.originFromAnchorTransform
 
             // Sample vertices (not all, for performance)
-            var vertexArray: [SIMD3<Float>] = []
-            vertices.asSIMD3(ofType: Float.self).forEach { vertex in
-                vertexArray.append(vertex)
-            }
-
-            let strideValue = max(1, vertexArray.count / 20)
-            for i in Swift.stride(from: 0, to: vertexArray.count, by: strideValue) {
-                let vertex = vertexArray[i]
+            let vertexCount = vertices.count
+            let strideValue = max(1, vertexCount / 20)
+            
+            for i in Swift.stride(from: 0, to: vertexCount, by: strideValue) {
+                let vertex = vertices[i]
                 let worldPosition = transform * SIMD4<Float>(vertex.x, vertex.y, vertex.z, 1.0)
                 surfaces.append(SIMD3<Float>(worldPosition.x, worldPosition.y, worldPosition.z))
             }
