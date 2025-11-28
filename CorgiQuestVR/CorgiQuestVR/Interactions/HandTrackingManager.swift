@@ -83,40 +83,32 @@ class HandTrackingManager: ObservableObject {
             return
         }
         
-        do {
-            // Create hand tracking provider
-            let provider = HandTrackingProvider()
-            handTrackingProvider = provider
-            
-            // Start the provider
-            try await provider.start()
-            
-            isTracking = true
-            print("Hand tracking started successfully")
-            
-            // Start processing hand updates
-            startProcessingHandUpdates()
-            
-        } catch {
-            print("Failed to start hand tracking: \(error)")
-            isTracking = false
-        }
+        // Create hand tracking provider
+        let provider = HandTrackingProvider()
+        handTrackingProvider = provider
+
+        isTracking = true
+        print("Hand tracking started successfully")
+
+        // Start processing hand updates
+        startProcessingHandUpdates()
     }
     
     /// Stops hand tracking and cleans up resources
     /// Requirements: 2.1
-    func stopTracking() {
+    nonisolated func stopTracking() {
         handTrackingTask?.cancel()
         handTrackingTask = nil
-        
-        handTrackingProvider?.stop()
+
         handTrackingProvider = nil
-        
-        isTracking = false
-        leftHandPosition = nil
-        rightHandPosition = nil
-        detectedGesture = nil
-        
+
+        Task { @MainActor in
+            isTracking = false
+            leftHandPosition = nil
+            rightHandPosition = nil
+            detectedGesture = nil
+        }
+
         print("Hand tracking stopped")
     }
     
@@ -212,14 +204,12 @@ class HandTrackingManager: ObservableObject {
     private func detectGestures(from anchor: HandAnchor) {
         // Get hand skeleton
         guard let skeleton = anchor.handSkeleton else { return }
-        
+
         // Get key joint positions
-        guard let thumbTip = skeleton.joint(.thumbTip),
-              let indexTip = skeleton.joint(.indexFingerTip),
-              let wrist = skeleton.joint(.wrist) else {
-            return
-        }
-        
+        let thumbTip = skeleton.joint(.thumbTip)
+        let indexTip = skeleton.joint(.indexFingerTip)
+        let wrist = skeleton.joint(.wrist)
+
         let thumbPos = thumbTip.anchorFromJointTransform.columns.3.xyz
         let indexPos = indexTip.anchorFromJointTransform.columns.3.xyz
         let wristPos = wrist.anchorFromJointTransform.columns.3.xyz
