@@ -25,32 +25,29 @@ class LightingAdapter: ObservableObject {
     var useSimplifiedMode: Bool = false
     
     // MARK: - Private Properties
-    
-    private var lightEstimate: ARLightEstimate?
+
+    private var currentAmbientIntensity: Float = 1000.0
     private let brightnessThreshold: Float = 1000.0  // Lux threshold for bright environments
     private let darkThreshold: Float = 100.0         // Lux threshold for dark environments
     private let outdoorThreshold: Float = 10000.0    // Lux threshold for outdoor detection
-    
+
     // Smoothing for brightness changes
     private var targetBrightness: Float = 1.0
     private let smoothingFactor: Float = 0.1
-    
+
     // MARK: - Initialization
-    
+
     init() {
         // Start with default indoor lighting
         updateBrightnessSettings(ambientIntensity: 1000.0)
     }
-    
+
     // MARK: - Public Methods
-    
-    /// Update lighting based on ARKit light estimate
-    func updateFromARLightEstimate(_ estimate: ARLightEstimate) {
-        self.lightEstimate = estimate
-        
-        // Get ambient light intensity in lumens
-        let ambientIntensity = estimate.ambientIntensity
-        
+
+    /// Update lighting based on ambient light intensity
+    /// - Parameter ambientIntensity: Ambient light intensity in lumens/lux
+    func updateFromAmbientIntensity(_ ambientIntensity: Float) {
+        self.currentAmbientIntensity = ambientIntensity
         updateBrightnessSettings(ambientIntensity: ambientIntensity)
     }
     
