@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import simd
+import RealityKit
 import ARKit
 
 /// Manages adaptive positioning of panels based on training context and user gaze

@@ -51,12 +51,10 @@ class CelebrationEffects: ObservableObject {
     }
     
     /// Stop the particle update loop
-    nonisolated func stop() {
+    func stop() {
         updateTimer?.invalidate()
         updateTimer = nil
-        Task { @MainActor in
-            particleSystem.clear()
-        }
+        particleSystem.clear()
     }
     
     /// Update particle physics
