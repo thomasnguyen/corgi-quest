@@ -27,7 +27,7 @@ struct PerformanceOverlay: View {
             HStack {
                 Text("Frame:")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                Text(String(format: "%.2fms", performanceMonitor.averageFrameTime * 1000))
+                Text(String(format: "%.2fms", performanceMonitor.frameTimeMs))
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(frameTimeColor)
             }
@@ -36,7 +36,7 @@ struct PerformanceOverlay: View {
             HStack {
                 Text("Memory:")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                Text(String(format: "%.1fMB", performanceMonitor.currentMemoryUsage))
+                Text(String(format: "%.1fMB", performanceMonitor.memoryUsageMB))
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(memoryColor)
             }
@@ -45,7 +45,7 @@ struct PerformanceOverlay: View {
             HStack {
                 Text("Particles:")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                Text("\(performanceMonitor.currentParticleCount)")
+                Text("\(performanceMonitor.activeParticleCount)")
                     .font(.system(size: 12, design: .monospaced))
             }
             
@@ -53,12 +53,12 @@ struct PerformanceOverlay: View {
             HStack {
                 Text("Audio:")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                Text("\(performanceMonitor.currentAudioSourceCount)")
+                Text("\(performanceMonitor.activeAudioSources)")
                     .font(.system(size: 12, design: .monospaced))
             }
             
             // Optimization Status
-            if performanceMonitor.isOptimizing {
+            if performanceMonitor.isPerformanceDegraded {
                 Text("⚠️ Optimizing")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundStyle(.orange)
@@ -82,10 +82,9 @@ struct PerformanceOverlay: View {
     }
     
     private var frameTimeColor: Color {
-        let frameTimeMs = performanceMonitor.averageFrameTime * 1000
-        if frameTimeMs <= 16.67 {
+        if performanceMonitor.frameTimeMs <= 16.67 {
             return .green
-        } else if frameTimeMs <= 20 {
+        } else if performanceMonitor.frameTimeMs <= 20 {
             return .yellow
         } else {
             return .red
@@ -93,9 +92,9 @@ struct PerformanceOverlay: View {
     }
     
     private var memoryColor: Color {
-        if performanceMonitor.currentMemoryUsage < 200 {
+        if performanceMonitor.memoryUsageMB < 200 {
             return .green
-        } else if performanceMonitor.currentMemoryUsage < 300 {
+        } else if performanceMonitor.memoryUsageMB < 300 {
             return .yellow
         } else {
             return .red
