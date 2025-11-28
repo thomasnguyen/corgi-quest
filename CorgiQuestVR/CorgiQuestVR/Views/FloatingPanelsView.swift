@@ -916,6 +916,15 @@ struct StatsScreenView: View {
     let onClose: () -> Void
     @State private var isVisible = false
     @State private var animateChart = false
+    
+    // Animation state variables for staggered fill animation
+    @State private var animatedProgress: [String: CGFloat] = [:]
+    @State private var glowScale: [String: CGFloat] = [:]
+    
+    // Animation timing constants (Requirements 3.1)
+    private let baseDelay: Double = 0.3
+    private let staggerInterval: Double = 0.2
+    private let fillDuration: Double = 0.8
 
     var body: some View {
         VStack(spacing: 0) {
@@ -951,7 +960,7 @@ struct StatsScreenView: View {
                                     .frame(width: 65, height: 65)
 
                                 Circle()
-                                    .trim(from: 0, to: stat.xpProgress)
+                                    .trim(from: 0, to: animatedProgress[stat.type] ?? 0)
                                     .stroke(
                                         LinearGradient(
                                             gradient: Gradient(colors: [
@@ -965,6 +974,8 @@ struct StatsScreenView: View {
                                     )
                                     .frame(width: 65, height: 65)
                                     .rotationEffect(.degrees(-90))
+                                    .scaleEffect(glowScale[stat.type] ?? 1.0)
+                                    .shadow(color: stat.color.opacity(0.6), radius: (glowScale[stat.type] ?? 1.0) > 1.0 ? 15 : 5)
 
                                 Text("\(stat.level)")
                                     .font(.system(size: 22, weight: .semibold, design: .rounded))
@@ -1215,6 +1226,39 @@ struct StatsScreenView: View {
             }
             withAnimation(.easeInOut(duration: 1.0).delay(0.3)) {
                 animateChart = true
+            }
+            
+            // Initialize all stat progress values to 0 (Requirements 1.1, 1.4)
+            for stat in stats {
+                animatedProgress[stat.type] = 0
+                glowScale[stat.type] = 1.0
+            }
+            
+            // Staggered fill animations (Requirements 1.2, 1.3, 3.2)
+            // PHY at 0.3s, INT at 0.5s, IMP at 0.7s, SOC at 0.9s
+            for (index, stat) in stats.enumerated() {
+                let delay = baseDelay + (Double(index) * staggerInterval)
+                
+                // Animate each stat's progress with easeOut curve over 0.8s duration
+                withAnimation(.easeOut(duration: fillDuration).delay(delay)) {
+                    animatedProgress[stat.type] = stat.xpProgress
+                }
+                
+                // Glow pulse effect on fill completion (Requirements 2.1, 2.2, 2.3)
+                // Trigger glow after fill duration + delay
+                let glowDelay = delay + fillDuration
+                DispatchQueue.main.asyncAfter(deadline: .now() + glowDelay) {
+                    // Animate scale to 1.05x with spring animation (increases shadow radius)
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                        glowScale[stat.type] = 1.05
+                    }
+                    // Animate scale back to 1.0x after brief delay (0.15s)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                            glowScale[stat.type] = 1.0
+                        }
+                    }
+                }
             }
         }
     }
