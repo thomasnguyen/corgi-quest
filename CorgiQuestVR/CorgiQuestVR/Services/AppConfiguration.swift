@@ -27,7 +27,7 @@ struct AppConfiguration {
     }
     
     /// Current environment (change this to switch between dev and prod)
-    static let current: Environment = .production
+    static let current: Environment = .development
     
     /// API base URL for the current environment
     static var apiBaseURL: String {
