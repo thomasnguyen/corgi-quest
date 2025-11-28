@@ -143,10 +143,10 @@ struct StatDetailModal: View {
                 .frame(height: 12)
             }
             .padding(20)
-            .background(
+            .background {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.black.opacity(0.3))
-            )
+            }
             
             // Recent Gains (placeholder - would come from backend)
             VStack(alignment: .leading, spacing: 12) {
@@ -161,7 +161,7 @@ struct StatDetailModal: View {
                 }
             }
             .padding(20)
-            .background(
+            .background {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.black.opacity(0.3))
             }
@@ -189,7 +189,7 @@ struct StatDetailModal: View {
                 )
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(
+                .background {
                     ZStack {
                         LinearGradient(
                             gradient: Gradient(colors: [
@@ -209,7 +209,7 @@ struct StatDetailModal: View {
                             endPoint: .center
                         )
                     }
-                )
+                }
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3)
@@ -220,10 +220,10 @@ struct StatDetailModal: View {
         }
         .padding(32)
         .frame(width: 500, height: 700)
-        .background(
+        .background {
             RoundedRectangle(cornerRadius: 24)
                 .fill(.regularMaterial)
-        )
+        }
         .overlay(
             RoundedRectangle(cornerRadius: 24)
                 .strokeBorder(
@@ -291,8 +291,7 @@ struct RecentGainRow: View {
             level: 5,
             xp: 75,
             xpToNextLevel: 100,
-            xpProgress: 0.75,
-            color: .red
+            xpProgress: 0.75
         ),
         onDismiss: {}
     )
