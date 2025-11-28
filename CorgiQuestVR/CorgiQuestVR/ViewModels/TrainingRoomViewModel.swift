@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import simd
 
 /// ViewModel for managing TrainingRoomView state and data fetching
 @MainActor
@@ -55,12 +56,26 @@ class TrainingRoomViewModel: ObservableObject {
     /// Polling interval in seconds
     private let pollingInterval: TimeInterval = 3.0
     
+    /// Spatial audio manager for 3D positioned sounds
+    let audioManager: SpatialAudioManager
+    
+    /// Previous stat XP values for detecting completion
+    private var previousStatXP: [String: Int] = [:]
+    
+    /// Previous goal progress for detecting completion
+    private var previousPhysicalProgress: Double = 0.0
+    private var previousMentalProgress: Double = 0.0
+    
     // MARK: - Initialization
     
     /// Initialize the ViewModel with a network service
     /// - Parameter networkService: The network service to use (defaults to production)
     init(networkService: NetworkService = NetworkService()) {
         self.networkService = networkService
+        self.audioManager = SpatialAudioManager()
+        
+        // Load audio files
+        audioManager.loadSounds()
     }
     
     // MARK: - Data Fetching
@@ -80,6 +95,14 @@ class TrainingRoomViewModel: ObservableObject {
     /// Transforms API response to UI models and updates published properties
     /// - Parameter status: The VRDogStatus response from the API
     func updateUI(with status: VRDogStatus) {
+        // Check for stat XP completion before updating
+        checkStatCompletion(newStats: status.stats)
+        
+        // Check for goal completion before updating
+        if let newGoals = status.goals {
+            checkGoalCompletion(newGoals: newGoals)
+        }
+        
         dogName = status.dogName
         dogLevel = status.level
         overallXp = status.overallXp
@@ -88,6 +111,74 @@ class TrainingRoomViewModel: ObservableObject {
         goals = status.goals
         activities = Array(status.recentActivities.prefix(5)) // Limit to 5 items
         weeklyXP = status.weeklyXP
+    }
+    
+    /// Checks if any stat has filled to completion and triggers audio
+    /// - Parameter newStats: The new stat data from the API
+    private func checkStatCompletion(newStats: [StatData]) {
+        for stat in newStats {
+            let previousXP = previousStatXP[stat.type] ?? 0
+            let currentXP = stat.xp
+            
+            // Check if XP increased and progress reached 1.0 (100%)
+            if currentXP > previousXP && stat.xpProgress >= 1.0 {
+                // Play whoosh sound at stat panel position
+                let position = panelPosition(for: stat.type)
+                audioManager.playSound(.statFill, at: position)
+            }
+            
+            previousStatXP[stat.type] = currentXP
+        }
+    }
+    
+    /// Checks if goals have reached completion and triggers audio
+    /// - Parameter newGoals: The new goal data from the API
+    private func checkGoalCompletion(newGoals: GoalData) {
+        // Check physical goal completion
+        if newGoals.physical.progress >= 1.0 && previousPhysicalProgress < 1.0 {
+            let position = panelPosition(for: "goals")
+            audioManager.playSound(.goalComplete, at: position)
+        }
+        
+        // Check mental goal completion
+        if newGoals.mental.progress >= 1.0 && previousMentalProgress < 1.0 {
+            let position = panelPosition(for: "goals")
+            audioManager.playSound(.goalComplete, at: position)
+        }
+        
+        previousPhysicalProgress = newGoals.physical.progress
+        previousMentalProgress = newGoals.mental.progress
+    }
+    
+    /// Returns the 3D position for a panel based on its identifier
+    /// - Parameter identifier: Panel identifier (stat type or panel name)
+    /// - Returns: 3D position in space
+    private func panelPosition(for identifier: String) -> SIMD3<Float> {
+        switch identifier {
+        case "PHY", "INT", "IMP", "SOC":
+            // Left panel: Stat Orbs
+            return SIMD3<Float>(x: -0.5, y: 0.0, z: -1.0)
+        case "goals":
+            // Top panel: Goals
+            return SIMD3<Float>(x: 0.0, y: 0.25, z: -1.0)
+        case "activities":
+            // Right panel: Activities
+            return SIMD3<Float>(x: 0.5, y: 0.0, z: -1.0)
+        case "chart":
+            // Bottom panel: Weekly Chart
+            return SIMD3<Float>(x: 0.0, y: -0.2, z: -1.0)
+        case "session":
+            // Center panel: Session
+            return SIMD3<Float>(x: 0.0, y: 0.0, z: -0.8)
+        default:
+            return SIMD3<Float>(x: 0.0, y: 0.0, z: -1.0)
+        }
+    }
+    
+    /// Triggers session end audio at the center panel position
+    func playSessionEndSound() {
+        let position = panelPosition(for: "session")
+        audioManager.playSound(.sessionEnd, at: position)
     }
     
     // MARK: - Voice Activity Logging

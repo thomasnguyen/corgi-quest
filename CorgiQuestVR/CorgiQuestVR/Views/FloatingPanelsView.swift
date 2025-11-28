@@ -19,28 +19,43 @@ struct FloatingPanelsView: View {
     @Binding var sessionState: SessionState
     let onMarkRep: () -> Void
     let onEndSession: () -> Void
+    
+    @State private var panelsVisible = false
+    @State private var floatOffset: CGFloat = 0
 
     var body: some View {
         ZStack {
-            // Left Panel: Stat Orbs
+            // Left Panel: Stat Orbs - with depth and float animation
             StatOrbsPanel(stats: stats)
-                .offset(x: -500, y: -50)
+                .offset(x: -500, y: -50 + floatOffset)
+                .rotation3DEffect(.degrees(panelsVisible ? 0 : -15), axis: (x: 0, y: 1, z: 0))
+                .opacity(panelsVisible ? 1 : 0)
+                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.1), value: panelsVisible)
 
-            // Top Panel: Today's Goals
+            // Top Panel: Today's Goals - with depth
             if let goals = goals {
                 GoalsPanel(goals: goals)
-                    .offset(x: 0, y: -250)
+                    .offset(x: 0, y: -250 + floatOffset * 0.8)
+                    .rotation3DEffect(.degrees(panelsVisible ? 0 : 10), axis: (x: 1, y: 0, z: 0))
+                    .opacity(panelsVisible ? 1 : 0)
+                    .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.2), value: panelsVisible)
             }
 
-            // Right Panel: Recent Activities
+            // Right Panel: Recent Activities - with depth and float animation
             ActivitiesPanel(activities: activities)
-                .offset(x: 500, y: -50)
+                .offset(x: 500, y: -50 + floatOffset * 1.2)
+                .rotation3DEffect(.degrees(panelsVisible ? 0 : 15), axis: (x: 0, y: 1, z: 0))
+                .opacity(panelsVisible ? 1 : 0)
+                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.3), value: panelsVisible)
 
-            // Bottom Panel: Weekly XP Chart
+            // Bottom Panel: Weekly XP Chart - with depth
             WeeklyChartPanel(weeklyXP: weeklyXP)
-                .offset(x: 0, y: 200)
+                .offset(x: 0, y: 200 + floatOffset * 0.6)
+                .rotation3DEffect(.degrees(panelsVisible ? 0 : -10), axis: (x: 1, y: 0, z: 0))
+                .opacity(panelsVisible ? 1 : 0)
+                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.4), value: panelsVisible)
 
-            // Center Panel: Session (conditional)
+            // Center Panel: Session (conditional) - always front and center
             if case .active(let sessionData) = sessionState {
                 SessionPanel(
                     sessionData: sessionData,
@@ -48,6 +63,17 @@ struct FloatingPanelsView: View {
                     onEndSession: onEndSession
                 )
                 .offset(x: 0, y: 0)
+                .scaleEffect(panelsVisible ? 1.0 : 0.9)
+                .opacity(panelsVisible ? 1 : 0)
+                .animation(.spring(response: 0.6, dampingFraction: 0.75).delay(0.5), value: panelsVisible)
+            }
+        }
+        .onAppear {
+            panelsVisible = true
+            
+            // Gentle floating animation for depth perception
+            withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                floatOffset = 8
             }
         }
     }
@@ -66,8 +92,15 @@ struct StatOrbsPanel: View {
             }
         }
         .padding(30)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.85))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -124,59 +157,132 @@ struct StatOrbView: View {
 /// Displays today's physical and mental goals with progress bars
 struct GoalsPanel: View {
     let goals: GoalData
+    @State private var animatedPhysicalProgress: CGFloat = 0
+    @State private var animatedMentalProgress: CGFloat = 0
+    @State private var streakPulse: CGFloat = 1.0
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Today's Goals")
                 .font(.headline)
+                .foregroundColor(.white)
             
-            // Physical goal
+            // Physical goal with shimmer animation
             VStack(alignment: .leading, spacing: 4) {
-                Text("Physical: \(goals.physical.current) / \(goals.physical.target)")
-                    .font(.caption)
+                HStack {
+                    Image(systemName: "figure.run")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                    Text("Physical: \(goals.physical.current) / \(goals.physical.target)")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 8)
-                            .cornerRadius(4)
+                        // Background track
+                        Capsule()
+                            .fill(Color.white.opacity(0.15))
+                            .frame(height: 10)
                         
-                        Rectangle()
-                            .fill(Color.red)
-                            .frame(width: geometry.size.width * goals.physical.progress, height: 8)
-                            .cornerRadius(4)
-                            .animation(.easeInOut(duration: 0.5), value: goals.physical.progress)
+                        // Animated progress fill with gradient
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.red,
+                                        Color.orange
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geometry.size.width * animatedPhysicalProgress, height: 10)
+                            .shadow(color: .red.opacity(0.6), radius: 8)
+                        
+                        // Shimmer overlay when progressing
+                        if animatedPhysicalProgress > 0 && animatedPhysicalProgress < 1.0 {
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white.opacity(0),
+                                            Color.white.opacity(0.4),
+                                            Color.white.opacity(0)
+                                        ]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: 40, height: 10)
+                                .offset(x: -20)
+                                .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: animatedPhysicalProgress)
+                        }
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 10)
             }
             
-            // Mental goal
+            // Mental goal with shimmer animation
             VStack(alignment: .leading, spacing: 4) {
-                Text("Mental: \(goals.mental.current) / \(goals.mental.target)")
-                    .font(.caption)
+                HStack {
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 12))
+                        .foregroundColor(.blue)
+                    Text("Mental: \(goals.mental.current) / \(goals.mental.target)")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 8)
-                            .cornerRadius(4)
+                        // Background track
+                        Capsule()
+                            .fill(Color.white.opacity(0.15))
+                            .frame(height: 10)
                         
-                        Rectangle()
-                            .fill(Color.blue)
-                            .frame(width: geometry.size.width * goals.mental.progress, height: 8)
-                            .cornerRadius(4)
-                            .animation(.easeInOut(duration: 0.5), value: goals.mental.progress)
+                        // Animated progress fill with gradient
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.blue,
+                                        Color.cyan
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geometry.size.width * animatedMentalProgress, height: 10)
+                            .shadow(color: .blue.opacity(0.6), radius: 8)
+                        
+                        // Shimmer overlay when progressing
+                        if animatedMentalProgress > 0 && animatedMentalProgress < 1.0 {
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white.opacity(0),
+                                            Color.white.opacity(0.4),
+                                            Color.white.opacity(0)
+                                        ]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: 40, height: 10)
+                                .offset(x: -20)
+                                .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: animatedMentalProgress)
+                        }
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 10)
             }
             
-            // Streak - PROMINENT DISPLAY (Skyrim-style)
+            // Streak - PROMINENT DISPLAY with pulse animation
             HStack(spacing: 12) {
                 Text("🔥")
                     .font(.system(size: 40))
                     .shadow(color: .orange, radius: 10)
+                    .scaleEffect(streakPulse)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(goals.streak) Day Streak!")
                         .font(.system(size: 20, weight: .bold, design: .serif))
@@ -188,21 +294,64 @@ struct GoalsPanel: View {
                 Text("🔥")
                     .font(.system(size: 40))
                     .shadow(color: .orange, radius: 10)
+                    .scaleEffect(streakPulse)
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.orange.opacity(0.2))
+                    .fill(Color.orange.opacity(0.3))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.orange, lineWidth: 2)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.orange,
+                                        Color.yellow
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2
+                            )
                     )
             )
+            .shadow(color: .orange.opacity(0.5), radius: 15)
         }
         .padding(30)
-        .frame(width: 300)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .frame(width: 320)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.85))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
+        .onAppear {
+            // Animate progress bars on appear
+            withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
+                animatedPhysicalProgress = goals.physical.progress
+            }
+            withAnimation(.easeOut(duration: 0.8).delay(0.4)) {
+                animatedMentalProgress = goals.mental.progress
+            }
+            
+            // Continuous pulse for streak
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                streakPulse = 1.1
+            }
+        }
+        .onChange(of: goals.physical.progress) { oldValue, newValue in
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                animatedPhysicalProgress = newValue
+            }
+        }
+        .onChange(of: goals.mental.progress) { oldValue, newValue in
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                animatedMentalProgress = newValue
+            }
+        }
     }
 }
 
@@ -214,20 +363,24 @@ struct ActivitiesPanel: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recent Activities")
                 .font(.headline)
+                .foregroundColor(.white)
             
             ForEach(activities.prefix(5)) { activity in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(activity.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
+                        .foregroundColor(.white)
                     
                     HStack(spacing: 8) {
                         ForEach(activity.xpBreakdown, id: \.stat) { gain in
                             Text("\(gain.stat) +\(gain.amount)")
                                 .font(.caption2)
+                                .fontWeight(.semibold)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(statColor(for: gain.stat).opacity(0.2))
+                                .background(statColor(for: gain.stat).opacity(0.25))
+                                .foregroundColor(statColor(for: gain.stat))
                                 .cornerRadius(4)
                         }
                     }
@@ -235,12 +388,12 @@ struct ActivitiesPanel: View {
                     HStack {
                         Text(activity.relativeTimestamp)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.5))
                         Text("•")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.5))
                         Text(activity.loggedBy)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.5))
                     }
                 }
                 .padding(.vertical, 4)
@@ -248,13 +401,21 @@ struct ActivitiesPanel: View {
                 
                 if activity.id != activities.prefix(5).last?.id {
                     Divider()
+                        .background(Color.white.opacity(0.2))
                 }
             }
         }
         .padding(30)
-        .frame(width: 300)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .frame(width: 320)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.85))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
         .animation(.easeInOut(duration: 0.3), value: activities.map { $0.id })
     }
     
@@ -282,47 +443,71 @@ struct WeeklyChartPanel: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Last 7 Days XP")
-                .font(.headline)
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.cyan)
+                Text("Last 7 Days XP")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
             
             Chart(weeklyXP) { day in
                 BarMark(
                     x: .value("Day", day.day),
                     y: .value("XP", animateChart ? day.total : 0)
                 )
-                .foregroundStyle(Color.blue.gradient)
-                .cornerRadius(4)
+                .foregroundStyle(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue,
+                            Color.cyan
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                .cornerRadius(5)
             }
             .chartXAxis {
                 AxisMarks(values: .automatic) { value in
                     AxisValueLabel()
                         .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
                     AxisValueLabel()
                         .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.5))
                 }
             }
             .frame(height: 120)
             .onAppear {
-                withAnimation(.easeInOut(duration: 0.8)) {
+                withAnimation(.easeInOut(duration: 1.0).delay(0.3)) {
                     animateChart = true
                 }
             }
             .onChange(of: weeklyXP.map { $0.total }) { oldValue, newValue in
                 // Re-animate when data changes
                 animateChart = false
-                withAnimation(.easeInOut(duration: 0.5)) {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                     animateChart = true
                 }
             }
         }
         .padding(30)
-        .frame(width: 400)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .frame(width: 420)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.85))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.7), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -1496,4 +1681,165 @@ struct SessionSummaryView: View {
         onMarkRep: { print("Mark rep pressed") },
         onEndSession: { print("End session pressed") }
     )
+}
+
+
+/// Session summary view shown after training ends
+struct SessionSummaryView: View {
+    let summary: SessionSummary
+    let onDone: () -> Void
+    
+    @State private var isVisible = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Title
+            Text("🎉 SESSION COMPLETE 🎉")
+                .font(.system(size: 24, weight: .bold, design: .serif))
+                .foregroundColor(.yellow)
+                .tracking(1.5)
+                .shadow(color: .yellow.opacity(0.4), radius: 6)
+            
+            // Activity name
+            Text(summary.activity)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.white)
+            
+            Divider()
+                .background(Color.white.opacity(0.3))
+            
+            // Stats
+            VStack(spacing: 12) {
+                HStack {
+                    Text("Duration:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text(summary.durationText)
+                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.white)
+                }
+                
+                HStack {
+                    Text("Reps Completed:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(summary.repsCompleted) / \(summary.repsTarget)")
+                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .foregroundColor(summary.repsCompleted >= summary.repsTarget ? .green : .white)
+                }
+            }
+            
+            Divider()
+                .background(Color.white.opacity(0.3))
+            
+            // XP Gained
+            VStack(alignment: .leading, spacing: 10) {
+                Text("XP Gained")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                ForEach(summary.xpGained, id: \.statType) { gain in
+                    HStack {
+                        Text(gain.statType)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(colorForStat(gain.color))
+                        Spacer()
+                        Text("+\(gain.amount) XP")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(colorForStat(gain.color))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(colorForStat(gain.color).opacity(0.15))
+                    )
+                }
+                
+                // Total
+                HStack {
+                    Text("TOTAL")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Text("+\(summary.totalXP) XP")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.yellow)
+                }
+                .padding(.top, 8)
+            }
+            
+            Divider()
+                .background(Color.white.opacity(0.3))
+            
+            // Done button
+            Button(action: onDone) {
+                Text("DONE")
+                    .font(.system(size: 17, weight: .bold, design: .serif))
+                    .tracking(1)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.996, green: 0.937, blue: 0.816),
+                                Color(red: 0.988, green: 0.835, blue: 0.529)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.702, green: 0.537, blue: 0.443),
+                                Color(red: 0.373, green: 0.333, blue: 0.325)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color(red: 0.976, green: 0.863, blue: 0.627), lineWidth: 3)
+                    )
+                    .cornerRadius(12)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(30)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.regularMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(Color.yellow.opacity(0.5), lineWidth: 2)
+        )
+        .shadow(color: .black.opacity(0.5), radius: 20)
+        .scaleEffect(isVisible ? 1.0 : 0.9)
+        .opacity(isVisible ? 1.0 : 0.0)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                isVisible = true
+            }
+        }
+    }
+    
+    private func colorForStat(_ colorName: String) -> Color {
+        switch colorName.lowercased() {
+        case "red":
+            return .red
+        case "blue":
+            return .blue
+        case "purple":
+            return .purple
+        case "green":
+            return .green
+        default:
+            return .white
+        }
+    }
 }

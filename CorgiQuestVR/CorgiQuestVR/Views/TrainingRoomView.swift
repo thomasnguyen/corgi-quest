@@ -19,6 +19,15 @@ struct TrainingRoomView: View {
     // Voice command handler - DISABLED for simulator (microphone permissions hang)
     // @StateObject private var voiceCommandHandler = VoiceCommandHandler()
 
+    // Hand tracking manager for gesture interactions
+    @StateObject private var handTracking = HandTrackingManager()
+    
+    // Panel hover state
+    @StateObject private var hoverState = PanelHoverState()
+    
+    // Panel position manager for drag repositioning
+    @StateObject private var positionManager = PanelPositionManager()
+
     // Debounce timer for rep marking
     @State private var lastRepMarkTime: Date = .distantPast
     private let repMarkDebounceInterval: TimeInterval = 0.5
@@ -26,6 +35,10 @@ struct TrainingRoomView: View {
     // XP notifications for pop-ups
     @State private var xpNotifications: [XPNotification] = []
     @State private var previousStatXP: [String: Int] = [:] // Track previous XP values
+    
+    // Stat detail modal state
+    @State private var selectedStat: StatData?
+    @State private var showStatDetail: Bool = false
 
     var body: some View {
         RealityView { content, attachments in
@@ -56,12 +69,16 @@ struct TrainingRoomView: View {
                     streak: viewModel.goals?.streak
                 )
                 .frame(width: 550) // Wider to accommodate streak
+                .panelHover(isHovered: hoverState.isHovered(.dogInfo), color: .yellow)
+                .dragFeedback(isDragging: positionManager.draggedPanel == .dogInfo)
             }
 
             // XP Progress Bar (always visible, centered)
             Attachment(id: "xpBar") {
                 XPProgressBar(currentXP: viewModel.overallXp, maxXP: viewModel.xpToNextLevel)
                     .frame(width: 250)
+                    .panelHover(isHovered: hoverState.isHovered(.xpBar), color: .orange)
+                    .dragFeedback(isDragging: positionManager.draggedPanel == .xpBar)
             }
 
             // Buttons overlay (only in minimal view - no background panel)
@@ -173,6 +190,8 @@ struct TrainingRoomView: View {
                         onEndSession: handleEndSessionButton
                     )
                     .frame(width: 350) // Smaller width so it doesn't block view
+                    .panelHover(isHovered: hoverState.isHovered(.session), color: .green)
+                    .dragFeedback(isDragging: positionManager.draggedPanel == .session)
                 }
             }
 
@@ -192,20 +211,129 @@ struct TrainingRoomView: View {
                 XPNotificationsView(notifications: xpNotifications)
                     .frame(width: 250)
             }
+            
+            // Stat Detail Modal (when a stat is tapped)
+            if showStatDetail, let stat = selectedStat {
+                Attachment(id: "statDetail") {
+                    StatDetailModal(
+                        stat: stat,
+                        onDismiss: closeStatDetail
+                    )
+                }
+            }
         }
         .onAppear {
             // Fetch initial data and start polling
             Task {
                 await viewModel.fetchInitialData()
                 viewModel.startPolling()
+                
+                // Start hand tracking
+                await handTracking.startTracking()
             }
         }
         .onDisappear {
             // Stop polling when view disappears
             viewModel.stopPolling()
+            
+            // Stop hand tracking
+            handTracking.stopTracking()
         }
         .onChange(of: viewModel.stats) { oldStats, newStats in
             detectXPChanges(old: oldStats, new: newStats)
+        }
+        .onChange(of: handTracking.leftHandPosition) { _, _ in
+            hoverState.updateHover(from: handTracking)
+        }
+        .onChange(of: handTracking.rightHandPosition) { _, _ in
+            hoverState.updateHover(from: handTracking)
+        }
+        .onChange(of: handTracking.detectedGesture) { _, newGesture in
+            handleGesture(newGesture)
+        }
+    }
+
+    // MARK: - Gesture Handling
+    
+    /// Handles detected hand gestures
+    /// Requirements: 2.1, 2.2, 2.5
+    private func handleGesture(_ gesture: HandGesture?) {
+        guard let gesture = gesture else {
+            // Gesture ended - check if we were dragging
+            if positionManager.isDragging {
+                positionManager.endDrag()
+            }
+            return
+        }
+        
+        switch gesture {
+        case .tap(let position):
+            handleTapGesture(at: position)
+        case .pinch(let start, let current):
+            handlePinchGesture(start: start, current: current)
+        case .dismiss:
+            handleDismissGesture()
+        default:
+            break
+        }
+    }
+    
+    /// Handles tap gesture - opens stat detail if tapping near a stat
+    /// Requirements: 2.1
+    private func handleTapGesture(at position: SIMD3<Float>) {
+        // Check if tapping near stats panel
+        if handTracking.isHandNear(panel: .stats, threshold: 0.2) {
+            // Find which stat was tapped (simplified - would need more precise hit testing)
+            if let firstStat = viewModel.stats.first {
+                selectedStat = firstStat
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                    showStatDetail = true
+                }
+            }
+        }
+    }
+    
+    /// Handles pinch gesture - starts or updates panel drag
+    /// Requirements: 2.2
+    private func handlePinchGesture(start: SIMD3<Float>, current: SIMD3<Float>) {
+        // Check if we're starting a new drag
+        if !positionManager.isDragging {
+            // Find which panel is being pinched
+            let panels: [PanelIdentifier] = [.stats, .goals, .activities, .chart, .session, .dogInfo, .xpBar]
+            
+            for panel in panels {
+                if handTracking.isHandNear(panel: panel, threshold: 0.2) {
+                    positionManager.startDrag(panel: panel, handPosition: start)
+                    break
+                }
+            }
+        } else {
+            // Update drag position
+            positionManager.updateDrag(currentHandPosition: current)
+        }
+    }
+    
+    /// Handles dismiss gesture - closes any open modals
+    /// Requirements: 2.5
+    private func handleDismissGesture() {
+        if showStatDetail {
+            closeStatDetail()
+        }
+        
+        if positionManager.isDragging {
+            positionManager.cancelDrag()
+        }
+    }
+    
+    /// Closes the stat detail modal
+    private func closeStatDetail() {
+        withAnimation(.easeOut(duration: 0.3)) {
+            showStatDetail = false
+        }
+        
+        // Clear selected stat after animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            selectedStat = nil
         }
     }
 
@@ -361,6 +489,9 @@ struct TrainingRoomView: View {
         print("Ending session with description: \(description)")
         print("Completed \(sessionData.currentReps) reps")
 
+        // Play session end sound at center panel position
+        viewModel.playSessionEndSound()
+
         // Calculate session duration
         let duration = Date().timeIntervalSince(sessionData.startTime)
 
@@ -404,14 +535,16 @@ struct TrainingRoomView: View {
     private func positionAttachments(headAnchor: AnchorEntity, attachments: RealityViewAttachments) {
         // Dog Name/Level/Streak panel - top center (one combined card)
         if let dogInfoAttachment = attachments.entity(for: "dogInfo") {
-            dogInfoAttachment.position = [0, 0.5, -1.2] // Top center - horizontally centered
+            let position = positionManager.position(for: .dogInfo)
+            dogInfoAttachment.position = position
             dogInfoAttachment.scale = [1.6, 1.6, 1.6] // Slightly smaller for cleaner look
             headAnchor.addChild(dogInfoAttachment)
         }
 
         // XP Progress Bar - very close below the info card
         if let xpBarAttachment = attachments.entity(for: "xpBar") {
-            xpBarAttachment.position = [0, 0.42, -1.2] // Much closer to dog info card
+            let position = positionManager.position(for: .xpBar)
+            xpBarAttachment.position = position
             xpBarAttachment.scale = [1.6, 1.6, 1.6]
             headAnchor.addChild(xpBarAttachment)
         }
@@ -426,7 +559,8 @@ struct TrainingRoomView: View {
         // Session Panel - left side (shows during active training)
         // Positioned to the side so you can see your dog clearly!
         if let sessionAttachment = attachments.entity(for: "session") {
-            sessionAttachment.position = [-0.6, -0.1, -1.2] // Left side, slightly down
+            let position = positionManager.position(for: .session)
+            sessionAttachment.position = position
             sessionAttachment.scale = [1.2, 1.2, 1.2] // Smaller so it doesn't block view
             headAnchor.addChild(sessionAttachment)
         }
@@ -450,6 +584,13 @@ struct TrainingRoomView: View {
             xpNotifAttachment.position = [0.9, 0.3, -1.2] // Upper right
             xpNotifAttachment.scale = [1.4, 1.4, 1.4]
             headAnchor.addChild(xpNotifAttachment)
+        }
+        
+        // Stat Detail Modal - center overlay
+        if let statDetailAttachment = attachments.entity(for: "statDetail") {
+            statDetailAttachment.position = [0, 0.0, -1.0] // Center, slightly closer
+            statDetailAttachment.scale = [1.5, 1.5, 1.5]
+            headAnchor.addChild(statDetailAttachment)
         }
     }
 
