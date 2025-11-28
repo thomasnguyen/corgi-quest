@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 import simd
 import ARKit
 
