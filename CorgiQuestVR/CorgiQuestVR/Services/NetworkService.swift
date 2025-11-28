@@ -34,10 +34,10 @@ class NetworkService {
     ///   - baseURL: The base URL for the API (defaults to production URL from AppConfiguration)
     ///   - useMockData: If true, returns mock data without network calls (defaults to true for development)
     init(baseURL: String? = nil, useMockData: Bool = true) {
-        // Use provided URL, or fall back to AppConfiguration's production URL
+        // Use provided URL, or fall back to mock API URL
         // For local development, pass "http://localhost:3000"
         // For production, use the deployed Netlify URL
-        self.baseURL = baseURL ?? AppConfiguration.apiBaseURL
+        self.baseURL = baseURL ?? "https://api.corgiquest.app"
         self.useMockData = useMockData
 
         // Configure URLSession with 5 second timeout (per requirements)
