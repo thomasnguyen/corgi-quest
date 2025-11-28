@@ -199,7 +199,7 @@ class AdaptivePositioner: ObservableObject {
     /// Updates mesh anchors from ARKit WorldTrackingProvider
     /// - Parameter anchors: Array of mesh anchors detected in the real world
     /// Requirements: 4.5
-    func updateMeshAnchors(_ anchors: [MeshAnchor]) {
+    func updateMeshAnchors(_ anchors: [ARAnchor]) {
         occlusionHandler.updateMeshAnchors(anchors)
 
         // Check all panels for occlusion and reposition if needed

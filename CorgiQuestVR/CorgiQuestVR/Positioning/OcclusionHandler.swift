@@ -60,11 +60,13 @@ class OcclusionHandler: ObservableObject {
     
     /// Updates the list of detected mesh anchors from ARKit
     /// - Parameter anchors: Array of mesh anchors from WorldTrackingProvider
-    func updateMeshAnchors(_ anchors: [MeshAnchor]) {
-        meshAnchors = anchors.map { meshAnchor in
+    func updateMeshAnchors(_ anchors: [ARAnchor]) {
+        meshAnchors = anchors.compactMap { anchor in
+            guard let meshAnchor = anchor as? ARMeshAnchor else { return nil }
+
             // Extract mesh geometry information
             let geometry = meshAnchor.geometry
-            let transform = meshAnchor.originFromAnchorTransform
+            let transform = meshAnchor.transform
 
             // Calculate approximate bounds from mesh vertices
             let bounds = calculateMeshBounds(geometry: geometry)
@@ -83,9 +85,9 @@ class OcclusionHandler: ObservableObject {
     }
 
     /// Calculates approximate bounding box for a mesh geometry
-    /// - Parameter geometry: The MeshResource.Contents to analyze
+    /// - Parameter geometry: The ARMeshGeometry to analyze
     /// - Returns: Approximate size of the mesh (width, height, depth)
-    private func calculateMeshBounds(geometry: MeshResource.Contents) -> SIMD3<Float> {
+    private func calculateMeshBounds(geometry: ARMeshGeometry) -> SIMD3<Float> {
         let vertices = geometry.vertices
         guard vertices.count > 0 else {
             return SIMD3<Float>(0.5, 0.5, 0.1)  // Default size
@@ -95,9 +97,10 @@ class OcclusionHandler: ObservableObject {
         var minVertex = SIMD3<Float>(Float.infinity, Float.infinity, Float.infinity)
         var maxVertex = SIMD3<Float>(-Float.infinity, -Float.infinity, -Float.infinity)
 
-        vertices.asSIMD3(ofType: Float.self).forEach { vertex in
-            minVertex = simd_min(minVertex, vertex)
-            maxVertex = simd_max(maxVertex, vertex)
+        for i in 0..<vertices.count {
+            let vertex = vertices[i]
+            minVertex = simd_min(minVertex, SIMD3<Float>(vertex.x, vertex.y, vertex.z))
+            maxVertex = simd_max(maxVertex, SIMD3<Float>(vertex.x, vertex.y, vertex.z))
         }
 
         return maxVertex - minVertex
