@@ -85,8 +85,8 @@ class CelebrationEffects: ObservableObject {
     }
     
     // MARK: - Cleanup
-    
+
     deinit {
-        stop()
+        updateTimer?.invalidate()
     }
 }
