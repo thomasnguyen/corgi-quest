@@ -60,21 +60,19 @@ class OcclusionHandler: ObservableObject {
     
     /// Updates the list of detected mesh anchors from ARKit
     /// - Parameter anchors: Array of mesh anchors from WorldTrackingProvider
-    func updateMeshAnchors(_ anchors: [ARAnchor]) {
+    func updateMeshAnchors(_ anchors: [WorldAnchor]) {
         meshAnchors = anchors.compactMap { anchor in
-            guard let meshAnchor = anchor as? ARMeshAnchor else { return nil }
-
-            // Extract mesh geometry information
-            let geometry = meshAnchor.geometry
-            let transform = meshAnchor.transform
-
-            // Calculate approximate bounds from mesh vertices
-            let bounds = calculateMeshBounds(geometry: geometry)
+            // On visionOS, WorldAnchor provides transform but not mesh geometry
+            // We'll use a simplified approach with estimated bounds
+            let transform = anchor.originFromAnchorTransform
             let position = SIMD3<Float>(
                 transform.columns.3.x,
                 transform.columns.3.y,
                 transform.columns.3.z
             )
+            
+            // Use default bounds since mesh geometry isn't directly available
+            let bounds = SIMD3<Float>(0.5, 0.5, 0.1)
 
             return MeshInfo(
                 position: position,
@@ -85,25 +83,11 @@ class OcclusionHandler: ObservableObject {
     }
 
     /// Calculates approximate bounding box for a mesh geometry
-    /// - Parameter geometry: The ARMeshGeometry to analyze
+    /// - Parameter geometry: Estimated size for the mesh
     /// - Returns: Approximate size of the mesh (width, height, depth)
-    private func calculateMeshBounds(geometry: ARMeshGeometry) -> SIMD3<Float> {
-        let vertices = geometry.vertices
-        guard vertices.count > 0 else {
-            return SIMD3<Float>(0.5, 0.5, 0.1)  // Default size
-        }
-
-        // Find min and max vertices
-        var minVertex = SIMD3<Float>(Float.infinity, Float.infinity, Float.infinity)
-        var maxVertex = SIMD3<Float>(-Float.infinity, -Float.infinity, -Float.infinity)
-
-        for i in 0..<vertices.count {
-            let vertex = vertices[i]
-            minVertex = simd_min(minVertex, SIMD3<Float>(vertex.x, vertex.y, vertex.z))
-            maxVertex = simd_max(maxVertex, SIMD3<Float>(vertex.x, vertex.y, vertex.z))
-        }
-
-        return maxVertex - minVertex
+    private func calculateMeshBounds() -> SIMD3<Float> {
+        // Default size for visionOS world anchors
+        return SIMD3<Float>(0.5, 0.5, 0.1)
     }
     
     // MARK: - Occlusion Detection
