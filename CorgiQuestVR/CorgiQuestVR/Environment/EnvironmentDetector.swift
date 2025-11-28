@@ -8,6 +8,7 @@
 import SwiftUI
 import ARKit
 import RealityKit
+import Combine
 
 /// Detects and responds to environmental changes
 @MainActor

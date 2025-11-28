@@ -193,7 +193,8 @@ class TrainingRoomViewModel: ObservableObject {
     /// Checks if goals have reached completion and triggers audio and particles
     /// Requirements: 3.2, 3.5 (Task 7 - with feature toggles)
     /// - Parameter newGoals: The new goal data from the API
-    private func checkGoalCompletion(newGoals: GoalData) {
+    private func checkGoalCompletion(newGoals: GoalData?) {
+        guard let newGoals = newGoals else { return }
         let config = AppConfiguration.shared
         let position = panelPosition(for: "goals")
         
@@ -525,8 +526,10 @@ class TrainingRoomViewModel: ObservableObject {
     
     // MARK: - Cleanup
     
-    deinit {
+    nonisolated deinit {
         stopPolling()
-        celebrationEffects.stop()
+        Task { @MainActor in
+            celebrationEffects.stop()
+        }
     }
 }

@@ -86,7 +86,9 @@ class CelebrationEffects: ObservableObject {
     
     // MARK: - Cleanup
 
-    deinit {
-        updateTimer?.invalidate()
+    nonisolated deinit {
+        Task { @MainActor in
+            updateTimer?.invalidate()
+        }
     }
 }
