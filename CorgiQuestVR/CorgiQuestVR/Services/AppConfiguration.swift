@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+import Combine
 
 /// Global app configuration with feature toggles and accessibility options
 /// Requirements: All (Task 7)
