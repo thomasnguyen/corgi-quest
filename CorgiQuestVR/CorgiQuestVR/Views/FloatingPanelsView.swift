@@ -600,28 +600,46 @@ struct SessionPanel: View {
     let onEndSession: () -> Void
 
     @State private var currentTime = Date()
+    @State private var pulseAnimation = false
+    @State private var celebrationScale: CGFloat = 1.0
+    @State private var celebrationRotation: Double = 0
+    @State private var showConfetti = false
+    @State private var previousIsComplete = false
 
     // Timer to update elapsed time every second
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(spacing: 16) {
-            // Title banner
+            // Title banner with decorative background
             Text("⚔️ ACTIVE SESSION ⚔️")
                 .font(.system(size: 18, weight: .bold, design: .serif))
                 .foregroundColor(.yellow)
                 .tracking(1.5)
-                .shadow(color: .yellow.opacity(0.4), radius: 6, x: 0, y: 0)
+                .shadow(color: .yellow.opacity(0.6), radius: 8, x: 0, y: 0)
                 .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(
+                    Capsule()
+                        .fill(Color.yellow.opacity(0.1))
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(Color.yellow.opacity(0.3), lineWidth: 1)
+                        )
+                )
 
-            // Elapsed timer
+            // Elapsed timer with pulsing icon
             HStack(spacing: 8) {
                 Image(systemName: "timer")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.cyan)
+                    .shadow(color: .cyan.opacity(0.5), radius: 4)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
                 Text(sessionData.elapsedTimeText(currentTime: currentTime))
                     .font(.system(size: 16, weight: .bold, design: .monospaced))
                     .foregroundColor(.cyan)
+                    .shadow(color: .cyan.opacity(0.3), radius: 2)
             }
             .onReceive(timer) { _ in
                 currentTime = Date()
@@ -648,7 +666,7 @@ struct SessionPanel: View {
                     .foregroundColor(.green)
             }
 
-            // Rep counter - BIG AND PROMINENT
+            // Rep counter - BIG AND PROMINENT with pulsing glow
             VStack(spacing: 6) {
                 Text(sessionData.isComplete ? "BONUS! 🎉" : "PROGRESS")
                     .font(.system(size: 12, weight: .bold, design: .serif))
@@ -658,8 +676,9 @@ struct SessionPanel: View {
                 Text(sessionData.repCounterText)
                     .font(.system(size: 48, weight: .heavy, design: .serif))
                     .foregroundColor(sessionData.isComplete ? .green : .yellow)
-                    .shadow(color: sessionData.isComplete ? .green.opacity(0.6) : .yellow.opacity(0.5), radius: 12)
+                    .shadow(color: sessionData.isComplete ? .green.opacity(pulseAnimation ? 0.8 : 0.4) : .yellow.opacity(pulseAnimation ? 0.7 : 0.4), radius: pulseAnimation ? 16 : 10)
                     .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+                    .scaleEffect(pulseAnimation ? 1.03 : 1.0)
             }
             .padding(.vertical, 8)
 
@@ -810,24 +829,168 @@ struct SessionPanel: View {
             }
         }
         .padding(20)
-        .background(.ultraThinMaterial)
-        .overlay(
+        .background(
             RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.yellow.opacity(0.7),
-                            Color.orange.opacity(0.5)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2.5
-                )
+                .fill(Color(red: 0.08, green: 0.08, blue: 0.08).opacity(0.95))
+        )
+        .overlay(
+            ZStack {
+                // Pulsing border
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                sessionData.isComplete ? Color.green.opacity(0.7) : Color.yellow.opacity(0.7),
+                                sessionData.isComplete ? Color.cyan.opacity(0.5) : Color.orange.opacity(0.5)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: sessionData.isComplete ? 3.5 : 2.5
+                    )
+                    .shadow(color: sessionData.isComplete ? .green.opacity(0.6) : .yellow.opacity(pulseAnimation ? 0.4 : 0.15), radius: sessionData.isComplete ? 16 : (pulseAnimation ? 12 : 6), x: 0, y: 0)
+
+                // Corner decorative elements
+                GeometryReader { geometry in
+                    // Top-left corner ornament
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .green : .yellow)
+                        .position(x: 20, y: 20)
+                        .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
+
+                    // Top-right corner ornament
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .green : .yellow)
+                        .position(x: geometry.size.width - 20, y: 20)
+                        .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(-celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
+
+                    // Bottom-left corner ornament
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .cyan : .orange)
+                        .position(x: 20, y: geometry.size.height - 20)
+                        .shadow(color: sessionData.isComplete ? .cyan.opacity(0.8) : .orange.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(-celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
+
+                    // Bottom-right corner ornament
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .cyan : .orange)
+                        .position(x: geometry.size.width - 20, y: geometry.size.height - 20)
+                        .shadow(color: sessionData.isComplete ? .cyan.opacity(0.8) : .orange.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
+
+                    // Confetti particles (only when complete)
+                    if showConfetti {
+                        ForEach(0..<12, id: \.self) { index in
+                            ConfettiParticle(index: index, geometry: geometry)
+                        }
+                    }
+                }
+            }
         )
         .cornerRadius(18)
-        .shadow(color: .yellow.opacity(0.2), radius: 8, x: 0, y: 0)
+        .scaleEffect(celebrationScale)
+        .shadow(color: sessionData.isComplete ? .green.opacity(0.5) : .yellow.opacity(pulseAnimation ? 0.3 : 0.15), radius: sessionData.isComplete ? 20 : (pulseAnimation ? 14 : 8), x: 0, y: 0)
         .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+        .onAppear {
+            // Start pulsing animation
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                pulseAnimation = true
+            }
+            previousIsComplete = sessionData.isComplete
+        }
+        .onChange(of: sessionData.isComplete) { oldValue, newValue in
+            // Trigger celebration when completed
+            if newValue && !previousIsComplete {
+                triggerCelebration()
+            }
+            previousIsComplete = newValue
+        }
+    }
+
+    /// Triggers celebration animation when session completes
+    private func triggerCelebration() {
+        // Bounce effect
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.5)) {
+            celebrationScale = 1.1
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                celebrationScale = 1.0
+            }
+        }
+
+        // Rotate corner stars
+        withAnimation(.easeInOut(duration: 0.8).repeatCount(3, autoreverses: true)) {
+            celebrationRotation = 360
+        }
+
+        // Show confetti
+        showConfetti = true
+
+        // Hide confetti after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation {
+                showConfetti = false
+            }
+        }
+    }
+}
+
+/// Confetti particle for celebration animation
+struct ConfettiParticle: View {
+    let index: Int
+    let geometry: GeometryProxy
+
+    @State private var yOffset: CGFloat = 0
+    @State private var xOffset: CGFloat = 0
+    @State private var opacity: Double = 1.0
+    @State private var rotation: Double = 0
+
+    private var color: Color {
+        let colors: [Color] = [.yellow, .orange, .green, .cyan, .purple, .pink]
+        return colors[index % colors.count]
+    }
+
+    private var symbol: String {
+        let symbols = ["star.fill", "sparkle", "circle.fill", "diamond.fill"]
+        return symbols[index % symbols.count]
+    }
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 12))
+            .foregroundColor(color)
+            .position(
+                x: geometry.size.width / 2 + xOffset,
+                y: geometry.size.height / 2 + yOffset
+            )
+            .opacity(opacity)
+            .rotationEffect(.degrees(rotation))
+            .onAppear {
+                let angle = Double(index) * (360.0 / 12.0)
+                let distance: CGFloat = 80
+
+                withAnimation(.easeOut(duration: 1.2)) {
+                    xOffset = cos(angle * .pi / 180) * distance
+                    yOffset = sin(angle * .pi / 180) * distance
+                    opacity = 0
+                }
+
+                withAnimation(.linear(duration: 1.2)) {
+                    rotation = Double.random(in: 180...540)
+                }
+            }
     }
 }
 
