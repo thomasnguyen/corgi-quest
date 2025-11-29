@@ -907,7 +907,7 @@ struct XPProgressBar: View {
     }
 }
 
-/// Full stats screen overlay - Apple-style design
+/// Full stats screen overlay - Apple-style design with 2D → 3D explosion transition
 struct StatsScreenView: View {
     let stats: [StatData]
     let goals: GoalData?
@@ -916,300 +916,102 @@ struct StatsScreenView: View {
     let onClose: () -> Void
     @State private var isVisible = false
     @State private var animateChart = false
-    
+
     // Animation state variables for staggered fill animation
     @State private var animatedProgress: [String: CGFloat] = [:]
     @State private var glowScale: [String: CGFloat] = [:]
-    
+
+    // Explosion animation state variables
+    @State private var explosionPhase: ExplosionPhase = .initial
+    @State private var orbPositions: [String: CGPoint] = [:]
+    @State private var orbScales: [String: CGFloat] = [:]
+    @State private var orbRotations: [String: Double] = [:]
+    @State private var particleOpacity: CGFloat = 0
+    @State private var chartPillarHeights: [CGFloat] = Array(repeating: 0, count: 7)
+
+    // Explosion phases
+    enum ExplosionPhase {
+        case initial      // Flat 2D panel
+        case shatter      // Panel flash/shatter
+        case exploding    // Orbs launching
+        case settled      // Final 3D positions
+    }
+
     // Animation timing constants (Requirements 3.1)
     private let baseDelay: Double = 0.3
     private let staggerInterval: Double = 0.2
     private let fillDuration: Double = 0.8
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Clean header with close button
-            HStack {
-                Text("Statistics")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+        ZStack {
+            // Background
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.regularMaterial)
+                .frame(width: 750, height: 600)
+
+            // Particle explosion effects
+            if explosionPhase == .shatter || explosionPhase == .exploding {
+                ForEach(0..<20, id: \.self) { index in
+                    Circle()
+                        .fill(particleColor(for: index))
+                        .frame(width: 8, height: 8)
+                        .offset(particleOffset(for: index))
+                        .opacity(particleOpacity)
+                        .blur(radius: 2)
+                }
+            }
+
+            VStack(spacing: 0) {
+                // Clean header with close button
+                HStack {
+                    Text("Statistics")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .opacity(explosionPhase == .initial ? 1.0 : 0.3)
+
+                    Spacer()
+
+                    Button(action: onClose) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(.white.opacity(0.6))
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+                .background(.thinMaterial)
 
                 Spacer()
-
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(.white.opacity(0.6))
-                        .symbolRenderingMode(.hierarchical)
-                }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .background(.thinMaterial)
 
-            // Content - NO SCROLL, everything fits
-            VStack(spacing: 16) {
-                // Stats cards in grid
-                HStack(spacing: 12) {
-                    ForEach(stats) { stat in
-                        VStack(spacing: 8) {
-                            ZStack {
-                                Circle()
-                                    .stroke(stat.color.opacity(0.15), lineWidth: 5)
-                                    .frame(width: 65, height: 65)
-
-                                Circle()
-                                    .trim(from: 0, to: animatedProgress[stat.type] ?? 0)
-                                    .stroke(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                stat.color,
-                                                stat.color.opacity(0.7)
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        ),
-                                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                                    )
-                                    .frame(width: 65, height: 65)
-                                    .rotationEffect(.degrees(-90))
-                                    .scaleEffect(glowScale[stat.type] ?? 1.0)
-                                    .shadow(color: stat.color.opacity(0.6), radius: (glowScale[stat.type] ?? 1.0) > 1.0 ? 15 : 5)
-
-                                Text("\(stat.level)")
-                                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.white)
-                            }
-
-                            Text(stat.type)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.white)
-
-                            Text(stat.name)
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundColor(.white.opacity(0.5))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(.thinMaterial)
-                        )
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 6)
-
-                // Chart and Goals side by side
-                HStack(alignment: .top, spacing: 12) {
-                    // Weekly XP Chart
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Weekly XP")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white)
-
-                        Chart(weeklyXP) { day in
-                            BarMark(
-                                x: .value("Day", day.day),
-                                y: .value("XP", animateChart ? day.total : 0)
-                            )
-                            .foregroundStyle(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.blue,
-                                        Color.cyan
-                                    ]),
-                                    startPoint: .bottom,
-                                    endPoint: .top
-                                )
-                            )
-                            .cornerRadius(5)
-                        }
-                        .chartXAxis {
-                            AxisMarks { _ in
-                                AxisValueLabel()
-                                    .font(.system(size: 9, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.6))
-                            }
-                        }
-                        .chartYAxis {
-                            AxisMarks(position: .leading) { _ in
-                                AxisValueLabel()
-                                    .font(.system(size: 8))
-                                    .foregroundStyle(.white.opacity(0.4))
-                            }
-                        }
-                        .frame(height: 110)
-                    }
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(.thinMaterial)
+            // Stat orbs with explosion animation
+            ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
+                statOrbView(for: stat, at: index)
+                    .offset(orbPositions[stat.type] ?? .zero)
+                    .scaleEffect(orbScales[stat.type] ?? 1.0)
+                    .rotation3DEffect(
+                        .degrees(orbRotations[stat.type] ?? 0),
+                        axis: (x: 0, y: 1, z: 0)
                     )
+            }
 
-                    // Goals
-                    if let goals = goals {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("Today's Goals")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
+            // Weekly chart as 3D pillars (bottom of screen)
+            if explosionPhase == .settled || explosionPhase == .exploding {
+                weeklyChartPillars()
+                    .offset(y: 180)
+            }
 
-                                Spacer()
-
-                                if goals.streak > 0 {
-                                    HStack(spacing: 3) {
-                                        Text("🔥")
-                                            .font(.system(size: 14))
-                                        Text("\(goals.streak)")
-                                            .font(.system(size: 12, weight: .semibold))
-                                            .foregroundColor(.orange)
-                                    }
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(
-                                        Capsule()
-                                            .fill(Color.orange.opacity(0.15))
-                                    )
-                                }
-                            }
-
-                            VStack(spacing: 10) {
-                                // Physical
-                                VStack(alignment: .leading, spacing: 5) {
-                                    HStack {
-                                        Text("Physical")
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Spacer()
-                                        Text("\(goals.physical.current)/\(goals.physical.target)")
-                                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                    }
-                                    GeometryReader { geo in
-                                        ZStack(alignment: .leading) {
-                                            Capsule()
-                                                .fill(Color.white.opacity(0.1))
-                                                .frame(height: 7)
-                                            Capsule()
-                                                .fill(
-                                                    LinearGradient(
-                                                        gradient: Gradient(colors: [
-                                                            Color.red,
-                                                            Color.orange
-                                                        ]),
-                                                        startPoint: .leading,
-                                                        endPoint: .trailing
-                                                    )
-                                                )
-                                                .frame(width: geo.size.width * goals.physical.progress, height: 7)
-                                        }
-                                    }
-                                    .frame(height: 7)
-                                }
-
-                                // Mental
-                                VStack(alignment: .leading, spacing: 5) {
-                                    HStack {
-                                        Text("Mental")
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Spacer()
-                                        Text("\(goals.mental.current)/\(goals.mental.target)")
-                                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                    }
-                                    GeometryReader { geo in
-                                        ZStack(alignment: .leading) {
-                                            Capsule()
-                                                .fill(Color.white.opacity(0.1))
-                                                .frame(height: 7)
-                                            Capsule()
-                                                .fill(
-                                                    LinearGradient(
-                                                        gradient: Gradient(colors: [
-                                                            Color.blue,
-                                                            Color.cyan
-                                                        ]),
-                                                        startPoint: .leading,
-                                                        endPoint: .trailing
-                                                    )
-                                                )
-                                                .frame(width: geo.size.width * goals.mental.progress, height: 7)
-                                        }
-                                    }
-                                    .frame(height: 7)
-                                }
-                            }
-                        }
-                        .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(.thinMaterial)
-                        )
-                    }
-                }
-                .padding(.horizontal, 20)
-
-                // Recent Activities
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Recent Activities")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-
-                    ForEach(activities.prefix(2)) { activity in
-                        HStack(spacing: 10) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(activity.name)
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-
-                                HStack(spacing: 5) {
-                                    ForEach(activity.xpBreakdown, id: \.stat) { gain in
-                                        Text("\(gain.stat) +\(gain.amount)")
-                                            .font(.system(size: 9, weight: .semibold))
-                                            .padding(.horizontal, 7)
-                                            .padding(.vertical, 3)
-                                            .background(
-                                                Capsule()
-                                                    .fill(statColor(for: gain.stat).opacity(0.2))
-                                            )
-                                            .foregroundColor(statColor(for: gain.stat))
-                                    }
-                                }
-                            }
-
-                            Spacer()
-
-                            Text(activity.relativeTimestamp)
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(.white.opacity(0.4))
-                        }
-                        .padding(.vertical, 3)
-
-                        if activity.id != activities.prefix(2).last?.id {
-                            Divider()
-                                .background(Color.white.opacity(0.1))
-                        }
-                    }
-                }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(.thinMaterial)
-                )
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+            // Goals panel (top right in settled state)
+            if explosionPhase == .settled, let goals = goals {
+                goalsView(goals: goals)
+                    .offset(x: 220, y: -150)
+                    .opacity(isVisible ? 1.0 : 0.0)
             }
         }
         .frame(width: 750, height: 600)
         .clipShape(RoundedRectangle(cornerRadius: 28))
-        .background(
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
-        )
         .overlay(
             RoundedRectangle(cornerRadius: 28)
                 .strokeBorder(
@@ -1221,38 +1023,98 @@ struct StatsScreenView: View {
         .scaleEffect(isVisible ? 1.0 : 0.96)
         .opacity(isVisible ? 1.0 : 0.0)
         .onAppear {
+            // Initialize animation state
+            initializeExplosionState()
+
+            // Trigger explosion sequence
+            startExplosionSequence()
+        }
+    }
+
+    // MARK: - Explosion Animation Methods
+
+    /// Initialize all orbs to center position (flat 2D layout)
+    private func initializeExplosionState() {
+        for stat in stats {
+            orbPositions[stat.type] = .zero
+            orbScales[stat.type] = 0.8
+            orbRotations[stat.type] = 0
+            animatedProgress[stat.type] = 0
+            glowScale[stat.type] = 1.0
+        }
+    }
+
+    /// Execute the 2-second explosion sequence
+    private func startExplosionSequence() {
+        // 0.0s - Initial visibility
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+            isVisible = true
+        }
+
+        // 0.2s - Shatter phase
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeIn(duration: 0.1)) {
+                explosionPhase = .shatter
+                particleOpacity = 1.0
+            }
+        }
+
+        // 0.3s - Start explosion, launch orbs one by one
+        for (index, stat) in stats.enumerated() {
+            let launchDelay = 0.3 + (Double(index) * 0.2) // 0.3s, 0.5s, 0.7s, 0.9s
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + launchDelay) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
+                    explosionPhase = .exploding
+
+                    // Set final position in arc formation
+                    let finalPosition = arcPosition(for: index, total: stats.count)
+                    orbPositions[stat.type] = finalPosition
+                    orbScales[stat.type] = 1.2
+                    orbRotations[stat.type] = Double.random(in: -15...15)
+                }
+            }
+        }
+
+        // 1.0s - Start weekly pillars shooting up
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            for i in 0..<weeklyXP.count {
+                let pillarDelay = Double(i) * 0.05
+                DispatchQueue.main.asyncAfter(deadline: .now() + pillarDelay) {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        chartPillarHeights[i] = 1.0
+                    }
+                }
+            }
+        }
+
+        // 1.2s - Settle into final positions
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
-                isVisible = true
+                explosionPhase = .settled
+                particleOpacity = 0
+
+                for stat in stats {
+                    orbScales[stat.type] = 1.0
+                }
             }
-            withAnimation(.easeInOut(duration: 1.0).delay(0.3)) {
-                animateChart = true
-            }
-            
-            // Initialize all stat progress values to 0 (Requirements 1.1, 1.4)
-            for stat in stats {
-                animatedProgress[stat.type] = 0
-                glowScale[stat.type] = 1.0
-            }
-            
-            // Staggered fill animations (Requirements 1.2, 1.3, 3.2)
-            // PHY at 0.3s, INT at 0.5s, IMP at 0.7s, SOC at 0.9s
+        }
+
+        // 1.4s - Start staggered fill animations
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             for (index, stat) in stats.enumerated() {
-                let delay = baseDelay + (Double(index) * staggerInterval)
-                
-                // Animate each stat's progress with easeOut curve over 0.8s duration
-                withAnimation(.easeOut(duration: fillDuration).delay(delay)) {
+                let fillDelay = Double(index) * staggerInterval
+
+                withAnimation(.easeOut(duration: fillDuration).delay(fillDelay)) {
                     animatedProgress[stat.type] = stat.xpProgress
                 }
-                
-                // Glow pulse effect on fill completion (Requirements 2.1, 2.2, 2.3)
-                // Trigger glow after fill duration + delay
-                let glowDelay = delay + fillDuration
+
+                // 1.8s+ - Glow pulse effects
+                let glowDelay = fillDelay + fillDuration
                 DispatchQueue.main.asyncAfter(deadline: .now() + glowDelay) {
-                    // Animate scale to 1.05x with spring animation (increases shadow radius)
                     withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
                         glowScale[stat.type] = 1.05
                     }
-                    // Animate scale back to 1.0x after brief delay (0.15s)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
                             glowScale[stat.type] = 1.0
@@ -1260,6 +1122,187 @@ struct StatsScreenView: View {
                     }
                 }
             }
+        }
+    }
+
+    /// Calculate arc position for orbs in 3D space
+    private func arcPosition(for index: Int, total: Int) -> CGPoint {
+        let radius: CGFloat = 250
+        let arcSpan: CGFloat = .pi * 0.8 // 144 degrees
+        let startAngle: CGFloat = .pi / 2 - arcSpan / 2
+        let angle = startAngle + (arcSpan * CGFloat(index) / CGFloat(max(1, total - 1)))
+
+        return CGPoint(
+            x: cos(angle) * radius,
+            y: -100 + sin(angle) * radius * 0.4
+        )
+    }
+
+    /// Particle color based on index
+    private func particleColor(for index: Int) -> Color {
+        let colors: [Color] = [.red, .blue, .purple, .green, .cyan, .orange]
+        return colors[index % colors.count]
+    }
+
+    /// Particle offset for explosion effect
+    private func particleOffset(for index: Int) -> CGSize {
+        let angle = Double(index) * (360.0 / 20.0) * .pi / 180.0
+        let distance: CGFloat = particleOpacity > 0 ? 150 : 0
+        return CGSize(
+            width: cos(angle) * distance,
+            height: sin(angle) * distance
+        )
+    }
+
+    /// Individual stat orb view
+    private func statOrbView(for stat: StatData, at index: Int) -> some View {
+        VStack(spacing: 8) {
+            ZStack {
+                // Background circle
+                Circle()
+                    .stroke(stat.color.opacity(0.15), lineWidth: 6)
+                    .frame(width: 80, height: 80)
+
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: animatedProgress[stat.type] ?? 0)
+                    .stroke(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                stat.color,
+                                stat.color.opacity(0.7)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .frame(width: 80, height: 80)
+                    .rotationEffect(.degrees(-90))
+                    .scaleEffect(glowScale[stat.type] ?? 1.0)
+                    .shadow(
+                        color: stat.color.opacity(0.8),
+                        radius: (glowScale[stat.type] ?? 1.0) > 1.0 ? 20 : 8
+                    )
+
+                // Level number
+                Text("\(stat.level)")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.5), radius: 2)
+            }
+
+            // Stat type
+            Text(stat.type)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(stat.color)
+
+            // Stat name
+            Text(stat.name)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.white.opacity(0.6))
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .shadow(color: stat.color.opacity(0.3), radius: 10)
+        )
+    }
+
+    /// Weekly chart as 3D pillars
+    private func weeklyChartPillars() -> some View {
+        HStack(spacing: 8) {
+            ForEach(Array(weeklyXP.enumerated()), id: \.offset) { index, day in
+                VStack(spacing: 4) {
+                    // Pillar
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.cyan,
+                                    Color.blue
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(
+                            width: 35,
+                            height: max(20, CGFloat(day.total) * chartPillarHeights[index] / 2)
+                        )
+                        .shadow(color: .cyan.opacity(0.6), radius: 8)
+                        .rotation3DEffect(
+                            .degrees(10),
+                            axis: (x: 1, y: 0, z: 0),
+                            perspective: 0.5
+                        )
+
+                    // Day label
+                    Text(day.day)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+        )
+    }
+
+    /// Compact goals view
+    private func goalsView(goals: GoalData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Goals")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+
+                if goals.streak > 0 {
+                    HStack(spacing: 2) {
+                        Text("🔥")
+                            .font(.system(size: 10))
+                        Text("\(goals.streak)")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            // Progress bars
+            VStack(spacing: 6) {
+                goalBar(label: "PHY", progress: goals.physical.progress, color: .red)
+                goalBar(label: "MEN", progress: goals.mental.progress, color: .blue)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
+        )
+    }
+
+    private func goalBar(label: String, progress: CGFloat, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Text(label)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.white.opacity(0.7))
+                .frame(width: 30, alignment: .leading)
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(height: 5)
+
+                    Capsule()
+                        .fill(color)
+                        .frame(width: geo.size.width * progress, height: 5)
+                }
+            }
+            .frame(height: 5)
         }
     }
 
