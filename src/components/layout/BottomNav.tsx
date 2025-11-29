@@ -6,9 +6,9 @@ export default function BottomNav() {
   const currentPath = router.location.pathname;
 
   const tabs = [
-    { name: "Overview", path: "/", Icon: OverviewIcon },
-    { name: "Quests", path: "/quests", Icon: QuestsIcon },
-    { name: "Activity", path: "/activity", Icon: ActivityIcon },
+    { name: "Overview", path: "/app", Icon: OverviewIcon },
+    { name: "Quests", path: "/app/quests", Icon: QuestsIcon },
+    { name: "Activity", path: "/app/activity", Icon: ActivityIcon },
     { name: "BUMI", path: "/bumi", Icon: OverviewIcon },
   ];
 
@@ -24,10 +24,12 @@ export default function BottomNav() {
         {tabs.map((tab) => {
           // For root path, only match exactly
           // For other paths, match if current path starts with the tab path
-          const isActive = tab.path === "/" 
-            ? currentPath === "/"
-            : currentPath === tab.path || currentPath.startsWith(`${tab.path}/`);
-          
+          const isActive =
+            tab.path === "/"
+              ? currentPath === "/"
+              : currentPath === tab.path ||
+                currentPath.startsWith(`${tab.path}/`);
+
           return (
             <Link
               key={tab.path}
@@ -38,10 +40,10 @@ export default function BottomNav() {
               <div className="relative">
                 <div>
                   {/* Inline SVG Icon - no HTTP request needed */}
-                  <div 
+                  <div
                     className="relative z-10 transition-all duration-300"
                     style={{
-                      filter: isActive 
+                      filter: isActive
                         ? "drop-shadow(0 0 8px rgba(245, 195, 95, 0.8)) drop-shadow(0 0 12px rgba(245, 195, 95, 0.6)) drop-shadow(0 0 16px rgba(245, 195, 95, 0.4))"
                         : "drop-shadow(0 0 0px rgba(245, 195, 95, 0))",
                     }}
@@ -52,11 +54,11 @@ export default function BottomNav() {
               </div>
 
               {/* Label */}
-              <span 
+              <span
                 className="transition-all duration-300"
-                style={{ 
+                style={{
                   color: "#F5C35F",
-                  textShadow: isActive 
+                  textShadow: isActive
                     ? "0 0 8px rgba(245, 195, 95, 0.8), 0 0 12px rgba(245, 195, 95, 0.6)"
                     : "none",
                 }}

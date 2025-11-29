@@ -514,7 +514,7 @@ export function RealtimeVoiceInterface({
    * Navigate to activity feed
    */
   const handleViewFeed = () => {
-    navigate({ to: "/activity" });
+    navigate({ to: "/app/activity" });
   };
 
   /**
@@ -1150,7 +1150,7 @@ export function RealtimeVoiceInterface({
           {/* Back/Close Button */}
           <div className="w-full flex justify-end mb-4">
             <button
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => navigate({ to: "/app" })}
               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
               aria-label="Close"
             >

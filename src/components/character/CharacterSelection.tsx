@@ -53,7 +53,7 @@ export default function CharacterSelection() {
     localStorage.setItem("selectedCharacterId", userId);
 
     // Navigate to Overview screen
-    navigate({ to: "/" });
+    navigate({ to: "/app" });
   };
 
   // Loading state

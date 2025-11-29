@@ -10,21 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
-import { Route as TrainingModeRouteImport } from './routes/training-mode'
 import { Route as ThanksRouteImport } from './routes/thanks'
-import { Route as SelectCharacterRouteImport } from './routes/select-character'
-import { Route as QuestsRouteImport } from './routes/quests'
-import { Route as LogActivityRouteImport } from './routes/log-activity'
-import { Route as HackathonRouteImport } from './routes/hackathon'
 import { Route as BumiRouteImport } from './routes/bumi'
-import { Route as ActivityRouteImport } from './routes/activity'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as QuestsIndexRouteImport } from './routes/quests.index'
-import { Route as StatsStatTypeRouteImport } from './routes/stats.$statType'
-import { Route as QuestsQuestIdRouteImport } from './routes/quests.$questId'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppTrainingModeRouteImport } from './routes/app.training-mode'
+import { Route as AppSelectCharacterRouteImport } from './routes/app.select-character'
+import { Route as AppQuestsRouteImport } from './routes/app.quests'
+import { Route as AppLogActivityRouteImport } from './routes/app.log-activity'
+import { Route as AppActivityRouteImport } from './routes/app.activity'
+import { Route as AppQuestsIndexRouteImport } from './routes/app.quests.index'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as AppStatsStatTypeRouteImport } from './routes/app.stats.$statType'
+import { Route as AppQuestsQuestIdRouteImport } from './routes/app.quests.$questId'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
@@ -35,34 +36,9 @@ const WaitlistRoute = WaitlistRouteImport.update({
   path: '/waitlist',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrainingModeRoute = TrainingModeRouteImport.update({
-  id: '/training-mode',
-  path: '/training-mode',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ThanksRoute = ThanksRouteImport.update({
   id: '/thanks',
   path: '/thanks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SelectCharacterRoute = SelectCharacterRouteImport.update({
-  id: '/select-character',
-  path: '/select-character',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuestsRoute = QuestsRouteImport.update({
-  id: '/quests',
-  path: '/quests',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogActivityRoute = LogActivityRouteImport.update({
-  id: '/log-activity',
-  path: '/log-activity',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HackathonRoute = HackathonRouteImport.update({
-  id: '/hackathon',
-  path: '/hackathon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BumiRoute = BumiRouteImport.update({
@@ -70,9 +46,9 @@ const BumiRoute = BumiRouteImport.update({
   path: '/bumi',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ActivityRoute = ActivityRouteImport.update({
-  id: '/activity',
-  path: '/activity',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -80,20 +56,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuestsIndexRoute = QuestsIndexRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => QuestsRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const StatsStatTypeRoute = StatsStatTypeRouteImport.update({
-  id: '/stats/$statType',
-  path: '/stats/$statType',
-  getParentRoute: () => rootRouteImport,
+const AppTrainingModeRoute = AppTrainingModeRouteImport.update({
+  id: '/training-mode',
+  path: '/training-mode',
+  getParentRoute: () => AppRoute,
 } as any)
-const QuestsQuestIdRoute = QuestsQuestIdRouteImport.update({
-  id: '/$questId',
-  path: '/$questId',
-  getParentRoute: () => QuestsRoute,
+const AppSelectCharacterRoute = AppSelectCharacterRouteImport.update({
+  id: '/select-character',
+  path: '/select-character',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuestsRoute = AppQuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLogActivityRoute = AppLogActivityRouteImport.update({
+  id: '/log-activity',
+  path: '/log-activity',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuestsIndexRoute = AppQuestsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppQuestsRoute,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
@@ -109,6 +105,16 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   id: '/demo/api/names',
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppStatsStatTypeRoute = AppStatsStatTypeRouteImport.update({
+  id: '/stats/$statType',
+  path: '/stats/$statType',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuestsQuestIdRoute = AppQuestsQuestIdRouteImport.update({
+  id: '/$questId',
+  path: '/$questId',
+  getParentRoute: () => AppQuestsRoute,
 } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
@@ -133,21 +139,22 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/activity': typeof ActivityRoute
+  '/app': typeof AppRouteWithChildren
   '/bumi': typeof BumiRoute
-  '/hackathon': typeof HackathonRoute
-  '/log-activity': typeof LogActivityRoute
-  '/quests': typeof QuestsRouteWithChildren
-  '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
-  '/training-mode': typeof TrainingModeRoute
   '/waitlist': typeof WaitlistRoute
-  '/quests/$questId': typeof QuestsQuestIdRoute
-  '/stats/$statType': typeof StatsStatTypeRoute
-  '/quests/': typeof QuestsIndexRoute
+  '/app/activity': typeof AppActivityRoute
+  '/app/log-activity': typeof AppLogActivityRoute
+  '/app/quests': typeof AppQuestsRouteWithChildren
+  '/app/select-character': typeof AppSelectCharacterRoute
+  '/app/training-mode': typeof AppTrainingModeRoute
+  '/app/': typeof AppIndexRoute
+  '/app/quests/$questId': typeof AppQuestsQuestIdRoute
+  '/app/stats/$statType': typeof AppStatsStatTypeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/app/quests/': typeof AppQuestsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -155,20 +162,20 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/activity': typeof ActivityRoute
   '/bumi': typeof BumiRoute
-  '/hackathon': typeof HackathonRoute
-  '/log-activity': typeof LogActivityRoute
-  '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
-  '/training-mode': typeof TrainingModeRoute
   '/waitlist': typeof WaitlistRoute
-  '/quests/$questId': typeof QuestsQuestIdRoute
-  '/stats/$statType': typeof StatsStatTypeRoute
-  '/quests': typeof QuestsIndexRoute
+  '/app/activity': typeof AppActivityRoute
+  '/app/log-activity': typeof AppLogActivityRoute
+  '/app/select-character': typeof AppSelectCharacterRoute
+  '/app/training-mode': typeof AppTrainingModeRoute
+  '/app': typeof AppIndexRoute
+  '/app/quests/$questId': typeof AppQuestsQuestIdRoute
+  '/app/stats/$statType': typeof AppStatsStatTypeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/app/quests': typeof AppQuestsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -177,21 +184,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/activity': typeof ActivityRoute
+  '/app': typeof AppRouteWithChildren
   '/bumi': typeof BumiRoute
-  '/hackathon': typeof HackathonRoute
-  '/log-activity': typeof LogActivityRoute
-  '/quests': typeof QuestsRouteWithChildren
-  '/select-character': typeof SelectCharacterRoute
   '/thanks': typeof ThanksRoute
-  '/training-mode': typeof TrainingModeRoute
   '/waitlist': typeof WaitlistRoute
-  '/quests/$questId': typeof QuestsQuestIdRoute
-  '/stats/$statType': typeof StatsStatTypeRoute
-  '/quests/': typeof QuestsIndexRoute
+  '/app/activity': typeof AppActivityRoute
+  '/app/log-activity': typeof AppLogActivityRoute
+  '/app/quests': typeof AppQuestsRouteWithChildren
+  '/app/select-character': typeof AppSelectCharacterRoute
+  '/app/training-mode': typeof AppTrainingModeRoute
+  '/app/': typeof AppIndexRoute
+  '/app/quests/$questId': typeof AppQuestsQuestIdRoute
+  '/app/stats/$statType': typeof AppStatsStatTypeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/app/quests/': typeof AppQuestsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -201,21 +209,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/activity'
+    | '/app'
     | '/bumi'
-    | '/hackathon'
-    | '/log-activity'
-    | '/quests'
-    | '/select-character'
     | '/thanks'
-    | '/training-mode'
     | '/waitlist'
-    | '/quests/$questId'
-    | '/stats/$statType'
-    | '/quests/'
+    | '/app/activity'
+    | '/app/log-activity'
+    | '/app/quests'
+    | '/app/select-character'
+    | '/app/training-mode'
+    | '/app/'
+    | '/app/quests/$questId'
+    | '/app/stats/$statType'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/app/quests/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -223,20 +232,20 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/activity'
     | '/bumi'
-    | '/hackathon'
-    | '/log-activity'
-    | '/select-character'
     | '/thanks'
-    | '/training-mode'
     | '/waitlist'
-    | '/quests/$questId'
-    | '/stats/$statType'
-    | '/quests'
+    | '/app/activity'
+    | '/app/log-activity'
+    | '/app/select-character'
+    | '/app/training-mode'
+    | '/app'
+    | '/app/quests/$questId'
+    | '/app/stats/$statType'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/app/quests'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -244,21 +253,22 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/activity'
+    | '/app'
     | '/bumi'
-    | '/hackathon'
-    | '/log-activity'
-    | '/quests'
-    | '/select-character'
     | '/thanks'
-    | '/training-mode'
     | '/waitlist'
-    | '/quests/$questId'
-    | '/stats/$statType'
-    | '/quests/'
+    | '/app/activity'
+    | '/app/log-activity'
+    | '/app/quests'
+    | '/app/select-character'
+    | '/app/training-mode'
+    | '/app/'
+    | '/app/quests/$questId'
+    | '/app/stats/$statType'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/app/quests/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -267,16 +277,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ActivityRoute: typeof ActivityRoute
+  AppRoute: typeof AppRouteWithChildren
   BumiRoute: typeof BumiRoute
-  HackathonRoute: typeof HackathonRoute
-  LogActivityRoute: typeof LogActivityRoute
-  QuestsRoute: typeof QuestsRouteWithChildren
-  SelectCharacterRoute: typeof SelectCharacterRoute
   ThanksRoute: typeof ThanksRoute
-  TrainingModeRoute: typeof TrainingModeRoute
   WaitlistRoute: typeof WaitlistRoute
-  StatsStatTypeRoute: typeof StatsStatTypeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
@@ -295,46 +299,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/training-mode': {
-      id: '/training-mode'
-      path: '/training-mode'
-      fullPath: '/training-mode'
-      preLoaderRoute: typeof TrainingModeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/thanks': {
       id: '/thanks'
       path: '/thanks'
       fullPath: '/thanks'
       preLoaderRoute: typeof ThanksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/select-character': {
-      id: '/select-character'
-      path: '/select-character'
-      fullPath: '/select-character'
-      preLoaderRoute: typeof SelectCharacterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/quests': {
-      id: '/quests'
-      path: '/quests'
-      fullPath: '/quests'
-      preLoaderRoute: typeof QuestsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/log-activity': {
-      id: '/log-activity'
-      path: '/log-activity'
-      fullPath: '/log-activity'
-      preLoaderRoute: typeof LogActivityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hackathon': {
-      id: '/hackathon'
-      path: '/hackathon'
-      fullPath: '/hackathon'
-      preLoaderRoute: typeof HackathonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bumi': {
@@ -344,11 +313,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BumiRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/activity': {
-      id: '/activity'
-      path: '/activity'
-      fullPath: '/activity'
-      preLoaderRoute: typeof ActivityRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -358,26 +327,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quests/': {
-      id: '/quests/'
+    '/app/': {
+      id: '/app/'
       path: '/'
-      fullPath: '/quests/'
-      preLoaderRoute: typeof QuestsIndexRouteImport
-      parentRoute: typeof QuestsRoute
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/stats/$statType': {
-      id: '/stats/$statType'
-      path: '/stats/$statType'
-      fullPath: '/stats/$statType'
-      preLoaderRoute: typeof StatsStatTypeRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/training-mode': {
+      id: '/app/training-mode'
+      path: '/training-mode'
+      fullPath: '/app/training-mode'
+      preLoaderRoute: typeof AppTrainingModeRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/quests/$questId': {
-      id: '/quests/$questId'
-      path: '/$questId'
-      fullPath: '/quests/$questId'
-      preLoaderRoute: typeof QuestsQuestIdRouteImport
-      parentRoute: typeof QuestsRoute
+    '/app/select-character': {
+      id: '/app/select-character'
+      path: '/select-character'
+      fullPath: '/app/select-character'
+      preLoaderRoute: typeof AppSelectCharacterRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/quests': {
+      id: '/app/quests'
+      path: '/quests'
+      fullPath: '/app/quests'
+      preLoaderRoute: typeof AppQuestsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/log-activity': {
+      id: '/app/log-activity'
+      path: '/log-activity'
+      fullPath: '/app/log-activity'
+      preLoaderRoute: typeof AppLogActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/activity': {
+      id: '/app/activity'
+      path: '/activity'
+      fullPath: '/app/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/quests/': {
+      id: '/app/quests/'
+      path: '/'
+      fullPath: '/app/quests/'
+      preLoaderRoute: typeof AppQuestsIndexRouteImport
+      parentRoute: typeof AppQuestsRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -399,6 +396,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/api/names'
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/stats/$statType': {
+      id: '/app/stats/$statType'
+      path: '/stats/$statType'
+      fullPath: '/app/stats/$statType'
+      preLoaderRoute: typeof AppStatsStatTypeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/quests/$questId': {
+      id: '/app/quests/$questId'
+      path: '/$questId'
+      fullPath: '/app/quests/$questId'
+      preLoaderRoute: typeof AppQuestsQuestIdRouteImport
+      parentRoute: typeof AppQuestsRoute
     }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
@@ -431,31 +442,48 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface QuestsRouteChildren {
-  QuestsQuestIdRoute: typeof QuestsQuestIdRoute
-  QuestsIndexRoute: typeof QuestsIndexRoute
+interface AppQuestsRouteChildren {
+  AppQuestsQuestIdRoute: typeof AppQuestsQuestIdRoute
+  AppQuestsIndexRoute: typeof AppQuestsIndexRoute
 }
 
-const QuestsRouteChildren: QuestsRouteChildren = {
-  QuestsQuestIdRoute: QuestsQuestIdRoute,
-  QuestsIndexRoute: QuestsIndexRoute,
+const AppQuestsRouteChildren: AppQuestsRouteChildren = {
+  AppQuestsQuestIdRoute: AppQuestsQuestIdRoute,
+  AppQuestsIndexRoute: AppQuestsIndexRoute,
 }
 
-const QuestsRouteWithChildren =
-  QuestsRoute._addFileChildren(QuestsRouteChildren)
+const AppQuestsRouteWithChildren = AppQuestsRoute._addFileChildren(
+  AppQuestsRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
+  AppLogActivityRoute: typeof AppLogActivityRoute
+  AppQuestsRoute: typeof AppQuestsRouteWithChildren
+  AppSelectCharacterRoute: typeof AppSelectCharacterRoute
+  AppTrainingModeRoute: typeof AppTrainingModeRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppStatsStatTypeRoute: typeof AppStatsStatTypeRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
+  AppLogActivityRoute: AppLogActivityRoute,
+  AppQuestsRoute: AppQuestsRouteWithChildren,
+  AppSelectCharacterRoute: AppSelectCharacterRoute,
+  AppTrainingModeRoute: AppTrainingModeRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppStatsStatTypeRoute: AppStatsStatTypeRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ActivityRoute: ActivityRoute,
+  AppRoute: AppRouteWithChildren,
   BumiRoute: BumiRoute,
-  HackathonRoute: HackathonRoute,
-  LogActivityRoute: LogActivityRoute,
-  QuestsRoute: QuestsRouteWithChildren,
-  SelectCharacterRoute: SelectCharacterRoute,
   ThanksRoute: ThanksRoute,
-  TrainingModeRoute: TrainingModeRoute,
   WaitlistRoute: WaitlistRoute,
-  StatsStatTypeRoute: StatsStatTypeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Zap, Brain } from "lucide-react";
-import { getIcon } from "../../routes/quests.index";
+import { getIcon } from "../../routes/app.quests.index";
 
 type IconName =
   | "Sun"
@@ -44,7 +44,7 @@ export default function QuestCard({
 
   return (
     <Link
-      to="/quests/$questId"
+      to="/app/quests/$questId"
       params={{ questId: id }}
       className={`block bg-[#1a1a1e]/80 backdrop-blur-sm border border-[#3d3d3d]/50 rounded-lg p-4 transition-all duration-200 relative ${
         isCompleted

@@ -5,7 +5,7 @@ export default function ActivityButtons() {
     <div className="px-5 pb-2 z-20">
       <div className="max-w-md mx-auto grid grid-cols-2 gap-3">
         <Link
-          to="/log-activity"
+          to="/app/log-activity"
           className="relative block w-full text-center py-4 overflow-hidden group transition-all"
           style={{
             backgroundImage: "url(/cta_button.svg)",

@@ -71,7 +71,7 @@ export function useDemoLogin() {
       }
 
       // Navigate to main app
-      await navigate({ to: "/" });
+      await navigate({ to: "/app" });
 
       setIsLoading(false);
       return {

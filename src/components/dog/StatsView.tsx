@@ -72,7 +72,7 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
   }).filter((stat): stat is DogStat => stat !== null);
 
   const handleStatClick = (statType: StatType) => {
-    navigate({ to: `/stats/$statType`, params: { statType } });
+    navigate({ to: `/app/stats/$statType`, params: { statType } });
   };
 
   return (
@@ -102,7 +102,8 @@ export default function StatsView({ dog, stats, moodHistory }: StatsViewProps) {
                     className="w-full h-full object-cover"
                   />
                 </picture>
-              ) : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== "" ? (
+              ) : equippedItem?.generatedImageUrl &&
+                equippedItem.generatedImageUrl !== "" ? (
                 // AI-generated image for non-moon items
                 <img
                   src={equippedItem.generatedImageUrl}

@@ -200,7 +200,7 @@ export default function AIRecommendations() {
   const handleLogActivity = (activityName: string) => {
     // Navigate to log-activity with activity name in search params
     navigate({
-      to: "/log-activity",
+      to: "/app/log-activity",
       search: { prefilledActivity: activityName },
     });
   };

@@ -11,7 +11,7 @@ import ActivityFrequencyChart from "../components/stats/ActivityFrequencyChart";
 import WeeklyXpChart from "../components/stats/WeeklyXpChart";
 import { useActiveDog } from "../hooks/useActiveDog";
 
-export const Route = createFileRoute("/stats/$statType")({
+export const Route = createFileRoute("/app/stats/$statType")({
   component: StatDetailPage,
 });
 
@@ -84,13 +84,13 @@ function StatDetailPage() {
   // Handle suggestion click
   const handleSuggestionClick = (activityName: string) => {
     navigate({
-      to: "/log-activity",
+      to: "/app/log-activity",
       search: { prefilledActivity: activityName },
     });
   };
 
   // Loading state
-  if (firstDog === undefined || statDetail === undefined) {
+  if (statDetail === undefined) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
@@ -104,14 +104,14 @@ function StatDetailPage() {
   }
 
   // No stat found
-  if (!firstDog || !statDetail) {
+  if (!statDetail) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen bg-[#121216]">
           <div className="text-center px-6">
             <p className="text-[#f9dca0] text-sm">Stat not found.</p>
             <Link
-              to="/"
+              to="/app"
               className="mt-4 inline-block text-[#f5c35f] hover:text-[#fcd587] transition-colors"
             >
               ← Back to Overview
@@ -145,7 +145,7 @@ function StatDetailPage() {
           {/* Header with Back Button */}
           <div className="px-5 pt-5 pb-4">
             <Link
-              to="/"
+              to="/app"
               className="inline-flex items-center gap-2 text-[#f9dca0] hover:text-[#fcd587] transition-colors mb-4"
             >
               <ArrowLeft size={20} strokeWidth={2} />

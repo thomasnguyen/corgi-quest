@@ -1,38 +1,38 @@
 # Implementation Plan
 
-- [-] 1. Backup and prepare for route restructuring
+- [x] 1. Backup and prepare for route restructuring
   - Create a git commit with current state before any changes
   - Document current route structure for reference
   - Run build to ensure current state is working
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
 
-- [ ] 2. Move landing page to root route
+- [x] 2. Move landing page to root route
   - Rename `src/routes/hackathon.tsx` to a temporary name (e.g., `hackathon-temp.tsx`)
   - Update the route definition to `createFileRoute("/")`
   - Test that landing page renders at `/`
   - _Requirements: 1.1, 1.2, 1.4, 4.1, 4.4_
 
-- [ ] 3. Create app layout route
+- [x] 3. Create app layout route
   - Create `src/routes/app.tsx` with layout wrapper
   - Add `<Outlet />` component for nested routes
   - Export route with `createFileRoute("/app")`
   - _Requirements: 4.3, 4.5_
 
-- [ ] 4. Move main app overview to /app route
+- [x] 4. Move main app overview to /app route
   - Rename `src/routes/index.tsx` to `src/routes/app.index.tsx`
   - Update route definition to `createFileRoute("/app/")`
   - Update character selection redirect from `/select-character` to `/app/select-character`
   - Test that overview renders at `/app`
   - _Requirements: 2.1, 2.2, 3.6, 4.2, 4.5_
 
-- [ ] 5. Move character selection route
+- [x] 5. Move character selection route
   - Rename `src/routes/select-character.tsx` to `src/routes/app.select-character.tsx`
   - Update route definition to `createFileRoute("/app/select-character")`
   - Update navigation on completion from `/` to `/app`
   - Test character selection flow
   - _Requirements: 2.2, 2.3, 3.1, 6.3_
 
-- [ ] 6. Move quest routes
+- [x] 6. Move quest routes
   - Rename `src/routes/quests.tsx` to `src/routes/app.quests.tsx`
   - Rename `src/routes/quests.index.tsx` to `src/routes/app.quests.index.tsx`
   - Rename `src/routes/quests.$questId.tsx` to `src/routes/app.quests.$questId.tsx`
@@ -40,85 +40,85 @@
   - Test quest list and quest detail pages
   - _Requirements: 2.5, 6.4_
 
-- [ ] 7. Move stat detail route
+- [x] 7. Move stat detail route
   - Rename `src/routes/stats.$statType.tsx` to `src/routes/app.stats.$statType.tsx`
   - Update route definition to `createFileRoute("/app/stats/$statType")`
   - Test stat detail pages for all stat types
   - _Requirements: 2.5, 6.5_
 
-- [ ] 8. Move activity feed route
+- [x] 8. Move activity feed route
   - Rename `src/routes/activity.tsx` to `src/routes/app.activity.tsx`
   - Update route definition to `createFileRoute("/app/activity")`
   - Test activity feed rendering
   - _Requirements: 2.5, 6.6_
 
-- [ ] 9. Move training mode route
+- [x] 9. Move training mode route
   - Rename `src/routes/training-mode.tsx` to `src/routes/app.training-mode.tsx`
   - Update route definition to `createFileRoute("/app/training-mode")`
   - Test training mode interface
   - _Requirements: 2.5, 6.7_
 
-- [ ] 10. Move log activity route
+- [x] 10. Move log activity route
   - Rename `src/routes/log-activity.tsx` to `src/routes/app.log-activity.tsx`
   - Update route definition to `createFileRoute("/app/log-activity")`
   - Test activity logging interface
   - _Requirements: 2.5_
 
-- [ ] 11. Finalize landing page at root
+- [x] 11. Finalize landing page at root
   - Rename `hackathon-temp.tsx` to `index.tsx` (replacing old index)
   - Verify landing page is at `/`
   - Test all landing page sections and interactions
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 12. Update CharacterSelection component navigation
+- [x] 12. Update CharacterSelection component navigation
   - Open `src/components/character/CharacterSelection.tsx`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
   - Test character selection completion flow
   - _Requirements: 3.1_
 
-- [ ] 13. Update DemoVideoSection component navigation
+- [x] 13. Update DemoVideoSection component navigation
   - Open `src/components/hackathon/DemoVideoSection.tsx`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
   - Test "Launch Demo" button on landing page
   - _Requirements: 1.5, 3.5_
 
-- [ ] 14. Update useDemoLogin hook navigation
+- [x] 14. Update useDemoLogin hook navigation
   - Open `src/hooks/useDemoLogin.ts`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
   - Test demo login flow
   - _Requirements: 3.4_
 
-- [ ] 15. Update TrainingModeSimple component navigation
+- [x] 15. Update TrainingModeSimple component navigation
   - Open `src/components/training/TrainingModeSimple.client.tsx`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
   - Test training mode exit flow
   - _Requirements: 3.2_
 
-- [ ] 16. Update TrainingModeInterface component navigation
+- [x] 16. Update TrainingModeInterface component navigation
   - Open `src/components/training/TrainingModeInterface.client.tsx`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
   - Test training mode exit flow
   - _Requirements: 3.2_
 
-- [ ] 17. Update RealtimeVoiceInterface component navigation
+- [x] 17. Update RealtimeVoiceInterface component navigation
   - Open `src/components/voice/RealtimeVoiceInterface.tsx`
   - Change `navigate({ to: "/" })` to `navigate({ to: "/app" })`
-  - Test voice interface close flow
+  - Test voic interface close flow
   - _Requirements: 3.3_
 
-- [ ] 18. Search for any remaining navigation references
+- [x] 18. Search for any remaining navigation references
   - Run grep search for `navigate({ to: "/" })` in src directory
   - Run grep search for `navigate({ to: "/hackathon" })` in src directory
   - Update any remaining references found
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 19. Search for Link component references
+- [x] 19. Search for Link component references
   - Run grep search for `<Link to="/"` in src directory
   - Run grep search for `<Link to="/hackathon"` in src directory
   - Update any Link components to use new paths
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 20. Regenerate route tree and build
+- [x] 20. Regenerate route tree and build
   - Run `npm run build` to regenerate TanStack Router route tree
   - Verify no build errors
   - Check that `src/routeTree.gen.ts` reflects new structure
@@ -161,7 +161,7 @@
   - Verify scroll restoration works correctly
   - _Requirements: 5.3, 5.4_
 
-- [ ] 26. Final verification and cleanup
+- [x] 26. Final verification and cleanup
   - Run full build and verify no errors
   - Test all routes one final time
   - Remove any temporary files or comments

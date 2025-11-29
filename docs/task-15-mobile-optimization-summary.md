@@ -16,7 +16,7 @@ Successfully implemented comprehensive mobile optimizations for the hackathon la
 - Proper spacing: `space-y-12 sm:space-y-16`
 
 **Files Modified:**
-- `src/routes/hackathon.tsx` - Main container structure
+- `src/routes/index.tsx` - Landing page main container structure (moved from hackathon.tsx)
 
 ---
 

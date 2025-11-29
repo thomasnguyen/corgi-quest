@@ -27,7 +27,7 @@ import {
 import { useStaleQuery } from "../hooks/useStaleQuery";
 import { useActiveDog } from "../hooks/useActiveDog";
 
-export const Route = createFileRoute("/quests/")({
+export const Route = createFileRoute("/app/quests/")({
   component: QuestsPage,
 });
 
