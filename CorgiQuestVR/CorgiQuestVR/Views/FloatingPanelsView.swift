@@ -810,7 +810,10 @@ struct SessionPanel: View {
             }
         }
         .padding(20)
-        .background(.ultraThinMaterial)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color(red: 0.08, green: 0.08, blue: 0.08).opacity(0.95))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 18)
                 .strokeBorder(
