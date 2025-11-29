@@ -1023,11 +1023,15 @@ struct StatsScreenView: View {
     }
 
     private func animatedOrbView(for stat: StatData, at index: Int) -> some View {
-        statOrbView(for: stat, at: index)
-            .offset(orbPositions[stat.type] ?? .zero)
-            .scaleEffect(orbScales[stat.type] ?? 1.0)
+        let position = orbPositions[stat.type] ?? .zero
+        let scale = orbScales[stat.type] ?? 1.0
+        let rotation = orbRotations[stat.type] ?? 0
+
+        return statOrbView(for: stat, at: index)
+            .offset(position)
+            .scaleEffect(scale)
             .rotation3DEffect(
-                .degrees(orbRotations[stat.type] ?? 0),
+                .degrees(rotation),
                 axis: (x: 0, y: 1, z: 0)
             )
     }
@@ -1260,8 +1264,7 @@ struct StatsScreenView: View {
                         .shadow(color: .cyan.opacity(0.6), radius: 8)
                         .rotation3DEffect(
                             .degrees(10),
-                            axis: (x: 1, y: 0, z: 0),
-                            perspective: 0.5
+                            axis: (x: 1, y: 0, z: 0)
                         )
 
                     // Day label
