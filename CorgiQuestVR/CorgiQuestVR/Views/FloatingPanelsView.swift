@@ -601,6 +601,10 @@ struct SessionPanel: View {
 
     @State private var currentTime = Date()
     @State private var pulseAnimation = false
+    @State private var celebrationScale: CGFloat = 1.0
+    @State private var celebrationRotation: Double = 0
+    @State private var showConfetti = false
+    @State private var previousIsComplete = false
 
     // Timer to update elapsed time every second
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -836,57 +840,157 @@ struct SessionPanel: View {
                     .strokeBorder(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color.yellow.opacity(0.7),
-                                Color.orange.opacity(0.5)
+                                sessionData.isComplete ? Color.green.opacity(0.7) : Color.yellow.opacity(0.7),
+                                sessionData.isComplete ? Color.cyan.opacity(0.5) : Color.orange.opacity(0.5)
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 2.5
+                        lineWidth: sessionData.isComplete ? 3.5 : 2.5
                     )
-                    .shadow(color: .yellow.opacity(pulseAnimation ? 0.4 : 0.15), radius: pulseAnimation ? 12 : 6, x: 0, y: 0)
+                    .shadow(color: sessionData.isComplete ? .green.opacity(0.6) : .yellow.opacity(pulseAnimation ? 0.4 : 0.15), radius: sessionData.isComplete ? 16 : (pulseAnimation ? 12 : 6), x: 0, y: 0)
 
                 // Corner decorative elements
                 GeometryReader { geometry in
                     // Top-left corner ornament
-                    Image(systemName: "diamond.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(.yellow)
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .green : .yellow)
                         .position(x: 20, y: 20)
-                        .shadow(color: .yellow.opacity(0.6), radius: 4)
+                        .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
 
                     // Top-right corner ornament
-                    Image(systemName: "diamond.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(.yellow)
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .green : .yellow)
                         .position(x: geometry.size.width - 20, y: 20)
-                        .shadow(color: .yellow.opacity(0.6), radius: 4)
+                        .shadow(color: sessionData.isComplete ? .green.opacity(0.8) : .yellow.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(-celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
 
                     // Bottom-left corner ornament
-                    Image(systemName: "diamond.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(.orange)
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .cyan : .orange)
                         .position(x: 20, y: geometry.size.height - 20)
-                        .shadow(color: .orange.opacity(0.6), radius: 4)
+                        .shadow(color: sessionData.isComplete ? .cyan.opacity(0.8) : .orange.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(-celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
 
                     // Bottom-right corner ornament
-                    Image(systemName: "diamond.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(.orange)
+                    Image(systemName: sessionData.isComplete ? "star.fill" : "diamond.fill")
+                        .font(.system(size: sessionData.isComplete ? 14 : 10))
+                        .foregroundColor(sessionData.isComplete ? .cyan : .orange)
                         .position(x: geometry.size.width - 20, y: geometry.size.height - 20)
-                        .shadow(color: .orange.opacity(0.6), radius: 4)
+                        .shadow(color: sessionData.isComplete ? .cyan.opacity(0.8) : .orange.opacity(0.6), radius: sessionData.isComplete ? 8 : 4)
+                        .rotationEffect(.degrees(celebrationRotation))
+                        .scaleEffect(sessionData.isComplete ? 1.2 : 1.0)
+
+                    // Confetti particles (only when complete)
+                    if showConfetti {
+                        ForEach(0..<12, id: \.self) { index in
+                            ConfettiParticle(index: index, geometry: geometry)
+                        }
+                    }
                 }
             }
         )
         .cornerRadius(18)
-        .shadow(color: .yellow.opacity(pulseAnimation ? 0.3 : 0.15), radius: pulseAnimation ? 14 : 8, x: 0, y: 0)
+        .scaleEffect(celebrationScale)
+        .shadow(color: sessionData.isComplete ? .green.opacity(0.5) : .yellow.opacity(pulseAnimation ? 0.3 : 0.15), radius: sessionData.isComplete ? 20 : (pulseAnimation ? 14 : 8), x: 0, y: 0)
         .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
         .onAppear {
             // Start pulsing animation
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                 pulseAnimation = true
             }
+            previousIsComplete = sessionData.isComplete
         }
+        .onChange(of: sessionData.isComplete) { oldValue, newValue in
+            // Trigger celebration when completed
+            if newValue && !previousIsComplete {
+                triggerCelebration()
+            }
+            previousIsComplete = newValue
+        }
+    }
+
+    /// Triggers celebration animation when session completes
+    private func triggerCelebration() {
+        // Bounce effect
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.5)) {
+            celebrationScale = 1.1
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                celebrationScale = 1.0
+            }
+        }
+
+        // Rotate corner stars
+        withAnimation(.easeInOut(duration: 0.8).repeatCount(3, autoreverses: true)) {
+            celebrationRotation = 360
+        }
+
+        // Show confetti
+        showConfetti = true
+
+        // Hide confetti after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation {
+                showConfetti = false
+            }
+        }
+    }
+}
+
+/// Confetti particle for celebration animation
+struct ConfettiParticle: View {
+    let index: Int
+    let geometry: GeometryProxy
+
+    @State private var yOffset: CGFloat = 0
+    @State private var xOffset: CGFloat = 0
+    @State private var opacity: Double = 1.0
+    @State private var rotation: Double = 0
+
+    private var color: Color {
+        let colors: [Color] = [.yellow, .orange, .green, .cyan, .purple, .pink]
+        return colors[index % colors.count]
+    }
+
+    private var symbol: String {
+        let symbols = ["star.fill", "sparkle", "circle.fill", "diamond.fill"]
+        return symbols[index % symbols.count]
+    }
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 12))
+            .foregroundColor(color)
+            .position(
+                x: geometry.size.width / 2 + xOffset,
+                y: geometry.size.height / 2 + yOffset
+            )
+            .opacity(opacity)
+            .rotationEffect(.degrees(rotation))
+            .onAppear {
+                let angle = Double(index) * (360.0 / 12.0)
+                let distance: CGFloat = 80
+
+                withAnimation(.easeOut(duration: 1.2)) {
+                    xOffset = cos(angle * .pi / 180) * distance
+                    yOffset = sin(angle * .pi / 180) * distance
+                    opacity = 0
+                }
+
+                withAnimation(.linear(duration: 1.2)) {
+                    rotation = Double.random(in: 180...540)
+                }
+            }
     }
 }
 
