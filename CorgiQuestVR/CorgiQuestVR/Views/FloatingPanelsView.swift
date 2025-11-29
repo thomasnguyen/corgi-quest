@@ -600,28 +600,42 @@ struct SessionPanel: View {
     let onEndSession: () -> Void
 
     @State private var currentTime = Date()
+    @State private var pulseAnimation = false
 
     // Timer to update elapsed time every second
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(spacing: 16) {
-            // Title banner
+            // Title banner with decorative background
             Text("⚔️ ACTIVE SESSION ⚔️")
                 .font(.system(size: 18, weight: .bold, design: .serif))
                 .foregroundColor(.yellow)
                 .tracking(1.5)
-                .shadow(color: .yellow.opacity(0.4), radius: 6, x: 0, y: 0)
+                .shadow(color: .yellow.opacity(0.6), radius: 8, x: 0, y: 0)
                 .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(
+                    Capsule()
+                        .fill(Color.yellow.opacity(0.1))
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(Color.yellow.opacity(0.3), lineWidth: 1)
+                        )
+                )
 
-            // Elapsed timer
+            // Elapsed timer with pulsing icon
             HStack(spacing: 8) {
                 Image(systemName: "timer")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.cyan)
+                    .shadow(color: .cyan.opacity(0.5), radius: 4)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
                 Text(sessionData.elapsedTimeText(currentTime: currentTime))
                     .font(.system(size: 16, weight: .bold, design: .monospaced))
                     .foregroundColor(.cyan)
+                    .shadow(color: .cyan.opacity(0.3), radius: 2)
             }
             .onReceive(timer) { _ in
                 currentTime = Date()
@@ -648,7 +662,7 @@ struct SessionPanel: View {
                     .foregroundColor(.green)
             }
 
-            // Rep counter - BIG AND PROMINENT
+            // Rep counter - BIG AND PROMINENT with pulsing glow
             VStack(spacing: 6) {
                 Text(sessionData.isComplete ? "BONUS! 🎉" : "PROGRESS")
                     .font(.system(size: 12, weight: .bold, design: .serif))
@@ -658,8 +672,9 @@ struct SessionPanel: View {
                 Text(sessionData.repCounterText)
                     .font(.system(size: 48, weight: .heavy, design: .serif))
                     .foregroundColor(sessionData.isComplete ? .green : .yellow)
-                    .shadow(color: sessionData.isComplete ? .green.opacity(0.6) : .yellow.opacity(0.5), radius: 12)
+                    .shadow(color: sessionData.isComplete ? .green.opacity(pulseAnimation ? 0.8 : 0.4) : .yellow.opacity(pulseAnimation ? 0.7 : 0.4), radius: pulseAnimation ? 16 : 10)
                     .shadow(color: .black.opacity(0.8), radius: 2, x: 0, y: 2)
+                    .scaleEffect(pulseAnimation ? 1.03 : 1.0)
             }
             .padding(.vertical, 8)
 
@@ -815,22 +830,63 @@ struct SessionPanel: View {
                 .fill(Color(red: 0.08, green: 0.08, blue: 0.08).opacity(0.95))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.yellow.opacity(0.7),
-                            Color.orange.opacity(0.5)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2.5
-                )
+            ZStack {
+                // Pulsing border
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.yellow.opacity(0.7),
+                                Color.orange.opacity(0.5)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2.5
+                    )
+                    .shadow(color: .yellow.opacity(pulseAnimation ? 0.4 : 0.15), radius: pulseAnimation ? 12 : 6, x: 0, y: 0)
+
+                // Corner decorative elements
+                GeometryReader { geometry in
+                    // Top-left corner ornament
+                    Image(systemName: "diamond.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.yellow)
+                        .position(x: 20, y: 20)
+                        .shadow(color: .yellow.opacity(0.6), radius: 4)
+
+                    // Top-right corner ornament
+                    Image(systemName: "diamond.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.yellow)
+                        .position(x: geometry.size.width - 20, y: 20)
+                        .shadow(color: .yellow.opacity(0.6), radius: 4)
+
+                    // Bottom-left corner ornament
+                    Image(systemName: "diamond.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                        .position(x: 20, y: geometry.size.height - 20)
+                        .shadow(color: .orange.opacity(0.6), radius: 4)
+
+                    // Bottom-right corner ornament
+                    Image(systemName: "diamond.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                        .position(x: geometry.size.width - 20, y: geometry.size.height - 20)
+                        .shadow(color: .orange.opacity(0.6), radius: 4)
+                }
+            }
         )
         .cornerRadius(18)
-        .shadow(color: .yellow.opacity(0.2), radius: 8, x: 0, y: 0)
+        .shadow(color: .yellow.opacity(pulseAnimation ? 0.3 : 0.15), radius: pulseAnimation ? 14 : 8, x: 0, y: 0)
         .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+        .onAppear {
+            // Start pulsing animation
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                pulseAnimation = true
+            }
+        }
     }
 }
 
