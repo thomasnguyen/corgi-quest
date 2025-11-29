@@ -943,92 +943,113 @@ struct StatsScreenView: View {
     private let fillDuration: Double = 0.8
 
     var body: some View {
+        mainContainer
+            .scaleEffect(isVisible ? 1.0 : 0.96)
+            .opacity(isVisible ? 1.0 : 0.0)
+            .onAppear {
+                initializeExplosionState()
+                startExplosionSequence()
+            }
+    }
+
+    // MARK: - View Components
+
+    private var mainContainer: some View {
         ZStack {
-            // Background
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.regularMaterial)
-                .frame(width: 750, height: 600)
-
-            // Particle explosion effects
-            if explosionPhase == .shatter || explosionPhase == .exploding {
-                ForEach(0..<20, id: \.self) { index in
-                    Circle()
-                        .fill(particleColor(for: index))
-                        .frame(width: 8, height: 8)
-                        .offset(particleOffset(for: index))
-                        .opacity(particleOpacity)
-                        .blur(radius: 2)
-                }
-            }
-
-            VStack(spacing: 0) {
-                // Clean header with close button
-                HStack {
-                    Text("Statistics")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .opacity(explosionPhase == .initial ? 1.0 : 0.3)
-
-                    Spacer()
-
-                    Button(action: onClose) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.white.opacity(0.6))
-                            .symbolRenderingMode(.hierarchical)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 20)
-                .background(.thinMaterial)
-
-                Spacer()
-            }
-
-            // Stat orbs with explosion animation
-            ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
-                statOrbView(for: stat, at: index)
-                    .offset(orbPositions[stat.type] ?? .zero)
-                    .scaleEffect(orbScales[stat.type] ?? 1.0)
-                    .rotation3DEffect(
-                        .degrees(orbRotations[stat.type] ?? 0),
-                        axis: (x: 0, y: 1, z: 0)
-                    )
-            }
-
-            // Weekly chart as 3D pillars (bottom of screen)
-            if explosionPhase == .settled || explosionPhase == .exploding {
-                weeklyChartPillars()
-                    .offset(y: 180)
-            }
-
-            // Goals panel (top right in settled state)
-            if explosionPhase == .settled, let goals = goals {
-                goalsView(goals: goals)
-                    .offset(x: 220, y: -150)
-                    .opacity(isVisible ? 1.0 : 0.0)
-            }
+            backgroundView
+            particlesView
+            headerView
+            orbsView
+            chartView
+            goalsViewIfNeeded
         }
         .frame(width: 750, height: 600)
         .clipShape(RoundedRectangle(cornerRadius: 28))
-        .overlay(
-            RoundedRectangle(cornerRadius: 28)
-                .strokeBorder(
-                    Color.white.opacity(0.2),
-                    lineWidth: 1
-                )
-        )
+        .overlay(borderOverlay)
         .shadow(color: .black.opacity(0.5), radius: 35, x: 0, y: 18)
-        .scaleEffect(isVisible ? 1.0 : 0.96)
-        .opacity(isVisible ? 1.0 : 0.0)
-        .onAppear {
-            // Initialize animation state
-            initializeExplosionState()
+    }
 
-            // Trigger explosion sequence
-            startExplosionSequence()
+    private var backgroundView: some View {
+        RoundedRectangle(cornerRadius: 28)
+            .fill(.regularMaterial)
+            .frame(width: 750, height: 600)
+    }
+
+    @ViewBuilder
+    private var particlesView: some View {
+        if explosionPhase == .shatter || explosionPhase == .exploding {
+            ForEach(0..<20, id: \.self) { index in
+                Circle()
+                    .fill(particleColor(for: index))
+                    .frame(width: 8, height: 8)
+                    .offset(particleOffset(for: index))
+                    .opacity(particleOpacity)
+                    .blur(radius: 2)
+            }
         }
+    }
+
+    private var headerView: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Statistics")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .opacity(explosionPhase == .initial ? 1.0 : 0.3)
+
+                Spacer()
+
+                Button(action: onClose) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.white.opacity(0.6))
+                        .symbolRenderingMode(.hierarchical)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .background(.thinMaterial)
+
+            Spacer()
+        }
+    }
+
+    private var orbsView: some View {
+        ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
+            statOrbView(for: stat, at: index)
+                .offset(orbPositions[stat.type] ?? .zero)
+                .scaleEffect(orbScales[stat.type] ?? 1.0)
+                .rotation3DEffect(
+                    .degrees(orbRotations[stat.type] ?? 0),
+                    axis: (x: 0, y: 1, z: 0)
+                )
+        }
+    }
+
+    @ViewBuilder
+    private var chartView: some View {
+        if explosionPhase == .settled || explosionPhase == .exploding {
+            weeklyChartPillars()
+                .offset(y: 180)
+        }
+    }
+
+    @ViewBuilder
+    private var goalsViewIfNeeded: some View {
+        if explosionPhase == .settled, let goals = goals {
+            goalsView(goals: goals)
+                .offset(x: 220, y: -150)
+                .opacity(isVisible ? 1.0 : 0.0)
+        }
+    }
+
+    private var borderOverlay: some View {
+        RoundedRectangle(cornerRadius: 28)
+            .strokeBorder(
+                Color.white.opacity(0.2),
+                lineWidth: 1
+            )
     }
 
     // MARK: - Explosion Animation Methods
