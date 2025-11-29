@@ -63,61 +63,6 @@ export function TestingInstructions() {
             </li>
           </ol>
         </div>
-
-        {/* Backup Credentials */}
-        <div className="space-y-3 pt-4 border-t border-[#f5c35f]/10">
-          <h3 className="text-[#feefd0] text-xl font-bold">
-            Backup Access (Manual Login)
-          </h3>
-          <p className="text-[#f9dca0] text-sm mb-3">
-            If auto-login doesn't work, you can manually select a character from
-            the character selection screen:
-          </p>
-          <div className="bg-[#0a0a0a] rounded border border-[#f5c35f]/10 p-4 space-y-2">
-            <p className="text-[#f5c35f] text-sm font-semibold mb-2">
-              Demo Characters:
-            </p>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <code className="text-[#fcd587] text-sm sm:text-base select-all">
-                  Thomas (Partner 1)
-                </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText("Thomas")}
-                  className="text-[#f5c35f] hover:text-[#fcd587] text-xs px-2 py-1 rounded border border-[#f5c35f]/20 hover:border-[#f5c35f]/40 transition-colors"
-                  aria-label="Copy Thomas"
-                >
-                  Copy
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <code className="text-[#fcd587] text-sm sm:text-base select-all">
-                  Holly (Partner 2)
-                </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText("Holly")}
-                  className="text-[#f5c35f] hover:text-[#fcd587] text-xs px-2 py-1 rounded border border-[#f5c35f]/20 hover:border-[#f5c35f]/40 transition-colors"
-                  aria-label="Copy Holly"
-                >
-                  Copy
-                </button>
-              </div>
-            </div>
-            <p className="text-[#f9dca0]/70 text-xs pt-2">
-              Both characters share the same household with real Bumi training
-              data
-            </p>
-          </div>
-        </div>
-
-        {/* Mobile Note */}
-        <div className="pt-4 border-t border-[#f5c35f]/10">
-          <p className="text-[#f9dca0]/70 text-sm">
-            💡 <span className="font-semibold">Tip:</span> For the best
-            experience, test on mobile devices where voice logging and real-time
-            sync shine during actual dog training sessions.
-          </p>
-        </div>
       </div>
     </section>
   );

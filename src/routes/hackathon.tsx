@@ -26,8 +26,24 @@ function HackathonLandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 md:py-16 space-y-12 sm:space-y-16">
+    <div className="min-h-screen bg-[#0a0a0a] text-white relative">
+      {/* Flame background at bottom with gradient fade */}
+      <div
+        className="fixed bottom-0 left-0 right-0 h-[300px] pointer-events-none z-0"
+        style={{
+          backgroundImage: "url(/images/flame_web_bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "bottom center",
+          backgroundRepeat: "no-repeat",
+          opacity: 0.6,
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.7) 50%, black 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.7) 50%, black 100%)",
+        }}
+      />
+
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 md:py-16 space-y-12 sm:space-y-16 relative z-10">
         <HeroSection onWatchDemo={handleWatchDemo} />
 
         {/* Demo Video Section */}

@@ -271,12 +271,22 @@ export function AddDogModal({ isOpen, onClose, onSuccess }: AddDogModalProps) {
       {/* Modal - Requirements: 4.1, 10.2, 10.3, 10.4 */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
         <div
-          className="bg-[#121216] border border-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slide-up"
-          style={{ willChange: "transform, opacity" }}
+          className="border border-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slide-up"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(18, 18, 22, 0.98) 0%, rgba(26, 26, 30, 0.98) 50%, rgba(139, 92, 46, 0.12) 100%)",
+            willChange: "transform, opacity",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with close button - Requirements: 10.4 */}
-          <div className="sticky top-0 bg-[#121216] border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+          <div
+            className="sticky top-0 border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(18, 18, 22, 0.98) 0%, rgba(18, 18, 22, 0.95) 100%)",
+            }}
+          >
             <h2 className="text-lg sm:text-xl font-bold text-[#f9dca0]">
               {modalState.stage === "voice-input" ||
               modalState.stage === "listening"

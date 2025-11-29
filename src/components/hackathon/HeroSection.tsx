@@ -20,16 +20,70 @@ export function HeroSection({ onWatchDemo }: HeroSectionProps) {
   };
 
   return (
-    <section className="flex flex-col items-center text-center space-y-8 py-8 sm:py-12">
+    <section className="flex flex-col items-center text-center space-y-8">
+      {/* Corgi Quest Logo */}
+      <div className="w-130 relative -mt-10 -mb-2">
+        <img
+          src="/corgiquestlogo.png"
+          alt="Corgi Quest Logo"
+          className="w-full h-full object-contain"
+        />
+      </div>
+
       {/* Headline with golden gradient */}
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-b from-[#feefd0] to-[#fcd587] bg-clip-text text-transparent leading-tight">
-        Train your dog together, level up in real-time
+        We couldn't stay aligned training our{" "}
+        <span className="relative inline-block">
+          <span className="relative z-10 bg-gradient-to-b from-amber-400 to-amber-600 bg-clip-text text-transparent">
+            reactive
+          </span>
+          <span className="absolute inset-0 bg-amber-700 blur-lg opacity-30" />
+        </span>{" "}
+        dog
       </h1>
 
       {/* Subheadline with cream text */}
       <p className="text-lg sm:text-xl md:text-2xl text-[#f9dca0] max-w-3xl">
-        AI-powered voice coaching + real-time sync + Vision Pro HUD
+        A real-time co-op dog-training RPG for couples
       </p>
+
+      {/* Micro-story */}
+      <p className="text-base sm:text-lg text-[#f9dca0]/80 max-w-2xl italic">
+        Bumi's reactivity stressed us out. We needed consistency and teamwork
+        before our human baby arrives.
+      </p>
+
+      {/* 15-second skim bullets */}
+      <div className="w-full max-w-2xl text-left space-y-3 pt-4">
+        <div className="flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">🔄</span>
+          <p className="text-[#feefd0] text-sm sm:text-base">
+            <strong>Instant couples sync</strong> — Syncs both partners in real
+            time
+          </p>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">🎙️</span>
+          <p className="text-[#feefd0] text-sm sm:text-base">
+            <strong>Hands-free voice logging</strong> — Claude turns "5 calm
+            reps" into XP as you train
+          </p>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">🥽</span>
+          <p className="text-[#feefd0] text-sm sm:text-base">
+            <strong>Vision Pro HUD</strong> — Stats and goals float around you
+            in live sessions
+          </p>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">🛠️</span>
+          <p className="text-[#feefd0] text-sm sm:text-base">
+            <strong>Kiro-powered</strong> — Specs, hooks, and steering wire the
+            whole system together
+          </p>
+        </div>
+      </div>
 
       {/* CTA Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
