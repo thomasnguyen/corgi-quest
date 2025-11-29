@@ -1015,8 +1015,10 @@ struct StatsScreenView: View {
         }
     }
 
+    @ViewBuilder
     private var orbsView: some View {
-        ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
+        ForEach(0..<stats.count, id: \.self) { index in
+            let stat = stats[index]
             statOrbView(for: stat, at: index)
                 .offset(orbPositions[stat.type] ?? .zero)
                 .scaleEffect(orbScales[stat.type] ?? 1.0)
