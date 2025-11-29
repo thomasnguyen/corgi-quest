@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { useStaleQuery } from "../hooks/useStaleQuery";
 import { useActiveDog } from "../hooks/useActiveDog";
 
-export const Route = createFileRoute("/activity")({
+export const Route = createFileRoute("/app/activity")({
   component: ActivityPage,
 });
 

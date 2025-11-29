@@ -119,10 +119,12 @@ export function DogMenu({
       {/* Bottom Sheet - Requirements: 2.1, 10.2, 10.3 */}
       <div
         ref={sheetRef}
-        className={`relative w-full max-w-md bg-[#1a1a1e] rounded-t-3xl border-t border-[#3d3d3d]/30 transition-transform duration-300 ${
+        className={`relative w-full max-w-md rounded-t-3xl border-t border-[#3d3d3d]/30 transition-transform duration-300 ${
           isAnimating ? "translate-y-0" : "translate-y-full"
         }`}
         style={{
+          background:
+            "linear-gradient(180deg, rgba(26, 26, 30, 0.98) 0%, rgba(18, 18, 22, 0.98) 50%, rgba(139, 92, 46, 0.1) 100%)",
           transform: `translate3d(0, ${isAnimating ? swipeOffset : "100%"}px, 0)`,
           willChange: "transform",
         }}

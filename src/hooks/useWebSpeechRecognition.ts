@@ -83,10 +83,10 @@ export function useWebSpeechRecognition(): UseWebSpeechRecognitionReturn {
     // Handle results
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       console.log("[Speech Recognition] 🎤 Got result event");
-      let interimTranscript = "";
-      let finalTranscript = "";
+      let fullTranscript = "";
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      // Build complete transcript from all results (not just new ones)
+      for (let i = 0; i < event.results.length; i++) {
         const transcriptPiece = event.results[i][0].transcript;
         console.log(
           "[Speech Recognition] Transcript piece:",
@@ -94,19 +94,15 @@ export function useWebSpeechRecognition(): UseWebSpeechRecognitionReturn {
           "isFinal:",
           event.results[i].isFinal
         );
-        if (event.results[i].isFinal) {
-          finalTranscript += transcriptPiece + " ";
-        } else {
-          interimTranscript += transcriptPiece;
-        }
+        fullTranscript += transcriptPiece + " ";
       }
 
-      // Accumulate transcript
-      setTranscript((prev) => {
-        const newTranscript = prev + finalTranscript + interimTranscript;
-        console.log("[Speech Recognition] 📝 New transcript:", newTranscript);
-        return newTranscript;
-      });
+      // Replace transcript instead of accumulating
+      setTranscript(fullTranscript.trim());
+      console.log(
+        "[Speech Recognition] 📝 Full transcript:",
+        fullTranscript.trim()
+      );
     };
 
     // Handle recognition end - auto-restart if needed

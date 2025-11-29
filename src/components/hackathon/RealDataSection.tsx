@@ -39,12 +39,11 @@ export function RealDataSection() {
               Why We Built This
             </p>
             <p className="text-[#f9dca0] leading-relaxed">
-              Bumi is our sweet, reactive corgi who struggles with fear and
-              impulse control. We're preparing for a baby, and consistent
-              training is critical. But staying motivated and coordinated as a
-              couple was hard — until we turned it into a real-time RPG. Now
-              every walk, every "sit," every calm moment becomes progress we can
-              see and celebrate together.
+              Every screenshot is real. Every XP gain is from an actual training
+              session with Bumi. We use this daily to prepare for a baby, and
+              the real-time sync keeps us aligned when life gets chaotic. We
+              built this for us—but if it works for us, maybe it works for
+              others.
             </p>
           </div>
         </div>

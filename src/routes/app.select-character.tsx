@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import CharacterSelection from "../components/character/CharacterSelection";
 
-export const Route = createFileRoute("/select-character")({
+export const Route = createFileRoute("/app/select-character")({
   component: SelectCharacterPage,
 });
 
@@ -21,7 +21,7 @@ function SelectCharacterPage() {
 
     if (selectedCharacterId) {
       // Redirect to Overview if character already selected
-      navigate({ to: "/" });
+      navigate({ to: "/app" });
     }
   }, [navigate]);
 

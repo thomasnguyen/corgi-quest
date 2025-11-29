@@ -190,7 +190,7 @@ export function TrainingModeSimple() {
   const handleStop = () => {
     console.log("[Training Mode] 🛑 Stop button clicked");
     stopSpeech();
-    navigate({ to: "/" });
+    navigate({ to: "/app" });
   };
 
   // Cleanup on unmount

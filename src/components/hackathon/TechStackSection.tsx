@@ -86,11 +86,6 @@ export function TechStackSection() {
             </h3>
           </div>
 
-          <p className="text-[#f9dca0] mb-4">
-            Kiro served as our AI pair programmer, architect, and spec generator
-            throughout development. Here's how we leveraged Kiro's features:
-          </p>
-
           <ul className="space-y-2">
             {kiroFeatures.map((feature, index) => (
               <li key={index} className="flex items-start gap-2 text-[#f9dca0]">

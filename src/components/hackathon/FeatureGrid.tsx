@@ -28,31 +28,30 @@ export function FeatureGrid() {
       icon: <Mic className="w-6 h-6" />,
       title: "Voice Logging",
       description:
-        "Hands-free activity logging during training sessions. Just speak naturally and Claude parses your training into structured data.",
+        "Hands-free activity logging during training. Claude parses natural speech into structured XP.",
     },
     {
       icon: <MessageCircle className="w-6 h-6" />,
       title: "Coach Mode",
       description:
-        "AI-guided training with rep counting and real-time feedback. Your personal voice coach for reactive dog training.",
+        "AI-guided training with rep counting and real-time feedback during live sessions.",
     },
     {
       icon: <Target className="w-6 h-6" />,
       title: "Goals & Streaks",
       description:
-        "Daily physical and mental training targets with streak tracking. Stay consistent and watch your progress compound.",
+        "Daily physical and mental training targets with streak tracking.",
     },
     {
       icon: <Map className="w-6 h-6" />,
       title: "Quests",
       description:
-        "Curated training activities with AI recommendations. Expert advice transformed into actionable daily quests.",
+        "Curated training activities with AI recommendations from expert sources.",
     },
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: "Cosmetics",
-      description:
-        "AI-generated dog transformations on level-up. DALL·E creates unique items based on your dog's photo.",
+      description: "AI-generated dog transformations on level-up using DALL·E.",
     },
   ];
 

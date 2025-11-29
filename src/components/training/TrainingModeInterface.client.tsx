@@ -439,7 +439,7 @@ export function TrainingModeInterface() {
     isPlayingRef.current = false;
     currentFunctionCallRef.current = null;
     activityPayloadRef.current = "";
-    navigate({ to: "/" });
+    navigate({ to: "/app" });
   };
 
   // Cleanup on unmount

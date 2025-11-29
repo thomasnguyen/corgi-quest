@@ -9,7 +9,7 @@
 - [x] Responsive padding: `py-8 sm:py-12 md:py-16`
 - [x] Proper spacing between sections: `space-y-12 sm:space-y-16`
 
-**Implementation:** `src/routes/hackathon.tsx`
+**Implementation:** `src/routes/index.tsx` (landing page at `/`)
 
 ---
 

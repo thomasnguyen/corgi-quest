@@ -9,7 +9,7 @@ const TrainingModeInterface = lazy(() =>
   }))
 );
 
-export const Route = createFileRoute("/training-mode")({
+export const Route = createFileRoute("/app/training-mode")({
   component: TrainingModeScreen,
   ssr: false,
 });

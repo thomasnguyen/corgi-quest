@@ -25,7 +25,7 @@ export function DemoVideoSection({
   const embedUrl = getYouTubeEmbedUrl(videoUrl);
 
   const handleLaunchDemo = () => {
-    navigate({ to: "/" });
+    navigate({ to: "/app" });
   };
 
   return (

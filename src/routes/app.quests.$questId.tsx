@@ -12,7 +12,7 @@ import {
   Target,
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
-import { getIcon } from "./quests.index";
+import { getIcon } from "./app.quests.index";
 
 type IconName =
   | "Sun"
@@ -33,7 +33,7 @@ type IconName =
   | "Zap"
   | "Brain";
 
-export const Route = createFileRoute("/quests/$questId")({
+export const Route = createFileRoute("/app/quests/$questId")({
   component: QuestDetailPage,
 });
 
@@ -386,7 +386,7 @@ function QuestDetailPage() {
         <div className="relative min-h-screen bg-[#121216] pb-32">
           <div className="relative z-10 px-5 pt-5">
             <button
-              onClick={() => navigate({ to: "/quests" })}
+              onClick={() => navigate({ to: "/app/quests" })}
               className="inline-flex items-center gap-2 text-[#f9dca0] hover:text-[#fcd587] transition-colors mb-6"
             >
               <ArrowLeft size={20} strokeWidth={2} />
@@ -404,7 +404,7 @@ function QuestDetailPage() {
   const handleCompleteQuest = () => {
     // Navigate to log-activity route with quest name in search params
     navigate({
-      to: "/log-activity",
+      to: "/app/log-activity",
       search: { questName: quest.name },
     });
   };
@@ -429,7 +429,7 @@ function QuestDetailPage() {
           {/* Header with Back Button */}
           <div className="px-5 pt-5 pb-4">
             <button
-              onClick={() => navigate({ to: "/quests" })}
+              onClick={() => navigate({ to: "/app/quests" })}
               className="inline-flex items-center gap-2 text-[#f9dca0] hover:text-[#fcd587] transition-colors mb-4"
             >
               <ArrowLeft size={20} strokeWidth={2} />

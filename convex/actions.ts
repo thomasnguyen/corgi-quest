@@ -735,31 +735,152 @@ export const parseDogDescription = action({
     transcript: v.string(),
   },
   handler: async (ctx, args) => {
-    // Smart parsing without OpenAI - perfect for demos and hackathons!
-    // Extracts name from transcript and returns realistic dog data
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate thinking
+    const apiKey = process.env.OPENAI_API_KEY;
 
-    // Extract dog name from transcript (first word/phrase before comma)
-    const extractedName = args.transcript.split(",")[0]?.trim() || "Buddy";
+    if (!apiKey) {
+      throw new Error(
+        "OPENAI_API_KEY not configured. Please add it to your Convex environment variables."
+      );
+    }
 
-    return {
-      name: extractedName,
-      breed: "Golden Retriever",
-      traits: ["friendly", "energetic", "distractible"],
-      initialStatEmphasis: {
-        PHY: 7,
-        INT: 5,
-        IMP: 3,
-        SOC: 8,
-      },
-      starterQuest: {
-        name: "Focus Walk",
-        description:
-          "Practice maintaining attention during a 10-minute walk with distractions",
-        targetStat: "IMP",
-        reps: 5,
-      },
-    };
+    try {
+      const systemPrompt = `You are an AI assistant that analyzes dog descriptions and extracts structured data for a dog training RPG app.
+
+Given a natural language description of a dog, extract:
+1. Dog name
+2. Breed (be specific, e.g., "Golden Retriever" not just "retriever")
+3. Personality traits (3-4 traits like "friendly", "energetic", "smart", "calm", "shy", "reactive", etc.)
+4. Initial stat emphasis (PHY, INT, IMP, SOC) - base stats at 5, adjust +2 or -2 based on traits
+5. A personalized starter quest based on the dog's weakest stat
+
+Stat guidelines:
+- PHY (Physical): Energetic, active, playful dogs get +2
+- INT (Intelligence): Smart, clever, quick learner dogs get +2
+- IMP (Impulse Control): Calm, patient dogs get +2; distractible/reactive dogs get -2
+- SOC (Social): Friendly, social dogs get +2; shy/anxious dogs get -1
+
+Quest types by weakest stat:
+- PHY: "Active Play Session" - 15 min active play, 5 reps
+- INT: "Basic Commands" - Practice sit/stay/come, 10 reps
+- IMP: "Impulse Control Training" - Wait calmly before meals, 5 reps
+- SOC: "Socialization Walk" - Calm walk with polite greetings, 3 reps
+
+Return JSON:
+{
+  "name": "Dog name",
+  "breed": "Specific breed",
+  "traits": ["trait1", "trait2", "trait3"],
+  "initialStatEmphasis": {
+    "PHY": 5,
+    "INT": 5,
+    "IMP": 5,
+    "SOC": 5
+  },
+  "starterQuest": {
+    "name": "Quest name",
+    "description": "Quest description",
+    "targetStat": "PHY|INT|IMP|SOC",
+    "reps": number
+  }
+}`;
+
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: args.transcript },
+            ],
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (response.status === 429) {
+          throw new Error(
+            "Rate limit exceeded. Please wait a moment and try again."
+          );
+        } else if (response.status === 401) {
+          throw new Error(
+            "OpenAI API authentication failed. Please check your API key configuration."
+          );
+        } else if (response.status >= 500) {
+          throw new Error(
+            "OpenAI service is temporarily unavailable. Please try again in a few moments."
+          );
+        }
+        throw new Error(
+          `OpenAI API request failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error("Invalid response from OpenAI: missing content");
+      }
+
+      const parsed = JSON.parse(data.choices[0].message.content);
+
+      // Validate required fields
+      if (!parsed.name || !parsed.breed || !parsed.traits) {
+        throw new Error(
+          "Could not extract all required information. Please provide more details about your dog's name, breed, and personality."
+        );
+      }
+
+      return {
+        name: parsed.name,
+        breed: parsed.breed,
+        traits: parsed.traits,
+        initialStatEmphasis: parsed.initialStatEmphasis || {
+          PHY: 5,
+          INT: 5,
+          IMP: 5,
+          SOC: 5,
+        },
+        starterQuest: parsed.starterQuest || {
+          name: "Basic Commands",
+          description: "Practice sit, stay, and come commands to build focus",
+          targetStat: "INT",
+          reps: 10,
+        },
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (
+          error.message.includes("fetch failed") ||
+          error.message.includes("network") ||
+          error.message.includes("ECONNREFUSED") ||
+          error.message.includes("ETIMEDOUT")
+        ) {
+          throw new Error(
+            "Network error. Please check your connection and try again."
+          );
+        }
+        if (
+          error.message.includes("Rate limit") ||
+          error.message.includes("authentication") ||
+          error.message.includes("temporarily unavailable") ||
+          error.message.includes("not configured") ||
+          error.message.includes("Could not extract")
+        ) {
+          throw error;
+        }
+        throw new Error(`Failed to parse dog description: ${error.message}`);
+      }
+      throw new Error("Failed to parse dog description: Unknown error");
+    }
   },
 });
 

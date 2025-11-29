@@ -19,7 +19,7 @@ interface LogActivitySearch {
   prefilledActivity?: string;
 }
 
-export const Route = createFileRoute("/log-activity")({
+export const Route = createFileRoute("/app/log-activity")({
   component: LogActivityPage,
   // Disable SSR for this route to avoid issues with browser-only dependencies
   ssr: false,

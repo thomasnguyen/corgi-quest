@@ -109,7 +109,7 @@ export default function StatOrb({
     circumference - (progressPercentage / 100) * circumference;
 
   const handleClick = () => {
-    navigate({ to: `/stats/$statType`, params: { statType } });
+    navigate({ to: `/app/stats/$statType`, params: { statType } });
   };
 
   return (

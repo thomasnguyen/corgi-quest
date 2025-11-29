@@ -126,7 +126,7 @@ class ExampleViewModel: ObservableObject {
     
     private let networkService: NetworkService
     
-    init(networkService: NetworkService = NetworkService(baseURL: AppConfiguration.apiBaseURL)) {
+    init(networkService: NetworkService = NetworkService(baseURL: "https://api.corgiquest.app")) {
         self.networkService = networkService
     }
     
