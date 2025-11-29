@@ -1018,15 +1018,18 @@ struct StatsScreenView: View {
     @ViewBuilder
     private var orbsView: some View {
         ForEach(0..<stats.count, id: \.self) { index in
-            let stat = stats[index]
-            statOrbView(for: stat, at: index)
-                .offset(orbPositions[stat.type] ?? .zero)
-                .scaleEffect(orbScales[stat.type] ?? 1.0)
-                .rotation3DEffect(
-                    .degrees(orbRotations[stat.type] ?? 0),
-                    axis: (x: 0, y: 1, z: 0)
-                )
+            animatedOrbView(for: stats[index], at: index)
         }
+    }
+
+    private func animatedOrbView(for stat: StatData, at index: Int) -> some View {
+        statOrbView(for: stat, at: index)
+            .offset(orbPositions[stat.type] ?? .zero)
+            .scaleEffect(orbScales[stat.type] ?? 1.0)
+            .rotation3DEffect(
+                .degrees(orbRotations[stat.type] ?? 0),
+                axis: (x: 0, y: 1, z: 0)
+            )
     }
 
     @ViewBuilder
