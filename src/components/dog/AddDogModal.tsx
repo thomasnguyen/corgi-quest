@@ -321,12 +321,79 @@ export function AddDogModal({ isOpen, onClose, onSuccess }: AddDogModalProps) {
 
             {/* Processing stage - Requirements: 5.1 */}
             {modalState.stage === "processing" && (
-              <div className="flex flex-col items-center justify-center min-h-[40vh] px-6">
-                <div className="w-16 h-16 border-4 border-[#f5c35f] border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-gray-400 text-lg">Thinking...</p>
-                <p className="text-gray-500 text-sm mt-2 text-center">
-                  Analyzing your dog's description
-                </p>
+              <div className="flex flex-col min-h-[50vh] px-4 sm:px-6 py-6">
+                {/* Header with pulsing icon */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-[#f5c35f]/20 flex items-center justify-center animate-pulse">
+                    <div className="w-6 h-6 rounded-full bg-[#f5c35f]" />
+                  </div>
+                  <div>
+                    <p className="text-[#f9dca0] font-semibold text-base">
+                      Analyzing your dog...
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      Extracting details from description
+                    </p>
+                  </div>
+                </div>
+
+                {/* Show the transcript being analyzed */}
+                <div className="mb-6 px-4 py-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                  <p className="text-gray-500 text-xs mb-1">
+                    Your description:
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    {modalState.transcript}
+                  </p>
+                </div>
+
+                {/* Skeleton loaders for fields being extracted */}
+                <div className="space-y-4">
+                  {/* Name skeleton */}
+                  <div className="animate-pulse-slow">
+                    <p className="text-gray-500 text-xs mb-2">
+                      Extracting name...
+                    </p>
+                    <div className="h-10 bg-gray-800/50 rounded-lg border border-gray-700 animate-shimmer" />
+                  </div>
+
+                  {/* Breed skeleton */}
+                  <div
+                    className="animate-pulse-slow"
+                    style={{ animationDelay: "150ms" }}
+                  >
+                    <p className="text-gray-500 text-xs mb-2">
+                      Identifying breed...
+                    </p>
+                    <div className="h-10 bg-gray-800/50 rounded-lg border border-gray-700 animate-shimmer" />
+                  </div>
+
+                  {/* Traits skeleton */}
+                  <div
+                    className="animate-pulse-slow"
+                    style={{ animationDelay: "300ms" }}
+                  >
+                    <p className="text-gray-500 text-xs mb-2">
+                      Analyzing personality traits...
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <div className="h-8 w-24 bg-gray-800/50 rounded-full border border-gray-700 animate-shimmer" />
+                      <div className="h-8 w-32 bg-gray-800/50 rounded-full border border-gray-700 animate-shimmer" />
+                      <div className="h-8 w-28 bg-gray-800/50 rounded-full border border-gray-700 animate-shimmer" />
+                    </div>
+                  </div>
+
+                  {/* Quest skeleton */}
+                  <div
+                    className="animate-pulse-slow"
+                    style={{ animationDelay: "450ms" }}
+                  >
+                    <p className="text-gray-500 text-xs mb-2">
+                      Generating starter quest...
+                    </p>
+                    <div className="h-16 bg-gray-800/50 rounded-lg border border-gray-700 animate-shimmer" />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -427,6 +494,37 @@ export function AddDogModal({ isOpen, onClose, onSuccess }: AddDogModalProps) {
           animation: slide-up 0.3s ease-out;
           /* Use GPU acceleration for smooth 60fps animations */
           transform: translate3d(0, 0, 0);
+        }
+
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animate-shimmer {
+          background: linear-gradient(
+            90deg,
+            rgba(31, 41, 55, 0.5) 0%,
+            rgba(55, 65, 81, 0.8) 50%,
+            rgba(31, 41, 55, 0.5) 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-slow {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 2s ease-in-out infinite;
         }
       `}</style>
     </>

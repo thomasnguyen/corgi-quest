@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Mic, AlertCircle, RotateCcw } from "lucide-react";
-import { useWebSpeechRecognition } from "../../hooks/useWebSpeechRecognition";
+import { useSimpleVoiceRecognition } from "../../hooks/useSimpleVoiceRecognition";
 import { ListeningIndicator } from "../training/ListeningIndicator";
 
 interface VoiceInputScreenProps {
@@ -35,7 +35,7 @@ export function VoiceInputScreen({
   const [debouncedTranscript, setDebouncedTranscript] = useState("");
   const transcriptDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use Web Speech API hook - Requirements: 4.5
+  // Use simple voice recognition hook for discrete recording - Requirements: 4.5
   const {
     transcript,
     isListening,
@@ -43,7 +43,7 @@ export function VoiceInputScreen({
     startListening,
     stopListening,
     resetTranscript,
-  } = useWebSpeechRecognition();
+  } = useSimpleVoiceRecognition();
 
   // Handle microphone button tap - Requirements: 4.4
   const handleMicrophoneTap = () => {
