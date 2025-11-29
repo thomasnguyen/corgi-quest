@@ -117,37 +117,26 @@ export function HeroSection({ onWatchDemo }: HeroSectionProps) {
         </div>
       )}
 
-      {/* Hero Visual - Mobile App Screenshot */}
+      {/* Hero Visual - Mobile App Screenshot with iPhone Bezel */}
       <div className="w-full max-w-sm mt-8 mx-auto">
-        <div className="relative rounded-3xl overflow-hidden border-2 border-[#f5c35f]/30 bg-[#121216] shadow-2xl">
-          {/* Mobile phone frame aspect ratio (9:19.5 typical for modern phones) */}
-          <div className="aspect-[9/19.5] flex items-center justify-center bg-gradient-to-b from-[#0a0a0a] to-[#121216]">
-            {/* Placeholder for mobile app screenshot */}
-            <div className="text-[#f9dca0]/50 text-center p-8">
-              <div className="mb-4">
-                <svg
-                  className="w-16 h-16 mx-auto text-[#f5c35f]/30"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-              <p className="text-sm">Mobile App Screenshot</p>
-              <p className="text-xs mt-2 opacity-70">
-                Training interface, stats, and real-time sync
-              </p>
+        <div className="relative w-full shadow-2xl">
+          {/* iPhone bezel background */}
+          <img
+            src="/images/backgrounds/iphone_bezel.png"
+            alt="iPhone frame"
+            className="w-full h-auto"
+          />
+
+          {/* Screenshot overlay - positioned absolutely inside the bezel */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-[calc(100%-16px)] h-[calc(100%-32px)] top-4 left-2 absolute">
+              <img
+                src="/app_screenshot.png"
+                alt="Corgi Quest app screenshot"
+                className="w-full h-full object-cover rounded-[32px]"
+              />
             </div>
           </div>
-
-          {/* Optional: Add a subtle glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#f5c35f]/5 to-transparent pointer-events-none" />
         </div>
 
         {/* Caption below phone */}
