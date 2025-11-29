@@ -1028,7 +1028,7 @@ struct StatsScreenView: View {
         let rotation = orbRotations[stat.type] ?? 0
 
         return statOrbView(for: stat, at: index)
-            .offset(position)
+            .offset(x: position.x, y: position.y)
             .scaleEffect(scale)
             .rotation3DEffect(
                 .degrees(rotation),
