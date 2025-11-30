@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as ToolsNoiseRouteImport } from './routes/tools.noise'
+import { Route as AppVrRouteImport } from './routes/app.vr'
 import { Route as AppTrainingModeRouteImport } from './routes/app.training-mode'
 import { Route as AppSelectCharacterRouteImport } from './routes/app.select-character'
 import { Route as AppQuestsRouteImport } from './routes/app.quests'
@@ -66,6 +67,11 @@ const ToolsNoiseRoute = ToolsNoiseRouteImport.update({
   id: '/tools/noise',
   path: '/tools/noise',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppVrRoute = AppVrRouteImport.update({
+  id: '/vr',
+  path: '/vr',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppTrainingModeRoute = AppTrainingModeRouteImport.update({
   id: '/training-mode',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/app/quests': typeof AppQuestsRouteWithChildren
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/app/vr': typeof AppVrRoute
   '/tools/noise': typeof ToolsNoiseRoute
   '/app/': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/app/log-activity': typeof AppLogActivityRoute
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/app/vr': typeof AppVrRoute
   '/tools/noise': typeof ToolsNoiseRoute
   '/app': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/app/quests': typeof AppQuestsRouteWithChildren
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/app/vr': typeof AppVrRoute
   '/tools/noise': typeof ToolsNoiseRoute
   '/app/': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/app/quests'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/app/vr'
     | '/tools/noise'
     | '/app/'
     | '/app/quests/$questId'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/app/log-activity'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/app/vr'
     | '/tools/noise'
     | '/app'
     | '/app/quests/$questId'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/app/quests'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/app/vr'
     | '/tools/noise'
     | '/app/'
     | '/app/quests/$questId'
@@ -353,6 +365,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tools/noise'
       preLoaderRoute: typeof ToolsNoiseRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/vr': {
+      id: '/app/vr'
+      path: '/vr'
+      fullPath: '/app/vr'
+      preLoaderRoute: typeof AppVrRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/training-mode': {
       id: '/app/training-mode'
@@ -482,6 +501,7 @@ interface AppRouteChildren {
   AppQuestsRoute: typeof AppQuestsRouteWithChildren
   AppSelectCharacterRoute: typeof AppSelectCharacterRoute
   AppTrainingModeRoute: typeof AppTrainingModeRoute
+  AppVrRoute: typeof AppVrRoute
   AppIndexRoute: typeof AppIndexRoute
   AppStatsStatTypeRoute: typeof AppStatsStatTypeRoute
 }
@@ -492,6 +512,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppQuestsRoute: AppQuestsRouteWithChildren,
   AppSelectCharacterRoute: AppSelectCharacterRoute,
   AppTrainingModeRoute: AppTrainingModeRoute,
+  AppVrRoute: AppVrRoute,
   AppIndexRoute: AppIndexRoute,
   AppStatsStatTypeRoute: AppStatsStatTypeRoute,
 }

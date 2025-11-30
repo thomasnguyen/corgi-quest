@@ -21,7 +21,7 @@ This plan transforms the existing Noise Desensitizer from a vertical card-based 
   - Render SoundTile components for each sound
   - _Requirements: 1.1, 1.2_
 
-- [-] 3. Create SoundTile component
+- [ ] 3. Create SoundTile component
   - Create `src/components/noise/SoundTile.tsx`
   - Implement compact tile design (icon, short label, intensity dot)
   - Add 44x44px minimum touch target
