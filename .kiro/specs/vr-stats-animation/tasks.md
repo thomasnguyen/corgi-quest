@@ -67,7 +67,7 @@
   - Re-animate with spring when data changes
   - Add chart icon to header (chart.bar.fill)
 
-- [ ] 12. Manual demo testing
+- [x] 12. Manual demo testing
   - Test in Xcode simulator: verify all animations work together
   - Verify readability improvements with darker backgrounds
   - Test 3D depth effects and floating animations

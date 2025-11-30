@@ -157,6 +157,53 @@ This adds delight and forward momentum to training.
 
 ---
 
+## 😊 **Mood Tracking**
+
+* Log your dog's mood throughout the day (calm, anxious, reactive, playful, tired, neutral)
+* Optional notes for context
+* Mood history graph shows patterns over time
+* Mood reminder popups encourage consistent tracking
+* Correlate mood with training activities
+
+---
+
+## 🐕 **Multi-Dog Support**
+
+* Add multiple dogs to a household
+* Switch between dogs with the dog menu
+* Each dog has independent stats, goals, and cosmetics
+* Perfect for families with multiple pets
+
+---
+
+## 👥 **Real-Time Presence**
+
+* See when your partner is active in the app
+* Know which screen they're viewing
+* Encourages coordination during training sessions
+* Powered by Convex real-time subscriptions
+
+---
+
+## 📧 **Waitlist & Early Access**
+
+* Waitlist signup with referral tracking
+* Referral codes for viral growth
+* Early access rewards for top referrers
+* Updates subscriber list for product announcements
+
+---
+
+## 🎪 **Hackathon Landing Page**
+
+* Feature showcase with demo video
+* Tech stack highlights
+* Core values presentation
+* Vision Pro section
+* Testing instructions for judges
+
+---
+
 # ⚙️ **Platform & Architecture**
 
 ## ⚡ **Real-Time System (Convex)**

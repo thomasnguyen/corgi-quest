@@ -61,25 +61,44 @@ function OverviewPage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Determine background based on equipped item (calculate early, before conditionals)
+  // Determine background based on equipped item and breed (calculate early, before conditionals)
   // Priority:
   // 1. Moon items → mage_bg.webp (local, never AI-generated)
   // 2. Non-moon equipped items → generatedImageUrl from Convex storage (AI-generated WebP)
-  // 3. Default (nothing equipped) → main_bg.webp (local)
+  // 3. Golden Retriever breed → golden_retriever.jpg (special breed background)
+  // 4. Default (nothing equipped) → main_bg.webp (local)
   const bgSuffix = isMobile ? "_mobile" : "";
   const isMoonItem = equippedItem?.item?.itemType === "moon";
+  const isGoldenRetriever = dogProfile?.dog?.breed
+    ?.toLowerCase()
+    .includes("golden retriever");
+
+  // Debug: log breed info
+  console.log(
+    "Dog breed:",
+    dogProfile?.dog?.breed,
+    "| isGoldenRetriever:",
+    isGoldenRetriever
+  );
+
+  const getDefaultBackground = () => {
+    if (isGoldenRetriever) return `/golden_retriever.png`;
+    return `/main_bg.webp`;
+  };
+  // if isGoldenRetriever add padding top 30px;
+
   const backgroundImage = isMoonItem
     ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
     : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
       ? equippedItem.generatedImageUrl
-      : `/main_bg.webp`;
+      : getDefaultBackground();
 
   // Fallback for browsers that don't support WebP (only for non-AI images)
   const backgroundImageFallback = isMoonItem
     ? `/images/backgrounds/mage_bg${bgSuffix}.webp`
     : equippedItem?.generatedImageUrl && equippedItem.generatedImageUrl !== ""
       ? equippedItem.generatedImageUrl
-      : `/main_bg.webp`;
+      : getDefaultBackground();
 
   // Preload the background image for faster rendering (must be before any conditional returns)
   useEffect(() => {
@@ -125,9 +144,12 @@ function OverviewPage() {
 
   return (
     <div
-      className="relative overflow-hidden bg-cover bg-bottom min-h-screen"
+      className="relative overflow-hidden bg-cover min-h-screen"
       style={{
         backgroundImage: `url('${backgroundImage}'), url('${backgroundImageFallback}')`,
+        backgroundPosition: isGoldenRetriever
+          ? "center top 30px"
+          : "center bottom",
       }}
     >
       {/* Content */}

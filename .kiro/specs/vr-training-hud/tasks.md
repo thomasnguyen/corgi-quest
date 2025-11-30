@@ -25,7 +25,7 @@
   - **Property 5: Voice log round trip**
   - **Validates: Requirements 6.1, 9.2**
 
-- [-] 2. Create visionOS app project structure
+- [x] 2. Create visionOS app project structure
 - [x] 2.1 Initialize visionOS app in Xcode (separate directory)
   - Create `visionos-app/` directory in mono-repo root
   - Create new visionOS app project in Xcode within that directory
@@ -198,7 +198,7 @@
   - Animate when activities array changes
   - _Requirements: 3.3_
 
-- [ ] 9. Add error handling and edge cases
+- [x] 9. Add error handling and edge cases
 - [ ] 9.1 Implement network error handling
   - Add offline indicator when connection fails
   - Implement retry logic with exponential backoff

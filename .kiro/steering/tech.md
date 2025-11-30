@@ -28,9 +28,16 @@ inclusion: always
 - **DALL-E 3**: AI-generated dog cosmetic transformations
 
 ## Voice & AI
-- **Web Speech API**: Browser-native speech recognition (primary)
-- **OpenAI Realtime API**: Advanced voice processing (optional)
-- **OpenAI GPT-4**: Activity parsing and recommendations
+- **Web Speech API**: Browser-native speech recognition (primary voice input)
+  - Used for training mode and activity logging
+  - Works hands-free during real-world training sessions
+- **OpenAI Realtime API**: Advanced voice processing (optional path)
+  - Enhanced voice interaction for complex coaching scenarios
+  - Provides real-time transcription and response
+- **Claude (Anthropic)**: Activity parsing and natural language understanding
+  - Parses voice transcripts into structured training data
+  - Determines XP allocation across stats (PHY/INT/IMP/SOC)
+- **OpenAI GPT-4**: AI recommendations and quest suggestions
 
 ## Development Tools
 - **npm**: Package manager
@@ -40,7 +47,7 @@ inclusion: always
 
 ## Deployment
 - **Convex Cloud**: Backend hosting and real-time infrastructure
-- **Vercel/Netlify**: Frontend hosting (TBD)
+- **Netlify**: Frontend hosting (SSR via TanStack Start)
 
 ## Technical Constraints
 - Must work on mobile browsers (iOS Safari, Chrome)

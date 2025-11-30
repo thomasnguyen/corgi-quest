@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import {
   getActiveDogId,
   setActiveDogId as setActiveDogIdStorage,
@@ -8,6 +8,23 @@ import { useSelectedCharacter } from "./useSelectedCharacter";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+
+// Event emitter for cross-component sync
+const activeDogListeners = new Set<() => void>();
+let currentActiveDogId: Id<"dogs"> | null = null;
+
+function emitActiveDogChange() {
+  activeDogListeners.forEach((listener) => listener());
+}
+
+function subscribeToActiveDog(callback: () => void) {
+  activeDogListeners.add(callback);
+  return () => activeDogListeners.delete(callback);
+}
+
+function getActiveDogSnapshot() {
+  return currentActiveDogId;
+}
 
 /**
  * Hook to manage the active dog selection for the current user
@@ -20,12 +37,27 @@ import type { Id } from "../../convex/_generated/dataModel";
  * - Clears invalid ID from localStorage
  * - Handles no dogs in household case
  *
+ * Uses useSyncExternalStore for cross-component synchronization.
+ *
  * Requirements: 1.2, 3.5, 7.1
  */
 export function useActiveDog() {
   const { selectedCharacterId, selectedUser } = useSelectedCharacter();
-  const [activeDogId, setActiveDogIdState] = useState<Id<"dogs"> | null>(null);
+
+  // Use useSyncExternalStore for cross-component sync
+  const activeDogId = useSyncExternalStore(
+    subscribeToActiveDog,
+    getActiveDogSnapshot,
+    getActiveDogSnapshot
+  );
+
   const [hasValidated, setHasValidated] = useState(false);
+
+  // Helper to update the shared state and notify all listeners
+  const updateActiveDogId = useCallback((dogId: Id<"dogs"> | null) => {
+    currentActiveDogId = dogId;
+    emitActiveDogChange();
+  }, []);
 
   // Query household dogs to validate active dog ID - Requirements: 1.2
   const householdDogs = useQuery(
@@ -50,7 +82,7 @@ export function useActiveDog() {
 
     // Case 1: No dogs in household - Requirements: 1.2
     if (householdDogs.length === 0) {
-      setActiveDogIdState(null);
+      updateActiveDogId(null);
       if (storedId) {
         // Clear invalid stored ID
         clearActiveDogId(selectedCharacterId);
@@ -66,7 +98,7 @@ export function useActiveDog() {
     // Case 2: No stored ID - use first dog - Requirements: 1.2
     if (!storedId) {
       const firstDog = householdDogs[0];
-      setActiveDogIdState(firstDog._id);
+      updateActiveDogId(firstDog._id);
       setActiveDogIdStorage(selectedCharacterId, firstDog._id);
       console.log(
         "[useActiveDog] No stored ID, using first dog:",
@@ -81,12 +113,12 @@ export function useActiveDog() {
 
     if (dogExists) {
       // Valid stored ID
-      setActiveDogIdState(storedId as Id<"dogs">);
+      updateActiveDogId(storedId as Id<"dogs">);
       console.log("[useActiveDog] Valid stored ID:", storedId);
     } else {
       // Invalid stored ID - fall back to first dog - Requirements: 1.2
       const firstDog = householdDogs[0];
-      setActiveDogIdState(firstDog._id);
+      updateActiveDogId(firstDog._id);
       setActiveDogIdStorage(selectedCharacterId, firstDog._id);
       console.warn(
         "[useActiveDog] Invalid stored ID:",
@@ -97,23 +129,23 @@ export function useActiveDog() {
     }
 
     setHasValidated(true);
-  }, [selectedCharacterId, householdDogs, hasValidated]);
+  }, [selectedCharacterId, householdDogs, hasValidated, updateActiveDogId]);
 
   // Reset validation when user changes
   useEffect(() => {
     setHasValidated(false);
   }, [selectedCharacterId]);
 
-  // Update both state and localStorage when active dog changes
+  // Update both shared state and localStorage when active dog changes
   const setActiveDogId = useCallback(
     (dogId: Id<"dogs">) => {
       if (selectedCharacterId) {
-        setActiveDogIdState(dogId);
+        updateActiveDogId(dogId);
         setActiveDogIdStorage(selectedCharacterId, dogId);
         console.log("[useActiveDog] Set active dog:", dogId);
       }
     },
-    [selectedCharacterId]
+    [selectedCharacterId, updateActiveDogId]
   );
 
   return {

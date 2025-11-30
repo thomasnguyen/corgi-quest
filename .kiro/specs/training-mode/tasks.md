@@ -128,7 +128,7 @@
     - Add error display
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 11.1, 11.2, 11.3_
 
-- [ ] 7. Implement real-time updates
+- [x] 7. Implement real-time updates
   - [ ] 7.1 Configure optimistic updates for activity logging
     - Use existing optimistic update pattern from log-activity
     - Update activity feed immediately

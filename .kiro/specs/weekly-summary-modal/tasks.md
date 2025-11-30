@@ -114,7 +114,7 @@
   - Ensure keyboard navigation works for all interactive elements
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 8. Add manual trigger button (optional)
+- [x] 8. Add manual trigger button (optional)
   - Add "View Weekly Summary" button to Overview page
   - Wire button to open modal state
   - Style as secondary action button
