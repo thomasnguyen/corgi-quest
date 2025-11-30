@@ -15,6 +15,7 @@ import { Route as BumiRouteImport } from './routes/bumi'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as ToolsNoiseRouteImport } from './routes/tools.noise'
 import { Route as AppTrainingModeRouteImport } from './routes/app.training-mode'
 import { Route as AppSelectCharacterRouteImport } from './routes/app.select-character'
 import { Route as AppQuestsRouteImport } from './routes/app.quests'
@@ -60,6 +61,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const ToolsNoiseRoute = ToolsNoiseRouteImport.update({
+  id: '/tools/noise',
+  path: '/tools/noise',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppTrainingModeRoute = AppTrainingModeRouteImport.update({
   id: '/training-mode',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/app/quests': typeof AppQuestsRouteWithChildren
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/tools/noise': typeof ToolsNoiseRoute
   '/app/': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
   '/app/stats/$statType': typeof AppStatsStatTypeRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/app/log-activity': typeof AppLogActivityRoute
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/tools/noise': typeof ToolsNoiseRoute
   '/app': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
   '/app/stats/$statType': typeof AppStatsStatTypeRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/app/quests': typeof AppQuestsRouteWithChildren
   '/app/select-character': typeof AppSelectCharacterRoute
   '/app/training-mode': typeof AppTrainingModeRoute
+  '/tools/noise': typeof ToolsNoiseRoute
   '/app/': typeof AppIndexRoute
   '/app/quests/$questId': typeof AppQuestsQuestIdRoute
   '/app/stats/$statType': typeof AppStatsStatTypeRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/app/quests'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/tools/noise'
     | '/app/'
     | '/app/quests/$questId'
     | '/app/stats/$statType'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/app/log-activity'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/tools/noise'
     | '/app'
     | '/app/quests/$questId'
     | '/app/stats/$statType'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/app/quests'
     | '/app/select-character'
     | '/app/training-mode'
+    | '/tools/noise'
     | '/app/'
     | '/app/quests/$questId'
     | '/app/stats/$statType'
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   BumiRoute: typeof BumiRoute
   ThanksRoute: typeof ThanksRoute
   WaitlistRoute: typeof WaitlistRoute
+  ToolsNoiseRoute: typeof ToolsNoiseRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/tools/noise': {
+      id: '/tools/noise'
+      path: '/tools/noise'
+      fullPath: '/tools/noise'
+      preLoaderRoute: typeof ToolsNoiseRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/training-mode': {
       id: '/app/training-mode'
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   BumiRoute: BumiRoute,
   ThanksRoute: ThanksRoute,
   WaitlistRoute: WaitlistRoute,
+  ToolsNoiseRoute: ToolsNoiseRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,

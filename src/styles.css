@@ -215,6 +215,35 @@ code {
   will-change: height;
 }
 
+/* Noise Tool - SoundTile animations */
+/* Pulse animation for playing indicator - Requirements: 1.5, 9.5 */
+@keyframes pulse-playing {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-playing {
+  animation: pulse-playing 1s ease-in-out infinite;
+}
+
+/* Border pulse for selected tile - Requirements: 1.5 */
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.animate-pulse-border {
+  animation: pulse-border 1s ease-in-out infinite;
+}
+
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
