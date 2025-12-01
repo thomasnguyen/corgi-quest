@@ -1198,3 +1198,59 @@ export const getOverallStatsData = query({
     };
   },
 });
+
+/**
+ * Query to get daily XP data for a specific date range
+ * Returns XP totals grouped by day for the specified date range
+ * Requirements: 5.1
+ */
+export const getDailyXP = query({
+  args: {
+    dogId: v.id("dogs"),
+    startDate: v.string(), // ISO date string (YYYY-MM-DD)
+    endDate: v.string(), // ISO date string (YYYY-MM-DD)
+  },
+  handler: async (ctx, args) => {
+    // Convert date strings to timestamps
+    const startTime = new Date(args.startDate).getTime();
+    const endTime = new Date(args.endDate).getTime() + 24 * 60 * 60 * 1000; // Include end date
+
+    // Get all activities in the date range
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_dog_and_created", (q) => q.eq("dogId", args.dogId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("createdAt"), startTime),
+          q.lt(q.field("createdAt"), endTime)
+        )
+      )
+      .collect();
+
+    // Get all stat gains for these activities
+    const activityIds = activities.map((a) => a._id);
+    const allStatGains = await Promise.all(
+      activityIds.map((activityId) =>
+        ctx.db
+          .query("activity_stat_gains")
+          .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+          .collect()
+      )
+    );
+
+    // Group total XP by day
+    const dailyXpMap = new Map<string, number>();
+    activities.forEach((activity, index) => {
+      const date = new Date(activity.createdAt).toISOString().split("T")[0];
+      const statGains = allStatGains[index] || [];
+      const totalXp = statGains.reduce((sum, sg) => sum + sg.xpAmount, 0);
+      const current = dailyXpMap.get(date) || 0;
+      dailyXpMap.set(date, current + totalXp);
+    });
+
+    // Return sorted array of daily XP data
+    return Array.from(dailyXpMap.entries())
+      .map(([date, xp]) => ({ date, xp }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  },
+});

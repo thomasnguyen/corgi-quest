@@ -104,23 +104,63 @@
     - Scroll older items down
     - _Requirements: 11.4_
 
-- [x] 8. Polish and optimize
-  - [x] 8.1 Add visual feedback for voice
+- [ ] 8. Implement 3D weekly XP chart
+  - [ ] 8.1 Create WeeklyChartPanel component
+    - Fetch last 7 days of XP data using useVRData hook
+    - Position panel at center bottom
+    - Add panel background and title
+    - _Requirements: 12.1, 12.2_
+  
+  - [ ] 8.2 Implement 3D bar chart rendering
+    - Use BoxGeometry for bars (NOT SVG)
+    - Calculate bar heights using normalized values (maxHeight = 0.6 units)
+    - Ensure minimum bar height of 0.05 units for visibility
+    - Space bars evenly with barSpacing = 0.12 units
+    - Center bars around origin using proper X positioning
+    - _Requirements: 12.1, 12.2, 12.6_
+  
+  - [ ] 8.3 Add chart labels and values
+    - Display day labels below each bar using 3D Text (fontSize 0.05)
+    - Display XP values above each bar using 3D Text (fontSize 0.04)
+    - Use proper text anchoring (center/top for labels, center/bottom for values)
+    - _Requirements: 12.3, 12.7_
+  
+  - [ ] 8.4 Add bar growth animations
+    - Animate bars growing from 0 to target height on mount
+    - Use spring animations for smooth transitions
+    - Stagger animations slightly for visual appeal
+    - _Requirements: 12.4_
+  
+  - [ ] 8.5 Implement real-time chart updates
+    - Listen for XP changes via Convex subscriptions
+    - Smoothly transition bar heights when data updates
+    - Update labels and values in real-time
+    - _Requirements: 12.5_
+
+- [ ] 9. Polish and optimize
+  - [ ] 9.1 Add visual feedback for voice
     - Pulsing microphone icon when listening
     - Show transcript preview in VR
     - Display "Processing..." when sending to Claude
     - Show success confirmation when XP awarded
     - _Requirements: 10.5_
   
-  - [x] 8.2 Optimize for performance
+  - [ ] 9.2 Optimize for performance
     - Use low-poly meshes (< 1000 triangles)
     - Prefer MeshBasicMaterial over Standard
     - Clean up resources on unmount
     - Limit simultaneous animations
     - _Requirements: 15.1, 15.2, 15.3_
   
-  - [x] 8.3 Test end-to-end voice flow
+  - [ ] 9.3 Test end-to-end voice flow
     - Enter VR → say training activity → watch stats update live
     - Test multiple activities in sequence
     - Verify real-time sync across devices
     - Test on Vision Pro if available
+  
+  - [ ] 9.4 Test chart rendering
+    - Verify bars render at correct heights
+    - Verify labels are readable and properly positioned
+    - Test with various XP values (0, small, large)
+    - Verify animations are smooth
+    - Test real-time updates when logging activities

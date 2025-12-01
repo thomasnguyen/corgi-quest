@@ -891,3 +891,48 @@ export const createDogWithStats = mutation({
     };
   },
 });
+
+/**
+ * Reset daily goals for a specific dog (for demo purposes)
+ * Sets physicalPoints and mentalPoints back to 0
+ */
+export const resetDailyGoalsForDemo = mutation({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  handler: async (ctx, args) => {
+    // Find today's goals for this dog (date stored as YYYY-MM-DD string)
+    const today = new Date();
+    const dateString = today.toISOString().split("T")[0]; // "2025-12-01"
+
+    const goals = await ctx.db
+      .query("daily_goals")
+      .withIndex("by_dog_and_date", (q) =>
+        q.eq("dogId", args.dogId).eq("date", dateString)
+      )
+      .first();
+
+    if (!goals) {
+      console.log("No goals found for today");
+      return { success: false, message: "No goals found for today" };
+    }
+
+    // Reset the points to 0
+    await ctx.db.patch(goals._id, {
+      physicalPoints: 0,
+      mentalPoints: 0,
+    });
+
+    console.log("Daily goals reset successfully");
+    return {
+      success: true,
+      message: "Daily goals reset to 0",
+      goals: {
+        physicalPoints: 0,
+        mentalPoints: 0,
+        physicalGoal: goals.physicalGoal,
+        mentalGoal: goals.mentalGoal,
+      },
+    };
+  },
+});

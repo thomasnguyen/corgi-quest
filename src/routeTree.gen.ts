@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WebxrRouteImport } from './routes/webxr'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as VrRouteImport } from './routes/vr'
 import { Route as ThanksRouteImport } from './routes/thanks'
@@ -34,6 +35,11 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const WebxrRoute = WebxrRouteImport.update({
+  id: '/webxr',
+  path: '/webxr',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
   path: '/waitlist',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/thanks': typeof ThanksRoute
   '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
+  '/webxr': typeof WebxrRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
   '/app/quests': typeof AppQuestsRouteWithChildren
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/thanks': typeof ThanksRoute
   '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
+  '/webxr': typeof WebxrRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
   '/app/select-character': typeof AppSelectCharacterRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/thanks': typeof ThanksRoute
   '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
+  '/webxr': typeof WebxrRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
   '/app/quests': typeof AppQuestsRouteWithChildren
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/thanks'
     | '/vr'
     | '/waitlist'
+    | '/webxr'
     | '/app/activity'
     | '/app/log-activity'
     | '/app/quests'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/thanks'
     | '/vr'
     | '/waitlist'
+    | '/webxr'
     | '/app/activity'
     | '/app/log-activity'
     | '/app/select-character'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/thanks'
     | '/vr'
     | '/waitlist'
+    | '/webxr'
     | '/app/activity'
     | '/app/log-activity'
     | '/app/quests'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   ThanksRoute: typeof ThanksRoute
   VrRoute: typeof VrRoute
   WaitlistRoute: typeof WaitlistRoute
+  WebxrRoute: typeof WebxrRoute
   ToolsNoiseRoute: typeof ToolsNoiseRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -330,6 +343,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/webxr': {
+      id: '/webxr'
+      path: '/webxr'
+      fullPath: '/webxr'
+      preLoaderRoute: typeof WebxrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/waitlist': {
       id: '/waitlist'
       path: '/waitlist'
@@ -546,6 +566,7 @@ const rootRouteChildren: RootRouteChildren = {
   ThanksRoute: ThanksRoute,
   VrRoute: VrRoute,
   WaitlistRoute: WaitlistRoute,
+  WebxrRoute: WebxrRoute,
   ToolsNoiseRoute: ToolsNoiseRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,

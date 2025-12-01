@@ -155,11 +155,13 @@ The WebXR VR-HUD feature provides an immersive training interface for Apple Visi
 
 #### Acceptance Criteria
 
-1. WHEN displaying the weekly chart THEN the WebXR System SHALL render a 3D bar chart showing XP per day
-2. WHEN rendering bars THEN the WebXR System SHALL display one bar per day for the last 7 days
-3. WHEN displaying the chart THEN the WebXR System SHALL label each bar with the day of the week
-4. WHEN the chart loads THEN the WebXR System SHALL animate the bars growing from zero to their final height
-5. WHEN XP data updates THEN the WebXR System SHALL smoothly transition bar heights to new values
+1. WHEN displaying the weekly chart THEN the WebXR System SHALL render a 3D bar chart using BoxGeometry primitives showing XP per day
+2. WHEN rendering bars THEN the WebXR System SHALL display one bar per day for the last 7 days with consistent spacing
+3. WHEN displaying the chart THEN the WebXR System SHALL label each bar with the day of the week using 3D text positioned below each bar
+4. WHEN the chart loads THEN the WebXR System SHALL animate the bars growing from zero to their final height over 0.5 seconds
+5. WHEN XP data updates THEN the WebXR System SHALL smoothly transition bar heights to new values using spring animations
+6. WHEN rendering bars THEN the WebXR System SHALL maintain a minimum bar height of 0.05 units for visibility even when XP is zero
+7. WHEN displaying XP values THEN the WebXR System SHALL show the numeric XP value above each bar using 3D text with appropriate font size
 
 ### Requirement 13: Session Feedback Animations
 

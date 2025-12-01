@@ -117,7 +117,7 @@ src/routes/
           │   └─ <ActivityItem> × 5
           │
           ├─ <WeeklyChartPanel>    # 7-day XP chart
-          │   └─ <BarChart3D>      # 3D bar chart
+          │   └─ <AnimatedBar> × 7 # One bar per day with growth animation
           │
           ├─ <SessionControlsPanel> # Training session UI
           │   ├─ <StartButton>     # Conditional: no active session
@@ -282,6 +282,200 @@ function InteractionRaycaster() {
 }
 ```
 
+#### WeeklyChartPanel
+
+3D bar chart showing last 7 days of XP with proper scaling and animations.
+
+```typescript
+import { Text } from '@react-three/drei';
+import { useSpring, animated } from '@react-spring/three';
+import { useEffect, useState } from 'react';
+
+interface WeeklyChartPanelProps {
+  weeklyXP: Array<{ date: string; xp: number }>;
+  position?: [number, number, number];
+}
+
+interface BarData {
+  label: string;
+  value: number;
+  date: string;
+}
+
+/**
+ * AnimatedBar - Single bar with growth animation
+ */
+function AnimatedBar({
+  height,
+  position,
+  color,
+  delay = 0,
+}: {
+  height: number;
+  position: [number, number, number];
+  color: string;
+  delay?: number;
+}) {
+  const [started, setStarted] = useState(false);
+  
+  useEffect(() => {
+    const timeout = setTimeout(() => setStarted(true), delay);
+    return () => clearTimeout(timeout);
+  }, [delay]);
+  
+  const { animatedHeight } = useSpring({
+    animatedHeight: started ? height : 0,
+    config: { tension: 200, friction: 20 },
+  });
+  
+  return (
+    <animated.mesh
+      position-x={position[0]}
+      position-y={animatedHeight.to(h => h / 2)}
+      position-z={position[2]}
+    >
+      <boxGeometry args={[0.08, animatedHeight, 0.08]} />
+      <meshBasicMaterial color={color} />
+    </animated.mesh>
+  );
+}
+
+/**
+ * WeeklyChartPanel - Displays 7-day XP bar chart
+ * 
+ * Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7
+ */
+export default function WeeklyChartPanel({
+  weeklyXP,
+  position = [0, -0.5, -1.5], // Center bottom
+}: WeeklyChartPanelProps) {
+  // Prepare data for last 7 days
+  const prepareChartData = (): BarData[] => {
+    const today = new Date();
+    const last7Days: BarData[] = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Find XP for this date
+      const dayData = weeklyXP.find(d => d.date === dateStr);
+      const xp = dayData?.xp ?? 0;
+      
+      // Format day label (Mon, Tue, etc.)
+      const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      last7Days.push({
+        label: dayLabel,
+        value: xp,
+        date: dateStr,
+      });
+    }
+    
+    return last7Days;
+  };
+  
+  const chartData = prepareChartData();
+  
+  // Chart dimensions - Requirements: 12.1
+  const maxHeight = 0.6; // Maximum bar height in world units
+  const barWidth = 0.08;
+  const barSpacing = 0.12;
+  const chartWidth = chartData.length * barSpacing;
+  
+  // Calculate max value for normalization - Requirements: 12.1
+  const maxValue = Math.max(...chartData.map(d => d.value), 1);
+  
+  return (
+    <group position={position}>
+      {/* Panel title */}
+      <Text
+        position={[0, maxHeight + 0.15, 0]}
+        fontSize={0.12}
+        color="#f9dca0"
+        anchorX="center"
+        anchorY="middle"
+      >
+        Last 7 Days
+      </Text>
+      
+      {/* Background panel */}
+      <mesh position={[0, maxHeight / 2, -0.02]}>
+        <planeGeometry args={[chartWidth + 0.2, maxHeight + 0.3]} />
+        <meshBasicMaterial color="#1a1a1a" transparent opacity={0.5} />
+      </mesh>
+      
+      {/* Bars - Requirements: 12.1, 12.2, 12.4, 12.6 */}
+      {chartData.map((item, index) => {
+        // Normalize height - Requirements: 12.1
+        const normalizedHeight = (item.value / maxValue) * maxHeight;
+        // Ensure minimum height for visibility - Requirements: 12.6
+        const barHeight = Math.max(normalizedHeight, 0.05);
+        
+        // Calculate X position (center bars around origin) - Requirements: 12.2
+        const xPos = (index - (chartData.length - 1) / 2) * barSpacing;
+        
+        return (
+          <group key={item.date}>
+            {/* Animated bar - Requirements: 12.4 */}
+            <AnimatedBar
+              height={barHeight}
+              position={[xPos, 0, 0]}
+              color="#D4AF37"
+              delay={index * 50} // Stagger animation
+            />
+            
+            {/* XP value above bar - Requirements: 12.7 */}
+            <Text
+              position={[xPos, barHeight + 0.05, 0]}
+              fontSize={0.04}
+              color="#f5c35f"
+              anchorX="center"
+              anchorY="bottom"
+            >
+              {item.value}
+            </Text>
+            
+            {/* Day label below bar - Requirements: 12.3 */}
+            <Text
+              position={[xPos, -0.05, 0]}
+              fontSize={0.05}
+              color="#888888"
+              anchorX="center"
+              anchorY="top"
+            >
+              {item.label}
+            </Text>
+          </group>
+        );
+      })}
+      
+      {/* Grid lines (optional, for reference) */}
+      {[0.25, 0.5, 0.75].map((ratio) => {
+        const y = ratio * maxHeight;
+        return (
+          <line key={ratio}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={2}
+                array={new Float32Array([
+                  -chartWidth / 2, y, 0.01,
+                  chartWidth / 2, y, 0.01,
+                ])}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial color="#3d3d3d" opacity={0.3} transparent />
+          </line>
+        );
+      })}
+    </group>
+  );
+}
+```
+
 ### Hooks
 
 #### useVRData
@@ -296,6 +490,7 @@ interface VRData {
   activities: Activity[];
   weeklyXP: { date: string; xp: number }[];
   streak: Streak | null;
+  isLoading: boolean;
 }
 
 function useVRData(dogId: Id<"dogs"> | null): VRData {
@@ -307,11 +502,26 @@ function useVRData(dogId: Id<"dogs"> | null): VRData {
     api.queries.getRecentActivities,
     dogId ? { dogId, limit: 5 } : "skip"
   );
+  
+  // Get last 7 days of XP data
   const weeklyXP = useQuery(
-    api.queries.getWeeklyXP,
-    dogId ? { dogId } : "skip"
+    api.queries.getDailyXP,
+    dogId ? { 
+      dogId, 
+      startDate: getDateDaysAgo(7),
+      endDate: getTodayDate()
+    } : "skip"
   );
+  
   const streak = useQuery(api.queries.getStreak, dogId ? { dogId } : "skip");
+  
+  // Check if any query is still loading
+  const isLoading = dog === undefined || 
+                    stats === undefined || 
+                    goals === undefined || 
+                    activities === undefined ||
+                    weeklyXP === undefined ||
+                    streak === undefined;
   
   return {
     dog: dog ?? null,
@@ -320,7 +530,19 @@ function useVRData(dogId: Id<"dogs"> | null): VRData {
     activities: activities ?? [],
     weeklyXP: weeklyXP ?? [],
     streak: streak ?? null,
+    isLoading,
   };
+}
+
+// Helper functions
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getDateDaysAgo(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
 }
 ```
 
@@ -597,16 +819,24 @@ After analyzing the acceptance criteria, many requirements focus on specific UI 
 **Validates: Requirements 11.4**
 
 ### Property 14: Weekly Chart Bar Count
-*For any* weekly XP data, the chart should render exactly 7 bars representing the last 7 days
+*For any* weekly XP data, the chart should render exactly 7 bars representing the last 7 days with consistent spacing
 **Validates: Requirements 12.2**
 
 ### Property 15: Chart Bar Labeling
-*For any* bar in the weekly chart, it should have a label showing the day of the week
+*For any* bar in the weekly chart, it should have a 3D text label showing the day of the week positioned below the bar
 **Validates: Requirements 12.3**
 
 ### Property 16: Chart Data Updates
-*For any* change in weekly XP data, the bar heights should smoothly transition to the new values
+*For any* change in weekly XP data, the bar heights should smoothly transition to the new values using spring animations
 **Validates: Requirements 12.5**
+
+### Property 17: Chart Bar Minimum Height
+*For any* bar in the weekly chart, even when XP is zero, the bar should have a minimum height of 0.05 units for visibility
+**Validates: Requirements 12.6**
+
+### Property 18: Chart XP Value Display
+*For any* bar in the weekly chart, the numeric XP value should be displayed above the bar using 3D text
+**Validates: Requirements 12.7**
 
 ### Property 17: Button Feedback Animation
 *For any* button activation, the button should play a scale animation
@@ -897,6 +1127,196 @@ import { Text } from '@react-three/drei';
 </Text>
 ```
 
+**Critical Text Sizing Guidelines:**
+- Panel titles: fontSize={0.12}
+- Stat labels: fontSize={0.08}
+- Numeric values: fontSize={0.06}
+- Chart labels: fontSize={0.05}
+- Chart values: fontSize={0.04}
+
+### 3D Chart Rendering (CRITICAL FOR AVOIDING SQUISHING)
+
+**Problem:** SVG charts from 2D web app cannot be used in WebXR. They will appear squished or not render at all.
+
+**Solution:** Build charts using 3D primitives (BoxGeometry, PlaneGeometry) with proper world-space dimensions.
+
+#### Bar Chart Implementation Pattern
+
+```typescript
+interface BarChartProps {
+  data: Array<{ label: string; value: number }>;
+  position: [number, number, number];
+  maxHeight?: number;
+  barWidth?: number;
+  barSpacing?: number;
+}
+
+function BarChart3D({ 
+  data, 
+  position, 
+  maxHeight = 0.6,
+  barWidth = 0.08,
+  barSpacing = 0.12 
+}: BarChartProps) {
+  const maxValue = Math.max(...data.map(d => d.value), 1);
+  
+  return (
+    <group position={position}>
+      {data.map((item, index) => {
+        // Calculate bar height (normalized to maxHeight)
+        const normalizedHeight = (item.value / maxValue) * maxHeight;
+        // Ensure minimum height for visibility
+        const barHeight = Math.max(normalizedHeight, 0.05);
+        
+        // Calculate X position for this bar
+        const xPos = (index - (data.length - 1) / 2) * barSpacing;
+        
+        // Bar is positioned so its bottom is at y=0
+        const yPos = barHeight / 2;
+        
+        return (
+          <group key={index}>
+            {/* Bar */}
+            <mesh position={[xPos, yPos, 0]}>
+              <boxGeometry args={[barWidth, barHeight, barWidth]} />
+              <meshBasicMaterial color="#D4AF37" />
+            </mesh>
+            
+            {/* Value label above bar */}
+            <Text
+              position={[xPos, barHeight + 0.05, 0]}
+              fontSize={0.04}
+              color="#f5c35f"
+              anchorX="center"
+              anchorY="bottom"
+            >
+              {item.value}
+            </Text>
+            
+            {/* Day label below bar */}
+            <Text
+              position={[xPos, -0.05, 0]}
+              fontSize={0.05}
+              color="#888888"
+              anchorX="center"
+              anchorY="top"
+            >
+              {item.label}
+            </Text>
+          </group>
+        );
+      })}
+      
+      {/* Chart background panel */}
+      <mesh position={[0, maxHeight / 2, -0.02]}>
+        <planeGeometry args={[data.length * barSpacing + 0.1, maxHeight + 0.2]} />
+        <meshBasicMaterial color="#1a1a1a" transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+```
+
+#### Key Principles for 3D Charts
+
+1. **Use World Units, Not Pixels**: All dimensions are in 3D world units (meters in VR)
+   - Bar width: 0.08 units (not 40px)
+   - Bar spacing: 0.12 units (not 60px)
+   - Max height: 0.6 units (not 300px)
+
+2. **Normalize Data**: Scale values to fit within a reasonable height range
+   ```typescript
+   const normalizedHeight = (value / maxValue) * maxHeight;
+   ```
+
+3. **Minimum Visibility**: Always ensure bars have minimum height
+   ```typescript
+   const barHeight = Math.max(normalizedHeight, 0.05);
+   ```
+
+4. **Proper Positioning**: Position bars so their bottom is at y=0
+   ```typescript
+   const yPos = barHeight / 2; // Center of box is at half height
+   ```
+
+5. **Text Sizing**: Use small fontSize values for readability
+   - Values: 0.04 units
+   - Labels: 0.05 units
+
+6. **Spacing Calculation**: Center bars around origin
+   ```typescript
+   const xPos = (index - (data.length - 1) / 2) * barSpacing;
+   ```
+
+#### Animated Bar Growth
+
+Use react-spring for smooth animations:
+
+```typescript
+import { useSpring, animated } from '@react-spring/three';
+
+function AnimatedBar({ targetHeight }: { targetHeight: number }) {
+  const { height } = useSpring({
+    height: targetHeight,
+    from: { height: 0 },
+    config: { tension: 200, friction: 20 }
+  });
+  
+  return (
+    <animated.mesh position-y={height.to(h => h / 2)}>
+      <boxGeometry args={[0.08, height, 0.08]} />
+      <meshBasicMaterial color="#D4AF37" />
+    </animated.mesh>
+  );
+}
+```
+
+#### Common Mistakes to Avoid
+
+❌ **Don't use SVG or HTML in WebXR**
+```typescript
+// WRONG - This won't work in VR
+<svg width={320} height={160}>
+  <rect x={10} y={10} width={40} height={100} />
+</svg>
+```
+
+❌ **Don't use pixel dimensions**
+```typescript
+// WRONG - Pixels don't translate to 3D space
+<boxGeometry args={[40, 100, 40]} /> // Way too large!
+```
+
+❌ **Don't forget to normalize data**
+```typescript
+// WRONG - Raw XP values will create huge bars
+<boxGeometry args={[0.08, xpValue, 0.08]} /> // If xpValue is 500, bar is 500 units tall!
+```
+
+✅ **Do use 3D primitives with world units**
+```typescript
+// CORRECT
+<mesh position={[xPos, barHeight / 2, 0]}>
+  <boxGeometry args={[0.08, barHeight, 0.08]} />
+  <meshBasicMaterial color="#D4AF37" />
+</mesh>
+```
+
+✅ **Do normalize to reasonable scale**
+```typescript
+// CORRECT
+const maxHeight = 0.6; // 60cm in VR space
+const normalizedHeight = (value / maxValue) * maxHeight;
+```
+
+✅ **Do use 3D text with small fontSize**
+```typescript
+// CORRECT
+<Text fontSize={0.04} color="#f5c35f">
+  {value}
+</Text>
+```
+
 ### Panel Layout Positions
 
 Recommended positions for comfortable viewing:
@@ -910,6 +1330,162 @@ const PANEL_LAYOUT: PanelLayout = {
   weeklyChart: [0, -0.5, -1.5],    // Center bottom
   sessionControls: [0, 0, -1.2],   // Center (when active)
 };
+```
+
+## Troubleshooting Chart Rendering Issues
+
+### Problem: Charts Appear Squished or Distorted
+
+**Symptoms:**
+- Bars are extremely thin or wide
+- Text is unreadable or overlapping
+- Chart doesn't fit in view
+- Bars have incorrect proportions
+
+**Root Causes:**
+1. Using pixel dimensions instead of world units
+2. Not normalizing data values
+3. Incorrect text fontSize
+4. Wrong positioning calculations
+
+**Solutions:**
+
+1. **Always normalize data to world units:**
+```typescript
+// ❌ WRONG - Using raw XP values
+<boxGeometry args={[0.08, xpValue, 0.08]} />
+
+// ✅ CORRECT - Normalize to max height
+const maxHeight = 0.6;
+const normalizedHeight = (xpValue / maxValue) * maxHeight;
+<boxGeometry args={[0.08, normalizedHeight, 0.08]} />
+```
+
+2. **Use appropriate world-space dimensions:**
+```typescript
+// ❌ WRONG - Pixel-based thinking
+const barWidth = 40; // Way too large!
+
+// ✅ CORRECT - World units (meters in VR)
+const barWidth = 0.08; // 8cm wide
+const barSpacing = 0.12; // 12cm between bars
+const maxHeight = 0.6; // 60cm tall
+```
+
+3. **Use small fontSize for 3D text:**
+```typescript
+// ❌ WRONG - Text will be huge
+<Text fontSize={12}>Label</Text>
+
+// ✅ CORRECT - Small world-space fontSize
+<Text fontSize={0.05}>Label</Text>
+```
+
+4. **Position bars correctly:**
+```typescript
+// ❌ WRONG - Bar floats in air
+<mesh position={[x, barHeight, z]}>
+
+// ✅ CORRECT - Bar sits on ground (y=0)
+<mesh position={[x, barHeight / 2, z]}>
+```
+
+5. **Center bars around origin:**
+```typescript
+// ❌ WRONG - All bars on one side
+const xPos = index * barSpacing;
+
+// ✅ CORRECT - Centered distribution
+const xPos = (index - (data.length - 1) / 2) * barSpacing;
+```
+
+### Problem: Bars Not Visible
+
+**Symptoms:**
+- Chart panel visible but no bars
+- Bars appear when XP is high but not when low
+
+**Solutions:**
+
+1. **Ensure minimum bar height:**
+```typescript
+const barHeight = Math.max(normalizedHeight, 0.05);
+```
+
+2. **Check data is being passed:**
+```typescript
+console.log('Chart data:', chartData);
+console.log('Max value:', maxValue);
+```
+
+3. **Verify positioning:**
+```typescript
+// Bars should be in front of background panel
+<mesh position={[x, y, 0]}> {/* Bar at z=0 */}
+<mesh position={[0, 0, -0.02]}> {/* Background at z=-0.02 */}
+```
+
+### Problem: Text Not Readable
+
+**Symptoms:**
+- Text too small or too large
+- Text overlapping with bars
+- Text cut off or outside view
+
+**Solutions:**
+
+1. **Use appropriate fontSize:**
+```typescript
+// Panel titles: 0.12
+// Stat labels: 0.08
+// Values: 0.04-0.06
+// Chart labels: 0.05
+```
+
+2. **Proper text anchoring:**
+```typescript
+// Value above bar
+<Text anchorX="center" anchorY="bottom" position={[x, barHeight + 0.05, 0]}>
+
+// Label below bar
+<Text anchorX="center" anchorY="top" position={[x, -0.05, 0]}>
+```
+
+3. **Ensure text is in front:**
+```typescript
+<Text position={[x, y, 0.01]}> {/* Slightly in front of background */}
+```
+
+### Problem: Animations Not Smooth
+
+**Symptoms:**
+- Bars jump instead of growing
+- Choppy transitions
+- Animations don't trigger
+
+**Solutions:**
+
+1. **Use react-spring for animations:**
+```typescript
+import { useSpring, animated } from '@react-spring/three';
+
+const { height } = useSpring({
+  height: targetHeight,
+  from: { height: 0 },
+  config: { tension: 200, friction: 20 }
+});
+```
+
+2. **Stagger animations:**
+```typescript
+delay={index * 50} // 50ms delay per bar
+```
+
+3. **Update on data changes:**
+```typescript
+useEffect(() => {
+  // Trigger animation when data changes
+}, [weeklyXP]);
 ```
 
 ## Future Enhancements
