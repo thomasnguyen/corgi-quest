@@ -122,13 +122,13 @@ export function HeroSection({ onWatchDemo }: HeroSectionProps) {
         <div className="relative w-full shadow-2xl">
           {/* iPhone bezel background */}
           <img
-            src="/images/backgrounds/iphone_bezel.png"
+            src="/images/backgrounds/iphone_web.png"
             alt="iPhone frame"
             className="w-full h-auto"
           />
 
           {/* Screenshot overlay - positioned absolutely inside the bezel */}
-          <div className="absolute inset-0 flex items-center justify-center">
+          {/* <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-[calc(100%-16px)] h-[calc(100%-32px)] top-4 left-2 absolute">
               <img
                 src="/app_screenshot.png"
@@ -136,7 +136,7 @@ export function HeroSection({ onWatchDemo }: HeroSectionProps) {
                 className="w-full h-full object-cover rounded-[32px]"
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Caption below phone */}

@@ -28,6 +28,20 @@ function registerServiceWorker() {
 }
 
 export const Route = createRootRoute({
+  notFoundComponent: () => (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-6xl font-bold mb-4">404</h1>
+        <p className="text-xl text-gray-400 mb-6">Page not found</p>
+        <a
+          href="/"
+          className="inline-block bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
+  ),
   head: () => ({
     meta: [
       {
