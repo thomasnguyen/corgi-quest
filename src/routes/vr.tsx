@@ -5,7 +5,6 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useActiveDog } from "../hooks/useActiveDog";
 import { useSimpleVoiceRecognition } from "../hooks/useSimpleVoiceRecognition";
-import StatOrb from "../components/dog/StatOrb";
 
 export const Route = createFileRoute("/vr")({
   component: VRTrainingDashboard,
@@ -36,6 +35,10 @@ function VRTrainingDashboard() {
   );
   const quests = useQuery(
     api.queries.getDogQuests,
+    activeDogId ? { dogId: activeDogId } : "skip"
+  );
+  const equippedItem = useQuery(
+    api.queries.getEquippedItem,
     activeDogId ? { dogId: activeDogId } : "skip"
   );
 
@@ -183,194 +186,313 @@ function VRTrainingDashboard() {
   }, [stopListening]);
 
   return (
-    <div className="min-h-screen bg-[#1a1a1e] p-4">
-      <div className="w-full max-w-[350px] space-y-4">
-        {/* Dog Avatar & Level */}
-        {dog && (
-          <div className="flex items-center gap-4 pb-6 border-b border-[#3d3d3d]">
-            <div className="w-16 h-16 rounded-full bg-[#2a2a2e] border-2 border-[#f5c35f] flex items-center justify-center overflow-hidden">
-              {dog.photoUrl ? (
+    <div className="min-h-screen bg-[#1a1a1e] p-6">
+      {/* Dog Header - Full Width */}
+      {dog && (
+        <div className="flex items-center gap-4 pb-6 mb-6 border-b border-[#3d3d3d]">
+          <div className="relative w-16 h-16">
+            {/* Border */}
+            <img
+              src="/Border.svg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+            {/* Avatar */}
+            <div className="relative w-14 h-14 mx-auto mt-1 rounded-full bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
+              {equippedItem?.item?.itemType === "moon" ? (
+                // Moon items use mage_avatar
+                <picture>
+                  <source srcSet="/mage_avatar.webp" type="image/webp" />
+                  <img
+                    src="/mage_avatar.png"
+                    alt={dog.name}
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
+              ) : equippedItem?.generatedImageUrl &&
+                equippedItem.generatedImageUrl !== "" ? (
+                // AI-generated image for equipped items
                 <img
-                  src={dog.photoUrl}
-                  alt={dog.name}
+                  src={equippedItem.generatedImageUrl}
+                  alt={`${dog.name} wearing ${equippedItem.item.name}`}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/default_avatar.png";
+                  }}
                 />
               ) : (
-                <span className="text-2xl">🐕</span>
+                // Default avatar
+                <picture>
+                  <source srcSet="/default_avatar.webp" type="image/webp" />
+                  <img
+                    src="/default_avatar.png"
+                    alt={dog.name}
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
               )}
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">{dog.name}</h2>
-              <p className="text-sm text-[#f9dca0]">Level {dog.overallLevel}</p>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">{dog.name}</h2>
+            <p className="text-sm text-[#f9dca0]">Level {dog.overallLevel}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* LEFT COLUMN - Voice Control & Quest */}
+        <div className="space-y-4">
+          {/* Voice Button - BIG */}
+          <button
+            onClick={handleMicrophoneTap}
+            disabled={isProcessing || !!voiceError}
+            className={`w-full py-8 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center gap-3 ${
+              isListening
+                ? "bg-red-500/20 border-2 border-red-500 text-red-400 hover:bg-red-500/30"
+                : "bg-[#f5c35f] text-[#121216] hover:bg-[#e5b84f] border-2 border-[#f5c35f]"
+            } ${
+              isProcessing || voiceError ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {isProcessing ? (
+              <>
+                <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Processing...
+              </>
+            ) : isListening ? (
+              <>
+                <MicOff size={24} />
+                Stop & Log Activity
+              </>
+            ) : (
+              <>
+                <Mic size={24} />
+                Tap to Speak
+              </>
+            )}
+          </button>
+
+          {/* Live Transcript */}
+          {isListening && transcript && (
+            <div className="py-3 px-4 bg-[#2a2a2e] rounded-lg border border-[#3d3d3d]">
+              <p className="text-sm text-gray-400 mb-1">You said:</p>
+              <p className="text-white">{transcript}</p>
             </div>
-          </div>
-        )}
-
-        {/* Voice Button - BIG */}
-        <button
-          onClick={handleMicrophoneTap}
-          disabled={isProcessing || !!voiceError}
-          className={`w-full py-8 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center gap-3 ${
-            isListening
-              ? "bg-red-500/20 border-2 border-red-500 text-red-400 hover:bg-red-500/30"
-              : "bg-[#f5c35f] text-[#121216] hover:bg-[#e5b84f] border-2 border-[#f5c35f]"
-          } ${
-            isProcessing || voiceError ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {isProcessing ? (
-            <>
-              <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              Processing...
-            </>
-          ) : isListening ? (
-            <>
-              <MicOff size={24} />
-              Stop & Log Activity
-            </>
-          ) : (
-            <>
-              <Mic size={24} />
-              Tap to Speak
-            </>
           )}
-        </button>
 
-        {/* Live Transcript */}
-        {isListening && transcript && (
-          <div className="py-3 px-4 bg-[#2a2a2e] rounded-lg border border-[#3d3d3d]">
-            <p className="text-sm text-gray-400 mb-1">You said:</p>
-            <p className="text-white">{transcript}</p>
-          </div>
-        )}
-
-        {/* Processing State */}
-        {isProcessing && (
-          <div className="py-4 px-4 bg-[#2a2a2e] rounded-lg border border-[#f5c35f]">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-[#f5c35f] border-t-transparent rounded-full animate-spin" />
-              <div>
-                <p className="text-sm font-medium text-[#f5c35f]">
-                  Processing with AI...
-                </p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Analyzing activity and calculating XP
-                </p>
+          {/* Processing State */}
+          {isProcessing && (
+            <div className="py-4 px-4 bg-[#2a2a2e] rounded-lg border border-[#f5c35f]">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-[#f5c35f] border-t-transparent rounded-full animate-spin" />
+                <div>
+                  <p className="text-sm font-medium text-[#f5c35f]">
+                    Processing with AI...
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Analyzing activity and calculating XP
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Voice Status */}
-        <div className="text-center py-3 px-4 bg-[#2a2a2e] rounded-lg border border-[#3d3d3d]">
-          {voiceError ? (
-            <p className="text-sm text-red-400">{voiceError}</p>
-          ) : isProcessing ? (
-            <p className="text-sm text-[#f5c35f]">Sending to Claude AI...</p>
-          ) : isListening ? (
-            <p className="text-sm text-green-400">🎤 Listening...</p>
-          ) : successMessage ? (
-            <p className="text-sm text-green-400">{successMessage}</p>
-          ) : (
-            <p className="text-sm text-[#f9dca0]">Tap mic to log activity</p>
+          {/* Voice Status */}
+          <div className="text-center py-3 px-4 bg-[#2a2a2e] rounded-lg border border-[#3d3d3d]">
+            {voiceError ? (
+              <p className="text-sm text-red-400">{voiceError}</p>
+            ) : isProcessing ? (
+              <p className="text-sm text-[#f5c35f]">Sending to Claude AI...</p>
+            ) : isListening ? (
+              <p className="text-sm text-green-400">🎤 Listening...</p>
+            ) : successMessage ? (
+              <p className="text-sm text-green-400">{successMessage}</p>
+            ) : (
+              <p className="text-sm text-[#f9dca0]">Tap mic to log activity</p>
+            )}
+          </div>
+
+          {/* Daily Goals */}
+          {goals && (
+            <div>
+              <h3 className="text-sm font-medium text-[#f9dca0] mb-3">
+                Today's Goals
+              </h3>
+              <div className="space-y-3 bg-[#2a2a2e] border border-[#3d3d3d] rounded-lg p-4">
+                {/* Physical Goal */}
+                <div>
+                  <div className="flex justify-between text-xs text-[#f9dca0] mb-1">
+                    <span>Physical</span>
+                    <span>
+                      {goals.physicalPoints} / {goals.physicalGoal}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-[#1a1a1e] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#ff6b35] transition-all duration-300"
+                      style={{
+                        width: `${Math.min(
+                          (goals.physicalPoints / goals.physicalGoal) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Mental Goal */}
+                <div>
+                  <div className="flex justify-between text-xs text-[#f9dca0] mb-1">
+                    <span>Mental</span>
+                    <span>
+                      {goals.mentalPoints} / {goals.mentalGoal}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-[#1a1a1e] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#4ecdc4] transition-all duration-300"
+                      style={{
+                        width: `${Math.min(
+                          (goals.mentalPoints / goals.mentalGoal) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quest Card */}
+          {firstQuest && (
+            <div>
+              <h3 className="text-sm font-medium text-[#f9dca0] mb-3">
+                Suggested Quest
+              </h3>
+              <div className="bg-[#2a2a2e] border border-[#3d3d3d] rounded-lg p-4">
+                <h4 className="font-medium text-white mb-2">
+                  {firstQuest.name}
+                </h4>
+                <p className="text-sm text-[#f9dca0] mb-3">
+                  {firstQuest.description}
+                </p>
+                <div className="flex gap-2 text-xs flex-wrap">
+                  <span className="px-2 py-1 bg-[#ff6b35]/20 text-[#ff6b35] rounded">
+                    {firstQuest.physicalPoints} Physical
+                  </span>
+                  <span className="px-2 py-1 bg-[#4ecdc4]/20 text-[#4ecdc4] rounded">
+                    {firstQuest.mentalPoints} Mental
+                  </span>
+                  <span className="px-2 py-1 bg-[#f5c35f]/20 text-[#f5c35f] rounded">
+                    {firstQuest.durationMinutes} min
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Quest Card */}
-        {firstQuest && (
-          <div>
-            <h3 className="text-sm font-medium text-[#f9dca0] mb-3">
-              Suggested Quest
-            </h3>
-            <div className="bg-[#2a2a2e] border border-[#3d3d3d] rounded-lg p-4">
-              <h4 className="font-medium text-white mb-2">{firstQuest.name}</h4>
-              <p className="text-sm text-[#f9dca0] mb-3">
-                {firstQuest.description}
-              </p>
-              <div className="flex gap-2 text-xs">
-                <span className="px-2 py-1 bg-[#ff6b35]/20 text-[#ff6b35] rounded">
-                  {firstQuest.physicalPoints} Physical
-                </span>
-                <span className="px-2 py-1 bg-[#4ecdc4]/20 text-[#4ecdc4] rounded">
-                  {firstQuest.mentalPoints} Mental
-                </span>
-                <span className="px-2 py-1 bg-[#f5c35f]/20 text-[#f5c35f] rounded">
-                  {firstQuest.durationMinutes} min
-                </span>
+        {/* RIGHT COLUMN - Detailed Stats & More Quests */}
+        <div className="space-y-4">
+          {/* Detailed Stats */}
+          {stats && stats.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-[#f9dca0] mb-3 uppercase tracking-wide">
+                Detailed Stats
+              </h3>
+              <div className="space-y-2">
+                {stats.map((stat: any) => {
+                  const percentage = (stat.xp / stat.xpToNextLevel) * 100;
+                  const STAT_ICONS: Record<string, string> = {
+                    PHY: "⚡",
+                    INT: "💡",
+                    IMP: "🛡️",
+                    SOC: "👥",
+                  };
+                  const STAT_NAMES: Record<string, string> = {
+                    PHY: "Physical",
+                    INT: "Intelligence",
+                    IMP: "Impulse Control",
+                    SOC: "Socialization",
+                  };
+
+                  return (
+                    <div
+                      key={stat._id}
+                      className="bg-[#2a2a2e] border border-[#3d3d3d] rounded-lg p-3"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">
+                            {STAT_ICONS[stat.statType]}
+                          </span>
+                          <div>
+                            <div className="text-white text-sm font-medium">
+                              {STAT_NAMES[stat.statType]}
+                            </div>
+                            <div className="text-[#f5c35f] text-xs">
+                              Level {stat.level}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-white text-xs">
+                            {stat.xp} / {stat.xpToNextLevel} XP
+                          </div>
+                          <div className="text-[#f5c35f] text-xs">
+                            {Math.round(percentage)}%
+                          </div>
+                        </div>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="w-full h-1.5 bg-[#1a1a1e] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#c6a755] to-[#fff1ab] transition-all duration-300"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Stat Orbs */}
-        {stats && stats.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-[#f9dca0] mb-3">Stats</h3>
-            <div className="flex justify-around items-center py-4 bg-[#2a2a2e] rounded-lg border border-[#3d3d3d]">
-              {stats.map((stat: any) => (
-                <StatOrb
-                  key={stat._id}
-                  statType={stat.statType}
-                  level={stat.level}
-                  xp={stat.xp}
-                  xpToNextLevel={stat.xpToNextLevel}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Daily Goals */}
-        {goals && (
-          <div>
-            <h3 className="text-sm font-medium text-[#f9dca0] mb-3">
-              Today's Goals
-            </h3>
-            <div className="space-y-3">
-              {/* Physical Goal */}
-              <div>
-                <div className="flex justify-between text-xs text-[#f9dca0] mb-1">
-                  <span>Physical</span>
-                  <span>
-                    {goals.physicalPoints} / {goals.physicalGoal}
-                  </span>
-                </div>
-                <div className="h-2 bg-[#2a2a2e] rounded-full overflow-hidden">
+          {/* Additional Quests */}
+          {quests && quests.length > 1 && (
+            <div>
+              <h3 className="text-sm font-medium text-[#f9dca0] mb-3">
+                More Quests
+              </h3>
+              <div className="space-y-2">
+                {quests.slice(1, 3).map((quest: any) => (
                   <div
-                    className="h-full bg-[#ff6b35] transition-all duration-300"
-                    style={{
-                      width: `${Math.min(
-                        (goals.physicalPoints / goals.physicalGoal) * 100,
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Mental Goal */}
-              <div>
-                <div className="flex justify-between text-xs text-[#f9dca0] mb-1">
-                  <span>Mental</span>
-                  <span>
-                    {goals.mentalPoints} / {goals.mentalGoal}
-                  </span>
-                </div>
-                <div className="h-2 bg-[#2a2a2e] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#4ecdc4] transition-all duration-300"
-                    style={{
-                      width: `${Math.min(
-                        (goals.mentalPoints / goals.mentalGoal) * 100,
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
+                    key={quest._id}
+                    className="bg-[#2a2a2e] border border-[#3d3d3d] rounded-lg p-3"
+                  >
+                    <h4 className="text-sm font-medium text-white mb-1">
+                      {quest.name}
+                    </h4>
+                    <div className="flex gap-2 text-xs">
+                      <span className="text-[#ff6b35]">
+                        {quest.physicalPoints}P
+                      </span>
+                      <span className="text-[#4ecdc4]">
+                        {quest.mentalPoints}M
+                      </span>
+                      <span className="text-[#f9dca0]">
+                        {quest.durationMinutes}min
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
