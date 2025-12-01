@@ -7,20 +7,14 @@ import { useActiveDog } from "../hooks/useActiveDog";
 import { useSimpleVoiceRecognition } from "../hooks/useSimpleVoiceRecognition";
 import StatOrb from "../components/dog/StatOrb";
 
-export const Route = createFileRoute("/app/vr")({
+export const Route = createFileRoute("/vr")({
   component: VRTrainingDashboard,
   ssr: false,
-  // Bypass the app layout to remove nav and bottom bar
-  beforeLoad: () => {
-    return {
-      noLayout: true,
-    };
-  },
 });
 
 /**
- * Compact 2D Training Dashboard for Vision Pro
- * Designed to sit on the left side of the browser in Vision Pro
+ * Compact Training Dashboard for Vision Pro
+ * Clean interface without app navigation - designed for VR viewing
  */
 function VRTrainingDashboard() {
   const { activeDogId } = useActiveDog();
@@ -30,7 +24,6 @@ function VRTrainingDashboard() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldAutoProcessRef = useRef(false);
   const wasListeningRef = useRef(false);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Fetch data
   const dogProfile = useQuery(
@@ -191,8 +184,7 @@ function VRTrainingDashboard() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1e] p-4">
-      {/* DOM Overlay Container - This will be the VR overlay */}
-      <div ref={overlayRef} className="w-full max-w-[350px] space-y-4">
+      <div className="w-full max-w-[350px] space-y-4">
         {/* Dog Avatar & Level */}
         {dog && (
           <div className="flex items-center gap-4 pb-6 border-b border-[#3d3d3d]">

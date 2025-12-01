@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
+import { Route as VrRouteImport } from './routes/vr'
 import { Route as ThanksRouteImport } from './routes/thanks'
 import { Route as BumiRouteImport } from './routes/bumi'
 import { Route as AppRouteImport } from './routes/app'
@@ -36,6 +37,11 @@ import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ss
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
   path: '/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VrRoute = VrRouteImport.update({
+  id: '/vr',
+  path: '/vr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ThanksRoute = ThanksRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/bumi': typeof BumiRoute
   '/thanks': typeof ThanksRoute
+  '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bumi': typeof BumiRoute
   '/thanks': typeof ThanksRoute
+  '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/bumi': typeof BumiRoute
   '/thanks': typeof ThanksRoute
+  '/vr': typeof VrRoute
   '/waitlist': typeof WaitlistRoute
   '/app/activity': typeof AppActivityRoute
   '/app/log-activity': typeof AppLogActivityRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/bumi'
     | '/thanks'
+    | '/vr'
     | '/waitlist'
     | '/app/activity'
     | '/app/log-activity'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bumi'
     | '/thanks'
+    | '/vr'
     | '/waitlist'
     | '/app/activity'
     | '/app/log-activity'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/bumi'
     | '/thanks'
+    | '/vr'
     | '/waitlist'
     | '/app/activity'
     | '/app/log-activity'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   BumiRoute: typeof BumiRoute
   ThanksRoute: typeof ThanksRoute
+  VrRoute: typeof VrRoute
   WaitlistRoute: typeof WaitlistRoute
   ToolsNoiseRoute: typeof ToolsNoiseRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
@@ -322,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/waitlist'
       fullPath: '/waitlist'
       preLoaderRoute: typeof WaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vr': {
+      id: '/vr'
+      path: '/vr'
+      fullPath: '/vr'
+      preLoaderRoute: typeof VrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/thanks': {
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   BumiRoute: BumiRoute,
   ThanksRoute: ThanksRoute,
+  VrRoute: VrRoute,
   WaitlistRoute: WaitlistRoute,
   ToolsNoiseRoute: ToolsNoiseRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
