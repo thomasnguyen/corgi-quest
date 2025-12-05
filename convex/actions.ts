@@ -38,7 +38,7 @@ export const generateSessionToken = action(async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o-realtime-preview-2024-10-01",
+          model: "gpt-4o-realtime-preview",
           voice: "alloy",
         }),
       }

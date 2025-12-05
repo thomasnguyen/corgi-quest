@@ -604,15 +604,22 @@ export function RealtimeVoiceInterface({
    */
   const handleFunctionCall = async (callId: string, argumentsJson: string) => {
     try {
+      log("[Voice] 🎯 handleFunctionCall called");
+      log("[Voice] callId:", callId);
+      log("[Voice] argumentsJson:", argumentsJson);
+
       // Parse function arguments
       const params: SaveActivityParams = JSON.parse(argumentsJson);
+      log("[Voice] Parsed params:", JSON.stringify(params, null, 2));
 
       // Validate required parameters
       if (!params.activityName) {
+        logError("[Voice] ❌ Missing activityName");
         throw new Error("Missing required parameter: activityName");
       }
 
       if (!params.statGains || params.statGains.length === 0) {
+        logError("[Voice] ❌ Missing or empty statGains");
         throw new Error("Missing required parameter: statGains");
       }
 
@@ -620,6 +627,7 @@ export function RealtimeVoiceInterface({
         params.physicalPoints === undefined ||
         params.mentalPoints === undefined
       ) {
+        logError("[Voice] ❌ Missing physicalPoints or mentalPoints");
         throw new Error(
           "Missing required parameters: physicalPoints or mentalPoints"
         );
@@ -627,15 +635,22 @@ export function RealtimeVoiceInterface({
 
       // Validate dogId and userId are available
       if (!dogId || !userId) {
+        logError("[Voice] ❌ Missing dogId or userId", { dogId, userId });
         throw new Error("Dog or user information not available");
       }
 
+      log("[Voice] ✅ All validations passed");
       log("[Voice] Calling mutation with params:", {
+        dogId,
+        userId,
         activityName: params.activityName,
         statGains: params.statGains,
+        physicalPoints: params.physicalPoints,
+        mentalPoints: params.mentalPoints,
       });
 
       // Call logActivity mutation
+      log("[Voice] 🚀 Calling logActivityMutation...");
       const result = await logActivityMutation({
         dogId,
         userId,
@@ -647,13 +662,11 @@ export function RealtimeVoiceInterface({
         mentalPoints: params.mentalPoints,
       });
 
-      log("[Voice] 🎉 MUTATION SUCCESS:", {
-        activityId: result.activityId,
-        totalXpGained: result.totalXpGained,
-        levelUps: result.levelUps,
-      });
+      log("[Voice] 🎉 MUTATION SUCCESS!");
+      log("[Voice] Result:", JSON.stringify(result, null, 2));
 
       // Store saved activity info for confirmation display
+      log("[Voice] Setting saved activity state...");
       setSavedActivity({
         activityId: result.activityId,
         activityName: params.activityName,
@@ -675,9 +688,11 @@ export function RealtimeVoiceInterface({
       }
 
       // Show single toast to prevent duplicates
+      log("[Voice] Showing toast:", toastMessage);
       showToastNotification(toastMessage, "success");
 
       // Send success response back to OpenAI
+      log("[Voice] Sending success response to OpenAI...");
       sendMessage({
         type: "conversation.item.create",
         item: {
@@ -693,16 +708,21 @@ export function RealtimeVoiceInterface({
       });
 
       // Trigger OpenAI to generate a response after function call
+      log("[Voice] Triggering OpenAI response...");
       sendMessage({
         type: "response.create",
       });
 
       // Notify parent component
       if (onActivitySaved && result.activityId) {
+        log("[Voice] Notifying parent component...");
         onActivitySaved(result.activityId);
       }
+
+      log("[Voice] ✅ handleFunctionCall completed successfully!");
     } catch (error) {
-      logError("[Voice] Function call failed:", error);
+      logError("[Voice] ❌ Function call failed!");
+      logError("[Voice] Error:", error);
 
       // Send error response back to OpenAI
       sendMessage({
@@ -736,21 +756,23 @@ export function RealtimeVoiceInterface({
   const handleRealtimeMessage = (message: RealtimeMessage) => {
     switch (message.type) {
       case "session.created":
-        log("[Voice] Session created, configuring...");
+        log("[Voice] 🎉 Session created, configuring...");
         configureSession();
         break;
 
       case "session.updated":
-        log("[Voice] Session configured");
+        log("[Voice] ✅ Session configured successfully");
         setSessionConfigured(true);
         // Start recording once session is configured (only once)
         if (!recordingStartedRef.current) {
+          log("[Voice] Starting recording for the first time...");
           recordingStartedRef.current = true;
           startRecording();
 
           // If quest name is provided, send initial context message to OpenAI
           if (questName) {
-            log("[Voice] Sending quest context to OpenAI:", questName);
+            log("[Voice] Quest name provided:", questName);
+            log("[Voice] Sending quest context to OpenAI...");
             // Send a conversation item to provide context about the quest
             sendMessage({
               type: "conversation.item.create",
@@ -770,7 +792,11 @@ export function RealtimeVoiceInterface({
             sendMessage({
               type: "response.create",
             });
+          } else {
+            log("[Voice] No quest name provided");
           }
+        } else {
+          log("[Voice] Recording already started, skipping");
         }
         break;
 
@@ -785,6 +811,7 @@ export function RealtimeVoiceInterface({
         break;
 
       case "response.audio.done":
+        log("[Voice] 🔊 Audio response complete");
         // Wait for audio queue to finish playing before changing state
         // Check if audio is still playing, if so wait for it to finish
         const checkAudioFinished = () => {
@@ -793,6 +820,7 @@ export function RealtimeVoiceInterface({
             setTimeout(checkAudioFinished, 100);
           } else {
             // Audio finished, now we can change state to idle
+            log("[Voice] Setting state to idle");
             setConversationState("idle");
           }
         };
@@ -826,12 +854,17 @@ export function RealtimeVoiceInterface({
       case "response.function_call_arguments.done":
         // Function call arguments complete, execute the function
         log("[Voice] 📞 response.function_call_arguments.done received");
-        log("[Voice] 📞 Message:", message);
+        log("[Voice] 📞 Full message:", JSON.stringify(message, null, 2));
 
         // The .done event contains both name and full arguments
         const callId = message.call_id;
         const functionName = message.name;
         const functionArgs = message.arguments;
+
+        log("[Voice] Extracted values:");
+        log("[Voice]   - callId:", callId);
+        log("[Voice]   - functionName:", functionName);
+        log("[Voice]   - functionArgs:", functionArgs);
 
         if (callId && functionName && functionArgs) {
           log("[Voice] ✅ Function call complete:", {
@@ -846,7 +879,7 @@ export function RealtimeVoiceInterface({
             log("[Voice] Arguments:", functionArgs);
             handleFunctionCall(callId, functionArgs);
           } else {
-            logWarn("[Voice] Unknown function:", functionName);
+            logWarn("[Voice] ⚠️ Unknown function:", functionName);
           }
 
           // Clear the current function call
@@ -856,26 +889,34 @@ export function RealtimeVoiceInterface({
           logWarn("[Voice] call_id:", callId);
           logWarn("[Voice] name:", functionName);
           logWarn("[Voice] arguments:", functionArgs);
-          logWarn("[Voice] Full message:", JSON.stringify(message));
+          logWarn("[Voice] Full message:", JSON.stringify(message, null, 2));
         }
         break;
 
       case "input_audio_buffer.speech_started":
+        log("[Voice] 🎤 Speech started detected");
         // Only set listening state if OpenAI is not currently speaking
         if (conversationState !== "speaking") {
+          log("[Voice] Setting listening state to true");
           setIsListening(true);
           setConversationState("listening");
           // Immediately update smoothed state to prevent flash
           listeningStartTimeRef.current = Date.now();
           setIsListeningSmoothed(true);
+        } else {
+          log("[Voice] Ignoring speech_started (currently speaking)");
         }
         break;
 
       case "input_audio_buffer.speech_stopped":
+        log("[Voice] 🛑 Speech stopped detected");
         // Only update state if OpenAI is not currently speaking
         if (conversationState !== "speaking") {
+          log("[Voice] Setting listening state to false, processing...");
           setIsListening(false);
           setConversationState("processing");
+        } else {
+          log("[Voice] Ignoring speech_stopped (currently speaking)");
         }
         break;
 
@@ -885,15 +926,93 @@ export function RealtimeVoiceInterface({
         onError?.(new Error(errorMessage));
         break;
 
-      // Silently handle other message types
+      // Log important response events
       case "response.created":
+        log("[Voice] 📝 Response created");
+        break;
+
       case "response.done":
+        log("[Voice] ✅ Response done");
+        log(
+          "[Voice] Full response.done message:",
+          JSON.stringify(message, null, 2)
+        );
+
+        // Check if response has any output
+        if (message.response) {
+          log(
+            "[Voice] Response object:",
+            JSON.stringify(message.response, null, 2)
+          );
+
+          // Check for failed status
+          if (message.response.status === "failed") {
+            logError("[Voice] ❌ Response FAILED!");
+            if (message.response.status_details?.error) {
+              const error = message.response.status_details.error;
+              logError("[Voice] Error type:", error.type);
+              logError("[Voice] Error code:", error.code);
+              logError("[Voice] Error message:", error.message);
+
+              // Show user-friendly error
+              if (error.code === "model_not_found") {
+                onError?.(
+                  new Error(
+                    "OpenAI Realtime API access required. Please ensure your API key has access to the Realtime API (currently in limited beta). Visit https://platform.openai.com/docs/guides/realtime for more info."
+                  )
+                );
+              } else {
+                onError?.(new Error(error.message || "OpenAI API error"));
+              }
+            }
+          }
+
+          if (message.response.output && message.response.output.length === 0) {
+            logWarn(
+              "[Voice] ⚠️ Response has NO OUTPUT! OpenAI didn't generate anything."
+            );
+          }
+
+          if (message.response.status) {
+            log("[Voice] Response status:", message.response.status);
+          }
+        }
+
+        // After response is done, go back to idle if not speaking
+        if (conversationState !== "speaking") {
+          setConversationState("idle");
+        }
+        break;
+
       case "response.output_item.added":
+        log("[Voice] 📦 Output item added:", message.item?.type);
+        break;
+
       case "response.output_item.done":
+        log("[Voice] ✅ Output item done:", message.item?.type);
+        break;
+
       case "response.content_part.added":
+        log("[Voice] 📄 Content part added");
+        break;
+
       case "response.content_part.done":
+        log("[Voice] ✅ Content part done");
+        break;
+
       case "response.audio_transcript.delta":
+        // Log transcript deltas to see what OpenAI is saying
+        if (message.delta) {
+          log("[Voice] 📝 Transcript delta:", message.delta);
+        }
+        break;
+
       case "response.audio_transcript.done":
+        log("[Voice] 📝 Audio transcript done:", message.transcript);
+        break;
+
+      case "conversation.item.input_audio_transcription.completed":
+        log("[Voice] 🎤 User said:", message.transcript);
         break;
 
       default:
@@ -906,6 +1025,10 @@ export function RealtimeVoiceInterface({
    * Configure the OpenAI session with system instructions and function definition
    */
   const configureSession = () => {
+    log("[Voice] 🔧 Configuring session with function definition...");
+    log("[Voice] Function name:", SAVE_ACTIVITY_FUNCTION_DEFINITION.name);
+    log("[Voice] Tool choice: auto");
+
     // Send session.update event to configure the session
     sendMessage({
       type: "session.update",
@@ -921,6 +1044,9 @@ export function RealtimeVoiceInterface({
           threshold: 0.5, // Voice activity detection sensitivity (0.0-1.0)
           prefix_padding_ms: 300, // Audio before speech starts
           silence_duration_ms: 1000, // Wait 1 second of silence before responding
+        },
+        input_audio_transcription: {
+          model: "whisper-1", // Enable transcription so we can see what user said
         },
       },
     });

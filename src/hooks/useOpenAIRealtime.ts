@@ -187,29 +187,50 @@ export function useOpenAIRealtime(
         const message: RealtimeMessage = JSON.parse(event.data);
 
         // Log message for debugging
-        console.log("[OpenAI Realtime]", message.type, message);
+
+        // Log full message for important events
+        if (
+          message.type === "session.created" ||
+          message.type === "error" ||
+          message.type === "response.function_call_arguments.done"
+        ) {
+          console.log(
+            "[OpenAI Realtime] Full message:",
+            JSON.stringify(message, null, 2)
+          );
+        }
 
         // Handle specific message types
         switch (message.type) {
           case "session.created":
-            console.log("Session created successfully");
             updateConnectionState("connected");
             reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
             break;
 
           case "error":
-            console.error("OpenAI Realtime API error:", message);
             const error = new Error(
               message.error?.message || "Unknown OpenAI error"
             );
             onError?.(error);
+            break;
+
+          case "input_audio_buffer.speech_started":
+            break;
+
+          case "input_audio_buffer.speech_stopped":
+            break;
+
+          case "response.function_call_arguments.done":
             break;
         }
 
         // Notify message listener
         onMessage?.(message);
       } catch (error) {
-        console.error("Failed to parse WebSocket message:", error);
+        console.error(
+          "[OpenAI Realtime] ❌ Failed to parse WebSocket message:",
+          error
+        );
         onError?.(error as Error);
       }
     },
@@ -283,27 +304,22 @@ export function useOpenAIRealtime(
    * Connect to OpenAI Realtime API
    */
   const connect = useCallback(async () => {
-    console.log("[OpenAI Realtime] connect() called");
 
     // Check if already connected or connecting
     if (
       wsRef.current?.readyState === WebSocket.OPEN ||
       connectionState === "connecting"
     ) {
-      console.log("[OpenAI Realtime] Already connected or connecting");
       return;
     }
 
     // Check microphone permission first
     if (hasPermission === null) {
-      console.log("[OpenAI Realtime] Requesting microphone permission...");
       const granted = await requestPermission();
       if (!granted) {
-        console.log("[OpenAI Realtime] Microphone permission denied");
         return;
       }
     } else if (hasPermission === false) {
-      console.log("[OpenAI Realtime] Microphone permission already denied");
       const error = new Error("Microphone permission required");
       onError?.(error);
       return;
@@ -314,7 +330,6 @@ export function useOpenAIRealtime(
       isManualDisconnectRef.current = false;
 
       // Generate session token from Convex
-      console.log("[OpenAI Realtime] Generating OpenAI session token...");
       const sessionToken = await generateToken();
       console.log(
         "[OpenAI Realtime] ✅ Session token generated:",
@@ -331,7 +346,7 @@ export function useOpenAIRealtime(
 
       // Create WebSocket connection
       const ws = new WebSocket(
-        "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01",
+        "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview",
         [
           "realtime",
           `openai-insecure-api-key.${sessionToken}`,
@@ -341,7 +356,6 @@ export function useOpenAIRealtime(
 
       // Set up event listeners
       ws.onopen = () => {
-        console.log("[OpenAI Realtime] 🔌 WebSocket connection opened!");
         // Note: Audio capture is handled by the component, not here
         // Connection state will be updated to "connected" when we receive session.created
       };
@@ -352,7 +366,6 @@ export function useOpenAIRealtime(
 
       wsRef.current = ws;
     } catch (error) {
-      console.error("[OpenAI Realtime] ❌ Failed to connect:", error);
       updateConnectionState("error");
       onError?.(error as Error);
     }
@@ -372,7 +385,6 @@ export function useOpenAIRealtime(
    * Disconnect from OpenAI Realtime API
    */
   const disconnect = useCallback(() => {
-    console.log("[OpenAI Realtime] Manually disconnecting");
 
     isManualDisconnectRef.current = true;
 
@@ -400,7 +412,6 @@ export function useOpenAIRealtime(
    */
   const startAudioCapture = useCallback(async () => {
     try {
-      console.log("[OpenAI Realtime] Starting audio capture...");
 
       // Get microphone stream
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -449,9 +460,7 @@ export function useOpenAIRealtime(
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      console.log("[OpenAI Realtime] ✅ Audio capture started");
     } catch (error) {
-      console.error("[OpenAI Realtime] Failed to start audio capture:", error);
       onError?.(error as Error);
     }
   }, [onError]);
@@ -460,7 +469,6 @@ export function useOpenAIRealtime(
    * Stop audio capture
    */
   const stopAudioCapture = useCallback(() => {
-    console.log("[OpenAI Realtime] Stopping audio capture...");
 
     if (processorRef.current) {
       processorRef.current.disconnect();
@@ -477,7 +485,6 @@ export function useOpenAIRealtime(
       audioContextRef.current = null;
     }
 
-    console.log("[OpenAI Realtime] Audio capture stopped");
   }, []);
 
   /**
@@ -486,16 +493,36 @@ export function useOpenAIRealtime(
   const sendMessage = useCallback(
     (message: any) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        console.error("Cannot send message: WebSocket not connected");
+        console.error(
+          "[OpenAI Realtime] ❌ Cannot send message: WebSocket not connected"
+        );
+        console.error(
+          "[OpenAI Realtime] WebSocket state:",
+          wsRef.current?.readyState
+        );
         return;
       }
 
       try {
         const messageStr =
           typeof message === "string" ? message : JSON.stringify(message);
+
+        // Log outgoing messages (except audio data which is too verbose)
+        if (message.type !== "input_audio_buffer.append") {
+          if (
+            message.type === "session.update" ||
+            message.type === "conversation.item.create" ||
+            message.type === "response.create"
+          ) {
+            console.log(
+              "[OpenAI Realtime] Message details:",
+              JSON.stringify(message, null, 2)
+            );
+          }
+        }
+
         wsRef.current.send(messageStr);
       } catch (error) {
-        console.error("Failed to send message:", error);
         onError?.(error as Error);
       }
     },

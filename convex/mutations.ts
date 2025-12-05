@@ -61,8 +61,14 @@ export const logActivity = mutation({
     mentalPoints: v.number(),
   },
   handler: async (ctx, args) => {
+    console.log(
+      "🔵 [MUTATION] logActivity called with args:",
+      JSON.stringify(args, null, 2)
+    );
+
     const now = Date.now();
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
 
     // Step 1: Insert activity record
     const activityId = await ctx.db.insert("activities", {
@@ -97,6 +103,9 @@ export const logActivity = mutation({
         .first();
 
       if (stat) {
+          level: stat.level,
+          xp: stat.xp,
+        });
         // Calculate level-up
         const result = calculateLevelUp(stat.level, stat.xp, statGain.xpAmount);
 
@@ -108,12 +117,19 @@ export const logActivity = mutation({
         });
 
         if (result.leveledUp) {
+          console.log(
+            "🔵 [MUTATION] LEVEL UP!",
+            statGain.statType,
+            "->",
+            result.newLevel
+          );
           levelUpResults.push({
             statType: statGain.statType,
             oldLevel: stat.level,
             newLevel: result.newLevel,
           });
         }
+      } else {
       }
     }
 
@@ -127,6 +143,9 @@ export const logActivity = mutation({
     const newlyUnlockedItems = [];
 
     if (dog) {
+        level: dog.overallLevel,
+        xp: dog.overallXp,
+      });
       const dogLevelResult = calculateLevelUp(
         dog.overallLevel,
         dog.overallXp,
@@ -140,6 +159,12 @@ export const logActivity = mutation({
       });
 
       if (dogLevelResult.leveledUp) {
+        console.log(
+          "🔵 [MUTATION] DOG LEVEL UP!",
+          dog.overallLevel,
+          "->",
+          dogLevelResult.newLevel
+        );
         levelUpResults.push({
           statType: "OVERALL",
           oldLevel: dog.overallLevel,
@@ -187,7 +212,6 @@ export const logActivity = mutation({
         mentalPoints: dailyGoal.mentalPoints + args.mentalPoints,
       });
     } else {
-      // Create today's daily goal if it doesn't exist
       await ctx.db.insert("daily_goals", {
         dogId: args.dogId,
         date: today,
@@ -209,7 +233,6 @@ export const logActivity = mutation({
         lastActivityDate: today,
       });
     } else {
-      // Create streak record if it doesn't exist
       await ctx.db.insert("streaks", {
         dogId: args.dogId,
         currentStreak: 0,
@@ -219,6 +242,9 @@ export const logActivity = mutation({
     }
 
     // Step 7: Invalidate AI recommendation cache (new activity affects recommendations)
+    console.log(
+      "🔵 [MUTATION] Step 7: Invalidating AI recommendation cache..."
+    );
     const cachedRec = await ctx.db
       .query("ai_recommendations")
       .withIndex("by_dog_and_date", (q) =>
@@ -229,6 +255,12 @@ export const logActivity = mutation({
     if (cachedRec) {
       await ctx.db.delete(cachedRec._id);
     }
+
+      activityId,
+      totalXpGained,
+      levelUps: levelUpResults,
+      newlyUnlockedItems,
+    });
 
     return {
       success: true,
