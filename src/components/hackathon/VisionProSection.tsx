@@ -22,12 +22,10 @@ export function VisionProSection() {
         {/* Image Container with Lazy Loading */}
         <div className="relative aspect-video bg-gradient-to-b from-[#0a0a0a] to-[#121216]">
           <img
-            src="/mage_bg.png" // Placeholder - replace with actual Vision Pro HUD screenshot
+            src="/vr_screenshot.png"
             alt="Vision Pro HUD showing real-time training stats, daily goals, and activity feed during a live training session"
             loading="lazy"
             className="w-full h-full object-cover"
-            // Optimize for fast loading while maintaining clarity
-            // Use WebP format with JPEG fallback
           />
           {/* Subtle overlay for better visual depth */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/40 to-transparent pointer-events-none" />

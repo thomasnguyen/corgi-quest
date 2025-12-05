@@ -49,7 +49,7 @@ function HackathonLandingPage() {
         {/* Demo Video Section */}
         <div ref={videoSectionRef}>
           <DemoVideoSection
-            videoUrl="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            videoUrl="https://www.youtube.com/watch?v=kePJhFgqlnU"
             caption="Watch how Corgi Quest transforms real-world dog training into an engaging RPG experience with voice logging, real-time sync between partners, and AI-powered coaching."
           />
         </div>

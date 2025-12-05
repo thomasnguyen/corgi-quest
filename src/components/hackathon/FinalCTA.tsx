@@ -70,9 +70,9 @@ export function FinalCTA() {
 
       {/* Additional context */}
       <div className="mt-8 text-[#f9dca0]/70 text-sm space-y-2">
-        <p>Built for Kiroween 2024 🎃</p>
+        <p>Built for Kiroween 2025 🎃</p>
         <p className="text-xs">
-          Real-time dog training RPG • Powered by Convex, Claude, and Kiro
+          Real-time dog training RPG • Powered by Convex, OpenAI, and Kiro
         </p>
       </div>
     </section>

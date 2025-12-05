@@ -49,42 +49,37 @@ export function RealDataSection() {
         </div>
       </div>
 
-      {/* Training Screenshots Grid */}
+      {/* Character Selection & App Screenshots */}
       <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-        {screenshots.map((screenshot, index) => (
-          <div
-            key={index}
-            className="bg-[#121216] border border-[#f5c35f]/20 rounded-lg overflow-hidden hover:border-[#f5c35f]/40 transition-colors"
-          >
-            {/* Image Container with Lazy Loading */}
-            <div className="relative aspect-[9/16] bg-gradient-to-b from-[#0a0a0a] to-[#121216]">
-              <img
-                src={screenshot.src}
-                alt={screenshot.alt}
-                loading="lazy"
-                className="w-full h-full object-cover"
-                // Optimize for fast loading - images should be < 500KB
-                // Use WebP format with JPEG fallback
-              />
-              {/* Subtle overlay for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 to-transparent pointer-events-none" />
-            </div>
-
-            {/* Caption */}
-            <div className="p-4">
-              <p className="text-[#f9dca0] text-sm text-center">
-                {screenshot.caption}
-              </p>
-            </div>
-          </div>
-        ))}
+        <div className="flex flex-col items-center">
+          <img
+            src="/choose-character.png"
+            alt="Character selection screen showing different dog breeds to choose from"
+            loading="lazy"
+            className="w-full max-w-xs object-contain"
+          />
+          <p className="text-[#f9dca0] text-sm text-center mt-4">
+            Choose your companion to start your training journey
+          </p>
+        </div>
+        <div className="flex flex-col items-center">
+          <img
+            src="/screenshot1.png"
+            alt="App screenshot showing training interface and stats"
+            loading="lazy"
+            className="w-full max-w-xs object-contain"
+          />
+          <p className="text-[#f9dca0] text-sm text-center mt-4">
+            Track your training progress in real-time
+          </p>
+        </div>
       </div>
 
       {/* Additional Context */}
       <div className="text-center">
         <p className="text-[#f9dca0]/70 text-sm max-w-2xl mx-auto">
           These screenshots show actual training sessions from the past week.
-          Every activity is logged in real-time, parsed by Claude, and synced
+          Every activity is logged in real-time, parsed by OpenAI, and synced
           instantly between our devices via Convex.
         </p>
       </div>

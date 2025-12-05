@@ -18,11 +18,11 @@ Corgi Quest turns everyday dog training into a shared RPG so couples can stay al
 3. **Skim "How we used Kiro"** – directly maps to Kiroween *Implementation* criteria.
 4. Optionally: peek at the `.kiro/`, `convex/`, and `app/` directories to see the stitched stack.
 
-> 🧪 **Links (update before submission):**
-> - ▶️ Demo video: `TODO: add link`
-> - 🌐 Hackathon landing page: `TODO: add link`
-> - 💻 Live web/PWA demo (auto-login): `TODO: add link`
-> - 🥽 Vision Pro HUD clip / section: `TODO: add link`
+> 🧪 **Links:**
+> - ▶️ Demo video: https://www.youtube.com/watch?v=kePJhFgqlnU
+> - 🌐 Hackathon landing page: https://corgi-quest.netlify.app
+> - 💻 Live web/PWA demo (auto-login): https://corgi-quest.netlify.app (click "Launch Demo")
+> - 🥽 Vision Pro HUD: Shown in the demo video above
 
 ---
 

@@ -65,7 +65,7 @@ export function HeroSection({ onWatchDemo }: HeroSectionProps) {
         <div className="flex items-start gap-3">
           <span className="text-xl flex-shrink-0">🎙️</span>
           <p className="text-[#feefd0] text-sm sm:text-base">
-            <strong>Hands-free voice logging</strong> — Claude turns "5 calm
+            <strong>Hands-free voice logging</strong> — OpenAI turns "5 calm
             reps" into XP as you train
           </p>
         </div>

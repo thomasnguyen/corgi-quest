@@ -22,7 +22,7 @@ export function TechStackSection() {
       description: "Real-time database and sync",
     },
     {
-      name: "Claude",
+      name: "OpenAI",
       icon: <Zap className="w-8 h-8" />,
       category: "ai",
       description: "Voice parsing and coaching",

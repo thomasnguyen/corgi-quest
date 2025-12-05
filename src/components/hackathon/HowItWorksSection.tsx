@@ -40,7 +40,7 @@ export function HowItWorksSection() {
     },
     {
       number: 2,
-      title: "Claude → XP Engine",
+      title: "OpenAI → XP Engine",
       description:
         "AI parses natural language, extracts activities, and calculates multi-stat XP distribution",
       icon: <Zap size={28} />,

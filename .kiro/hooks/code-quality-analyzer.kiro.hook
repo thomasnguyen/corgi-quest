@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Code Quality Analyzer",
+  "description": "Monitors source code files for changes and provides suggestions for code quality improvements including code smells, design patterns, best practices, readability, maintainability, and performance optimizations while maintaining existing functionality",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.{ts",
+      "tsx",
+      "js",
+      "jsx}",
+      "convex/**/*.ts",
+      "CorgiQuestVR/**/*.swift"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the modified code in this file for potential improvements. Focus on:\n\n1. **Code Smells**: Identify any code smells such as duplicated code, long functions, large classes, excessive parameters, or inappropriate intimacy between modules.\n\n2. **Design Patterns**: Suggest applicable design patterns that could improve the code structure (e.g., Factory, Strategy, Observer, Singleton where appropriate).\n\n3. **Best Practices**: Check adherence to language-specific and framework-specific best practices:\n   - For TypeScript/React: proper typing, hooks usage, component composition, memoization\n   - For Convex: correct use of useQuery/useMutation hooks, proper validators\n   - For Swift/SwiftUI: proper state management, view composition, performance\n\n4. **Readability**: Suggest improvements for:\n   - Variable and function naming clarity\n   - Code organization and structure\n   - Comment quality and necessity\n   - Complexity reduction\n\n5. **Maintainability**: Identify opportunities to:\n   - Reduce coupling between components\n   - Improve testability\n   - Enhance error handling\n   - Simplify conditional logic\n\n6. **Performance**: Look for:\n   - Unnecessary re-renders or recomputations\n   - Missing memoization opportunities\n   - Inefficient algorithms or data structures\n   - Memory leaks or resource management issues\n\nProvide specific, actionable suggestions with code examples where helpful. Prioritize improvements that offer the most value while maintaining the existing functionality. Be constructive and focus on teaching moments."
+  }
+}

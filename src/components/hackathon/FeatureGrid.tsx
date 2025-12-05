@@ -28,7 +28,7 @@ export function FeatureGrid() {
       icon: <Mic className="w-6 h-6" />,
       title: "Voice Logging",
       description:
-        "Hands-free activity logging during training. Claude parses natural speech into structured XP.",
+        "Hands-free activity logging during training. OpenAI parses natural speech into structured XP.",
     },
     {
       icon: <MessageCircle className="w-6 h-6" />,

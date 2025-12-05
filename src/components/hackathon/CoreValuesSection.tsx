@@ -32,7 +32,7 @@ export function CoreValuesSection() {
       icon: <Mic size={48} strokeWidth={1.5} />,
       title: "AI Voice Coach Mode",
       description:
-        "Hands-free training with Claude-powered voice parsing and rep counting",
+        "Hands-free training with OpenAI-powered voice parsing and rep counting",
     },
     {
       icon: <Glasses size={48} strokeWidth={1.5} />,

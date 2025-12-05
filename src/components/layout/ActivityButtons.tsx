@@ -20,7 +20,7 @@ export default function ActivityButtons() {
         </Link>
 
         <Link
-          to="/training-mode"
+          to="/app/training-mode"
           className="relative block w-full text-center py-4 overflow-hidden group transition-all"
           style={{
             backgroundImage: "url(/cta_button.svg)",
